@@ -5,7 +5,38 @@ Created on Sat Jul 21 11:10:49 2018
 
 @author: yifei.wan
 """
+import sys
+import getopt
 
+def pathways(args):
+    '''
+    This is a entry function. It is utilized to accept paths of input file 
+    and out file from shell respectively. It also provides options for 
+    linux commands.
+    '''
+    inputfile = ''
+    outputfile = ''
+    
+    try:
+        opts, arg = getopt.getopt(args, 'hi:o:')
+    except getopt.GetoptError:
+        print('Usage: -i <path of input> -o <path of output>')
+        sys.exit(2)
+        
+    for opt, arg in opts:
+        if opt == '-h':
+            print('Usage: PGxOneV3_Drug_extract.py -i <path of input> -o <path of output>')
+            sys.exit(0)
+        elif opt == '-i':
+            inputfile = arg
+        elif opt == '-o':
+            outputfile = arg
+            
+    print('\ninput: {:<30}'.format(inputfile))
+    print('output: {:<30}\n'.format(outputfile))
+            
+    return inputfile, outputfile
+    
 def read(inputfile):
     '''
     This function is used to read file and restructure data as a list.
@@ -50,6 +81,7 @@ def write_output(mul_targets_durg, outputfile):
         output.writelines(str(line[0]) + str(line[1] + '\n') for line in mul_targets_durg)
         
 def main(inputfile, outputfile):
+    inputfile, outputfile = pathways(sys.argv[1:])
     durglist = read(inputfile)
     durg_dict = durgs_targets(durglist)
     durg_mult_target = mul_targets_durg(durg_dict)
