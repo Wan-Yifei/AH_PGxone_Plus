@@ -32,9 +32,13 @@ def pathways(args):
             inputfile = arg
         elif opt == '-o':
             outputfile = arg
-    
-    print('input %s' %inputfile)
-    print('outputfile %s' %outputfile)
+
+    print('\ninput: {:<30}'.format(inputfile))
+    print('output: {:<30}\n'.format(outputfile))
+            
+    return inputfile, outputfile
+
+
     
     
 pathways(sys.argv[1:])            
