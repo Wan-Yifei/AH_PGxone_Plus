@@ -17,6 +17,10 @@ sys.stdout = codecs.getwriter('utf8')(sys.stdout)
 
 
 def ParseArg():
+    '''
+    yifei:
+    This function is used to set, accept and store argus.
+    '''
     p = argparse.ArgumentParser(description="generate OncoGxOne interpretation file with clinvar annotated VCF file, coverage file, fusionmap output and mutation/drug information", epilog="Need: VCFutility")
     p.add_argument("VCFfile",type=str, help="clinvar annotated VCF file")
     p.add_argument("fusionOutput",type=str, help="fusionmap or factera output")
@@ -40,12 +44,27 @@ min_qual = args.qual
 min_freq = args.freq
 state = args.state
 output = codecs.open(args.output,'w',encoding='utf-8')
+
+'''
+Q#1
+yifei:
+    I don't know the function of xml2Action and which module includes it.
+'''
+
 total_info, Guideline, PMIDs, patient_information = xml2Action(args.XML)
+
+
 #output = sys.stdout
 Sample_name = args.CNV.split("_CNV")[0]
 
+'''
+Q#2
+yifei:
+Check the structure and content of file 'Admera_preferred_transcript_07DEC2015.txt'.
+'''
 transcript_file = open(scriptFolder+"Admera_preferred_transcript_07DEC2015.txt",'r')
-preferred_transcript={}
+
+preferred_transcript={} ## yifei: One dict is ready to be established.
 for l in transcript_file.read().split("\n"):
     if l.strip()=="" or l.startswith("Gene"): continue
     lsep = l.strip().split("\t")
@@ -59,12 +78,17 @@ transcript_file.close()
 
 
 def searchSnomedID(description):
+    '''
+    yifei:
+	This function is not applied in this script.
+    '''
     for i in SNOMEDCT.search(description):
-        if i.term.endswith("(disorder)"):
+        if i.term.endswith("(disorder)"): ## Yifei: What's the attribute 'term'?
             return i
 
+## States' name 
 state_to_code = {"VERMONT": "VT", "GEORGIA": "GA", "IOWA": "IA", "Armed Forces Pacific": "AP", "GUAM": "GU", "KANSAS": "KS", "FLORIDA": "FL", "AMERICAN SAMOA": "AS", "NORTH CAROLINA": "NC", "HAWAII": "HI", "NEW YORK": "NY", "CALIFORNIA": "CA", "ALABAMA": "AL", "IDAHO": "ID", "FEDERATED STATES OF MICRONESIA": "FM", "Armed Forces Americas": "AA", "DELAWARE": "DE", "ALASKA": "AK", "ILLINOIS": "IL", "Armed Forces Africa": "AE", "SOUTH DAKOTA": "SD", "CONNECTICUT": "CT", "MONTANA": "MT", "MASSACHUSETTS": "MA", "PUERTO RICO": "PR", "Armed Forces Canada": "AE", "NEW HAMPSHIRE": "NH", "MARYLAND": "MD", "NEW MEXICO": "NM", "MISSISSIPPI": "MS", "TENNESSEE": "TN", "PALAU": "PW", "COLORADO": "CO", "Armed Forces Middle East": "AE", "NEW JERSEY": "NJ", "UTAH": "UT", "MICHIGAN": "MI", "WEST VIRGINIA": "WV", "WASHINGTON": "WA", "MINNESOTA": "MN", "OREGON": "OR", "VIRGINIA": "VA", "VIRGIN ISLANDS": "VI", "MARSHALL ISLANDS": "MH", "WYOMING": "WY", "OHIO": "OH", "SOUTH CAROLINA": "SC", "INDIANA": "IN", "NEVADA": "NV", "LOUISIANA": "LA", "NORTHERN MARIANA ISLANDS": "MP", "NEBRASKA": "NE", "ARIZONA": "AZ", "WISCONSIN": "WI", "NORTH DAKOTA": "ND", "Armed Forces Europe": "AE", "PENNSYLVANIA": "PA", "OKLAHOMA": "OK", "KENTUCKY": "KY", "RHODE ISLAND": "RI", "DISTRICT OF COLUMBIA": "DC", "ARKANSAS": "AR", "MISSOURI": "MO", "TEXAS": "TX", "MAINE": "ME"}
-
+## Exchange full name with brief
 code_to_state = {v: k.title() for k, v in state_to_code.items()}
 
 def shorternNucleoChange(NucleoChange):
@@ -73,6 +97,7 @@ def shorternNucleoChange(NucleoChange):
     For example: c.2236_2250delGAATTAAGAGAAG  ->  c.2236_2250del
     '''
     if len(NucleoChange)>15:
+        ## yifei: .end() returns index of the letter after del|ins
         trimed_end = [m.end() for m in re.finditer("del|ins", NucleoChange)][-1]
         return NucleoChange[:trimed_end]
     else:
@@ -85,6 +110,10 @@ def MutationsFromVCF(sample):
     mutations={}
     pathogenic_mutations=[]
     for v in sample:
+	'''
+	Yifei:
+	Q#4: What is CLNACC?
+	'''
         if 'CLNACC' not in v.INFO and 'EFF' not in v.INFO: continue
         try:
             depth = v.samples[0]['DP'][0]
@@ -103,24 +132,34 @@ def MutationsFromVCF(sample):
         if freq < min_freq: continue
         
         # find the EFF record with preferred transcript
+		## yifei:  what's EFF?
         preferred_found=False
         n_eff = 0
         while (not preferred_found) and n_eff<len(v.INFO["EFF"].split(",")):
-            mutation_eff = EFF(v.INFO["EFF"].split(",")[n_eff])
+		## yifei: extract gene name and corresponding EFF from v.INFO
+            mutation_eff = EFF(v.INFO["EFF"].split(",")[n_eff]) ## VCFmodules.SnpEff
             transcript = mutation_eff.Transcript_ID.split(".")[0]
             GeneName = mutation_eff.Gene_Name
+			## yifei: cannot find prefered transcript lead to break 
             if GeneName not in preferred_transcript: break
+			## yifei: Or find prefered transcript lead to 
             if transcript in preferred_transcript[GeneName]:
                 preferred_found=True
             n_eff+=1
 
         try:
+			## yfiei: check is there a name already
             mutation_eff.Mutation_Name
         except:
             continue
 
         if 'CLNACC' in v.INFO:
             variant=v.INFO["CLNACC"].split(",")[0].split(".")[0]
+			'''
+			yifei:
+			Q#5: where is the mutation_translate from? And what is it used for?
+			ClinAccToMutationName
+			'''
             try:
                 mutation = mutation_translate(variant)
             except:
@@ -160,6 +199,10 @@ def RecordString(mutation, recommendation, group_index, Type="SNV-indel", title=
     else:
         Gene = mutation.split("-",1)[0]
         Alteration = mutation.split("-",1)[1]
+		'''
+		yifei:
+		Q#6: What's firstTwo?
+		'''
     firstTwo = "%d\t%s"%(group_index,Gene)
     Line1 = "%s\t%s\t%s\t"%(firstTwo,title[0],Alteration)
     Line2 = "%s\t%s\t%s\t"%(firstTwo,title[1],recommendation[1])
@@ -199,18 +242,34 @@ def interpretationToLine(interp, group="therapyS"):
         if t in interp['therapies']:
             lines.append([interp['therapies'][t]['disease'],interp[group],"FDA"])
         else:
+		'''
+		yifei:
+		Q#6
+		not in therapies? patient_info should be checked!
+		'''
             lines.append([patient_information['disease'],interp[group],"FDA"])
     return sorted(lines, key=lambda x:x[0])
     
 
 Table_n = 5
+'''
+yifei:
+Start to output group #5.
+'''
 for mutation in sorted(total_info.keys()):
+'''
+yifei:
+var total_info is from xml2Action function.
+var point_result is from MutationsFromVCF function.
+'''
     # alteration details
     interp = total_info[mutation]
     pathway = interp['pathway']
     summary = interp['comment']
     Gene = mutation.split("-")[0]
+	## yifei: firstTwo corresponds to Group/tGene ??
     firstTwo = "%d\t%s"%(Table_n,Gene)
+	## yifei: 'if' figure out type of mutation
     if "amplification" in mutation:
         Line1 = "%s\tPathways\t%s\t"%(firstTwo, pathway)
         Line2 = "%s\tAlteration Detected\t%s\t"%(firstTwo, "Amplification")
@@ -234,19 +293,30 @@ for mutation in sorted(total_info.keys()):
         Line3 = "%s\tAlteration Detected\t%s\t"%(firstTwo, mutation.split("-")[-1])
         Line4 = "%s\tVariation Type\t%s\t"%(firstTwo, mutation_type)
         Alteration_details[mutation] = [Line1,Line2,Line3,Line4]
+		## yifei: reset Type as default
         Type = "SNV-indel"
+		
     #recommendation
+	## yifei: rank_index? One gene multiple Alterations?
     Alteration_rank_index=0
     if interp['therapyS']!=None:
+		## yifei: from function interpretationToLine: therapy_group, disease, "FDA"
         lines = interpretationToLine(interp)
+		
         Total_drugs.extend(interp['therapyS'].split(", "))
+		## yifei: lines form interpretationToLine are treated as recommendations
         for line in lines:
+		## yfiei: prepare table#1
             table11_str.append(RecordString(mutation, line, 1, Type))
             Alteration_details[mutation].append("%s\tDetails\tResponse to %s:\tPotential Clinical Benefit in %s"%(firstTwo,line[1],line[0]))
             Alteration_rank_index+=1
     if interp['therapyO']!=None:
         lines = interpretationToLine(interp,"therapyO")
         Total_drugs.extend(interp['therapyO'].split(", "))
+		'''
+		yifei:
+		Q#6: what's the difference between table11 and table12? They are Potential Clinical Benefit both.
+		'''
         for line in lines:
             table12_str.append(RecordString(mutation, line, 2, Type))
             Alteration_details[mutation].append("%s\tDetails\tResponse to %s:\tPotential Clinical Benefit in %s#"%(firstTwo,line[1],line[0]))
@@ -255,14 +325,19 @@ for mutation in sorted(total_info.keys()):
         lines = interpretationToLine(interp,"therapyR")
         Total_drugs.extend(interp['therapyR'].split(", "))
         for line in lines:  
+		## yifei: table#2 is ready
             table2_str.append(RecordString(mutation, line, 3, Type))
             Alteration_details[mutation].append("%s\tDetails\tResponse to %s:\tPotential Drug Resistance in %s"%(firstTwo,line[1],line[0]))
             Alteration_rank_index+=1
     if not Alteration_details[mutation][-1].startswith("%s\tDetails"%firstTwo):  # if no clinical recommendations in Details 
         Alteration_details[mutation].append("%s\tDetails\tResponse unknown\t"%(firstTwo))
+	## yifei: used for?	
     Alteration_details[mutation].append(Alteration_rank_index)
+	
     Location = interp['location']
+	
     if Gene not in Gene_info:
+		##yifei: summary = interp['comment']
         Gene_info[Gene]=[summary, [Location], interp['prevalence'], [interp['effect']]]
     else:
         Gene_info[Gene][1].append(Location)
@@ -291,6 +366,9 @@ for f in fusion_select:
 
 
 ## PGx Side effect results
+'''
+yifei:?
+'''
 from subprocess import Popen, PIPE
 (stdout, stderr) = Popen("grep Oncology %s_clinical_action.txt | grep -v 'GO' | grep -v 'CYP3A4'"%Sample_name, shell=True, stdout=PIPE).communicate()
 lines = [x.split("\t") for x in stdout.split("\n") if x.strip()!=""]
@@ -310,6 +388,7 @@ for line in sorted_lines:
     else:
         side_effect = line[3].capitalize()
     Total_drugs.extend(drugs)  ## add PGx Side effect drugs
+	## yifei: table3 output ready, corresponds to ? on report
     table3_str.append(RecordString(gene+"-"+genotype, [cancer_type, ", ".join(drugs)+": || "+side_effect, "PharmGKB"], 4, title=["Genotype","Therapies and Clinical Side Effects"]))
 
 
@@ -318,7 +397,10 @@ for line in sorted_lines:
 from collections import OrderedDict
 Total_PubMed = list(OrderedDict.fromkeys(PMIDs))
 Total_drugs = list(OrderedDict.fromkeys(Total_drugs))
-
+'''
+yifei:
+write table#1, 2, #3 to file.
+'''
 print >>output, "Group\tGene\tResultColumn\tResultValue\tResultValueDetail"
 for str1 in table11_str:
     print >>output, str1
