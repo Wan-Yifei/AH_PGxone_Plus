@@ -46,7 +46,8 @@ def parseSectionWithItems(Section, PMIDs):
     >>> print(patient_information)
    
     '''
-tree = ET.ElementTree(file='/home/ywan/project/AMP demo-AML_COMPLETE.xml')
+#tree = ET.ElementTree(file='/home/ywan/project/AMP demo-AML_COMPLETE.xml')
+tree = ET.ElementTree(file='AMP_demo-AML_COMPLETE.xml')
 root = tree.getroot()            
 PMIDs = []
 
@@ -56,7 +57,6 @@ Mutation_total_info={}
 Guideline = {}
 patient_information = {}
 # yifei: dict for prognostic and dignostic info
-pro_dig_level = {}
 patient_information['disease'] = root.attrib['disease']
 patient_information['snomed_id'] = root.attrib['snomed-disease-concept-id']
 
@@ -78,28 +78,23 @@ for elem in tree.iter(tag='positive-result'):
         resultdict['therapyR'] = None
     resultdict['pathway'] = elem.attrib['pathway']
     Mutation_total_info[Mutation]=resultdict
-    
 
-'''#2. Guideline information '''
+'''#2. yifei: Prognostic and dignostic level '''
+for elem in tree.iter(tag='positive-result'):
+    if elem.attrib['variant-curated']=="No": 
+        continue
+    Mutation = elem.attrib['biomarker']+"-"+elem.attrib['result-value']
+
+    Mutation_total_info[Mutation]['diagnostic-significance'] = elem.attrib['diagnostic-level-of-evidence']
+    Mutation_total_info[Mutation]['prognostic-significance'] = elem.attrib['prognostic-level-of-evidence']    
+
+'''#3. Guideline information '''
 for elem in tree.iter(tag="guideline"):
     Biomarker = elem.find('biomarkers/biomarker')
     Mutation = Biomarker.attrib['marker']+"-"+Biomarker.attrib['alteration']
     Guideline[Mutation]=elem.find('content/item/text').text
     #break
-
-'''#3. yifei: Prognostic and dignostic level '''
-for elem in tree.iter(tag='biomarker-content'):
-    Gene = elem.attrib['marker']
-    Alteration = elem.attrib['alteration-name']
-    #break
-    try:
-        pro_dig_level['{}\t{}'.format(Gene, Alteration)] = elem.find('diagnostic-significance/variant').attrib['diagnostic-level-of-evidence'] \
-        + '\t' + elem.find('prognostic-significance/variant').attrib['prognostic-level-of-evidence']
-    except:
-        # yifei: some mutations don't have both
-        pro_dig_level['{}\t{}'.format(Gene, Alteration)] = 'None found' + 'None found'
         
-
 '''#4. content for the gene description and clinical trials '''
 
 for elem in tree.iter(tag='biomarker-content'):
