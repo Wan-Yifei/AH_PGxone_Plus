@@ -8,11 +8,43 @@ Created on Wed Jul 25 17:51:50 2018
 
 import xml.etree.ElementTree as ET
 #import sys,pprint
-#import re
+import re
 
 #tree = ET.parse('C:/Users/yifei.wan/Desktop/OncoGxOne/New_version/AMP demo-AML_COMPLETE.xml')
 #root = tree.getroot()
 #PMIDs = []
+PMIDs = []
+Mutation_total_info={}
+Guideline = {}
+patient_information = {}
+interactions = {}
+
+def extractPMID(text, PMIDs):
+    '''
+    Extract PMIDs from the paragraph text and replace the PMIDs with in-text reference
+
+    :param text: paragraph text 
+    :param PMIDs: previous list of PMIDs
+    :returns: new_text: updated paragraph text; PMIDs: updated list of PMIDs after extract the PMID information from "text"
+
+    :Example:
+
+    >>> from NofOne.NofOneParser import *
+    >>> PMIDs = ['12313450']
+    >>> text = "Amplification of CCND1 has been described in multiple tumor types and has been reported to be correlated with overexpression of the Cyclin D1 protein, cell cycle progression, and cell proliferation (Quintayo et al., 2012; 22976805, Elsheikh et al., 2008; 17653856)"
+    >>> new_text, PMIDs = extractPMID(text, PMIDs)
+    >>> print PMIDs
+    ['12313450','22976805','17653856']
+    >>> print new_text
+    "Amplification of CCND1 has been described in multiple tumor types and has been reported to be correlated with overexpression of the Cyclin D1 protein, cell cycle progression, and cell proliferation (Quintayo et al., 2012, Elsheikh et al., 2008)"
+
+    '''
+    pattern = r'\((.*?)\)'  # find all parenthesis
+    for m in re.findall(pattern, text):
+        PMIDs.extend(re.findall(r'\d{7,8}',m))
+    big_regex = re.compile('|'.join(re.escape("; "+pmid) for pmid in PMIDs))
+    new_text = big_regex.sub("", text)
+    return new_text, PMIDs
 
 def parseItem(item):
     references = item.findall("references/reference")
@@ -49,13 +81,11 @@ def parseSectionWithItems(Section, PMIDs):
 #tree = ET.ElementTree(file='/home/ywan/project/AMP demo-AML_COMPLETE.xml')
 tree = ET.ElementTree(file='AMP_demo-AML_COMPLETE.xml')
 root = tree.getroot()            
-PMIDs = []
+#PMIDs = []
 
 '''# 1. content for the first 3 tables, gene, therapyO, therapyS, therapyO, mutation, and pathway '''
 
-Mutation_total_info={}
-Guideline = {}
-patient_information = {}
+
 # yifei: dict for prognostic and dignostic info
 patient_information['disease'] = root.attrib['disease']
 patient_information['snomed_id'] = root.attrib['snomed-disease-concept-id']
@@ -95,7 +125,24 @@ for elem in tree.iter(tag="guideline"):
     Guideline[Mutation]=elem.find('content/item/text').text
     #break
         
-'''#4. content for the gene description and clinical trials '''
+'''#4. yifei: Interaction '''
+
+ref_interaction = []
+for elem in tree.findall('interactions/interaction'):
+    print(elem)
+    interaction = [biomarker.attrib['marker'] + '-' + biomarker.attrib['alteration'] for biomarker in elem.findall('interaction-biomarkers/biomarker')]    
+    Mutation_total_info[interaction[0]]['interaction'] = ' with '.join(interaction)
+    Mutation_total_info[interaction[1]]['interaction'] = ' with '.join(interaction)
+    ## yifei: extract PMIDs form summary
+    interactions[' with '.join(interaction)], ref_interaction = extractPMID(elem.find('interaction-summary').text, PMIDs)
+
+# yifei: If mutation doesn't have interaction, value = None
+    
+    
+# yifei: clean PMID or ref_interaction will be recorded twice    
+PMIDs = []    
+    
+'''#5. content for the gene description and clinical trials '''
 ''' yifei: PMID of prognosis and dignosis would be updated inside blow loop '''
 
 for elem in tree.iter(tag='biomarker-content'):
@@ -106,14 +153,19 @@ for elem in tree.iter(tag='biomarker-content'):
     for ee in tree.iter(tag='glossary-item'):
         if Gene == ee.find('biomarker').text:
             Mutation_total_info[Mutation]['comment'] = ee.find('description').text
+            
+    # yifei: prognosis and dignosis
+    Mutation_total_info[Mutation]['diagnosis'], PMIDs = parseSectionWithItems(elem.find('diagnostic-significance/variant'), PMIDs)
+    Mutation_total_info[Mutation]['prognosis'], PMIDs = parseSectionWithItems(elem.find('prognostic-significance/variant'), PMIDs)
+    # yifei: connect PMIDs with interactions
+    PMIDs = PMIDs + ref_interaction
+    # yifei: PMID for 'Gene info'
     Mutation_total_info[Mutation]['location'], PMIDs = parseSectionWithItems(elem.find('molecular-function'), PMIDs)
     Mutation_total_info[Mutation]['prevalence'], PMIDs = parseSectionWithItems(elem.find('incidence'), PMIDs)
     Mutation_total_info[Mutation]['effect'], PMIDs = parseSectionWithItems(elem.find('./biomarker-summary[@content-type="clinical-relevance"]'), PMIDs)
     Mutation_total_info[Mutation]['role'], PMIDs = parseSectionWithItems(elem.find('role-in-disease'), PMIDs)
     Mutation_total_info[Mutation]['ClinicalTrials'] = []
-    # yifei: prognosis and dignosis
-    Mutation_total_info[Mutation]['diagnosis'], PMIDs = parseSectionWithItems(elem.find('diagnostic-significance/variant'), PMIDs)
-    Mutation_total_info[Mutation]['prognosis'], PMIDs = parseSectionWithItems(elem.find('prognostic-significance/variant'), PMIDs)
+
 
     for CT in elem.findall('clinical-trials'):
         ClinType = CT.attrib['prioritized-by']
