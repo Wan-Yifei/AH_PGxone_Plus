@@ -96,6 +96,7 @@ for elem in tree.iter(tag="guideline"):
     #break
         
 '''#4. content for the gene description and clinical trials '''
+''' yifei: PMID of prognosis and dignosis would be updated inside blow loop '''
 
 for elem in tree.iter(tag='biomarker-content'):
     Gene = elem.attrib['marker']
@@ -110,6 +111,10 @@ for elem in tree.iter(tag='biomarker-content'):
     Mutation_total_info[Mutation]['effect'], PMIDs = parseSectionWithItems(elem.find('./biomarker-summary[@content-type="clinical-relevance"]'), PMIDs)
     Mutation_total_info[Mutation]['role'], PMIDs = parseSectionWithItems(elem.find('role-in-disease'), PMIDs)
     Mutation_total_info[Mutation]['ClinicalTrials'] = []
+    # yifei: prognosis and dignosis
+    Mutation_total_info[Mutation]['diagnosis'], PMIDs = parseSectionWithItems(elem.find('diagnostic-significance/variant'), PMIDs)
+    Mutation_total_info[Mutation]['prognosis'], PMIDs = parseSectionWithItems(elem.find('prognostic-significance/variant'), PMIDs)
+
     for CT in elem.findall('clinical-trials'):
         ClinType = CT.attrib['prioritized-by']
         for trial in CT.findall('clinical-trial'):
