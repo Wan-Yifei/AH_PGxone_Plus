@@ -326,7 +326,7 @@ def xml2ActionNew(xml):
             except:
                 pass    
     PMIDs = list(OrderedDict.fromkeys(PMIDs))
-    return Mutation_total_info, Guideline, PMIDs, patient_information
+    return Mutation_total_info, Guideline, PMIDs, patient_information, interactions
 
 
 
