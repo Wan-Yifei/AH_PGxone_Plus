@@ -1,3 +1,19 @@
+"""
+Copy created on Fri Jul 27 15:40:52 2018
+
+@author: Dr. Pengfei.yu
+@maintainer: Yifei Wan
+
+Update:
+# =============================================================================
+# 07/26/2018    alpha version 0.0.1
+# @Yifei.wan
+# Summary:
+# Add two new tables at the end of script (line#449) to output pl/dl and interaction. 
+# Test code (line#429): 'print Alt' was closed to avoid mistake under Python 3.
+# Hint: This script works with NofOneParser_alpha.py alpha version 0.0.2.
+# =============================================================================
+"""
 import sys, codecs, subprocess, argparse, os, re
 scriptFolder = os.path.dirname(os.path.abspath(sys.argv[0]))+"/"
 sys.path.append(scriptFolder)
@@ -409,7 +425,7 @@ if len(table3_str)==0:
 Alteration_list = sorted(Alteration_details.keys(), key=lambda x: (-Alteration_details[x][-1],x))
 # sort alterations based on number of recommendations
 for Alt in Alteration_list:
-    print Alt
+#    print Alt
     print >>output, "\n".join(Alteration_details[Alt][:-1])
 
 Ordered_Genes = list(OrderedDict.fromkeys([x.split("-")[0] for x in Alteration_list]))
