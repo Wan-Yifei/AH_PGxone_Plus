@@ -12,6 +12,7 @@ Update:
 # Add two new tables at the end of script (line#449) to output pl/dl and interaction. 
 # Test code (line#429): 'print Alt' was closed to avoid mistake under Python 3.
 # Hint: This script works with NofOneParser_alpha.py alpha version 0.0.2.
+# Hint: The ClinAccToMutationName.py should be in work directory.
 # =============================================================================
 """
 import sys, codecs, subprocess, argparse, os, re
