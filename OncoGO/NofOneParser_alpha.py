@@ -8,11 +8,13 @@ Created on Thu Jul 26 22:22:09 2018
 
 Update:
 # =============================================================================
-# 07/26/2018    alpha version 0.0.1
+# 07/26/2018    alpha version 0.0.2
 # @Yifei.wan
-# Summary
+# Summary:
 # Add new blocks into function xml2ActionNew() to extract 'prognosis & diagnosis 
 # level', 'interaction' and corresponding PMIDs.
+# Update #0.0.1 -> 0.0.2:
+# Add new info PL and DL into interactions.
 # =============================================================================
 """
 
@@ -251,7 +253,11 @@ def xml2ActionNew(xml):
         Mutation_total_info[interaction[0]]['interaction'] = ' with '.join(interaction)
         Mutation_total_info[interaction[1]]['interaction'] = ' with '.join(interaction)
         ## yifei: extract PMIDs form summary
-        interactions[' with '.join(interaction)], ref_interaction = extractPMID(elem.find('interaction-summary').text, PMIDs)
+        summary, ref_interaction = extractPMID(elem.find('interaction-summary').text, PMIDs)
+        ## yifei: PL, DL and summary would be stored as a dictionary
+        interactions[' with '.join(interaction)] = {'prognostic-level-of-evidence': elem.attrib['prognostic-level-of-evidence'],
+                                                'diagnostic-level-of-evidence': elem.attrib['diagnostic-level-of-evidence'],
+                                                'summary': summary}
     
     # yifei: If mutation doesn't have interaction, value = Not found
     for mutation in Mutation_total_info.keys():
