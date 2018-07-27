@@ -5,7 +5,9 @@ sys.path.append("/home/pengfei.yu/Softwares")
 from VCFmodules.VCFutility import *
 from ClinAccToMutationName import *
 from ClinTrials.ClinTrialsUtil import *
-from NofOne.NofOneParser import *
+# yifei: import alpha version xml2ActionNew
+#from NofOne.NofOneParser_alpha import *
+from NofOneParser_alpha import *
 from pymedtermino.snomedct import *
 from ClinTrials.state_graph import *
 from VCFmodules.SnpEff import *
@@ -151,11 +153,7 @@ def MutationsFromVCF(sample):
 
         if 'CLNACC' in v.INFO:
             variant=v.INFO["CLNACC"].split(",")[0].split(".")[0]
-			'''
-			yifei:
-			Q#5: where is the mutation_translate from? And what is it used for?
-			ClinAccToMutationName
-			'''
+
             try:
                 mutation = mutation_translate(variant)
             except:
@@ -195,10 +193,7 @@ def RecordString(mutation, recommendation, group_index, Type="SNV-indel", title=
     else:
         Gene = mutation.split("-",1)[0]
         Alteration = mutation.split("-",1)[1]
-		'''
-		yifei:
-		Q#6: What's firstTwo?
-		'''
+
     firstTwo = "%d\t%s"%(group_index,Gene)
     Line1 = "%s\t%s\t%s\t"%(firstTwo,title[0],Alteration)
     Line2 = "%s\t%s\t%s\t"%(firstTwo,title[1],recommendation[1])
@@ -238,11 +233,7 @@ def interpretationToLine(interp, group="therapyS"):
         if t in interp['therapies']:
             lines.append([interp['therapies'][t]['disease'],interp[group],"FDA"])
         else:
-		'''
-		yifei:
-		Q#6
-		not in therapies? patient_info should be checked!
-		'''
+
             lines.append([patient_information['disease'],interp[group],"FDA"])
     return sorted(lines, key=lambda x:x[0])
     
@@ -253,11 +244,12 @@ yifei:
 Start to output group #5.
 '''
 for mutation in sorted(total_info.keys()):
-'''
+
+    '''
 yifei:
 var total_info is from xml2Action function.
 var point_result is from MutationsFromVCF function.
-'''
+    '''
     # alteration details
     interp = total_info[mutation]
     pathway = interp['pathway']
@@ -309,10 +301,7 @@ var point_result is from MutationsFromVCF function.
     if interp['therapyO']!=None:
         lines = interpretationToLine(interp,"therapyO")
         Total_drugs.extend(interp['therapyO'].split(", "))
-		'''
-		yifei:
-		Q#6: what's the difference between table11 and table12? They are Potential Clinical Benefit both.
-		'''
+
         for line in lines:
             table12_str.append(RecordString(mutation, line, 2, Type))
             Alteration_details[mutation].append("%s\tDetails\tResponse to %s:\tPotential Clinical Benefit in %s#"%(firstTwo,line[1],line[0]))

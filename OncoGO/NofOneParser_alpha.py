@@ -196,7 +196,7 @@ def xml2ActionNew(xml):
     >>> print(patient_information)
    
     '''
-    tree = ET.ElementTree(file='/home/ywan/project/demo.xml')
+    tree = ET.ElementTree(file= xml)
     root = tree.getroot()            
     PMIDs = []
     Mutation_total_info={}
@@ -248,7 +248,7 @@ def xml2ActionNew(xml):
     
     ref_interaction = []
     for elem in tree.findall('interactions/interaction'):
-        print(elem)
+        #print(elem)
         interaction = [biomarker.attrib['marker'] + '-' + biomarker.attrib['alteration'] for biomarker in elem.findall('interaction-biomarkers/biomarker')]    
         Mutation_total_info[interaction[0]]['interaction'] = ' with '.join(interaction)
         Mutation_total_info[interaction[1]]['interaction'] = ' with '.join(interaction)
