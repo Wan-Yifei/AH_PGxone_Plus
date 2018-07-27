@@ -79,7 +79,7 @@ def parseSectionWithItems(Section, PMIDs):
    
     '''
 #tree = ET.ElementTree(file='/home/ywan/project/AMP demo-AML_COMPLETE.xml')
-tree = ET.ElementTree(file='AMP_demo-AML_COMPLETE.xml')
+tree = ET.ElementTree(file='/home/ywan/project/demo.xml')
 root = tree.getroot()            
 #PMIDs = []
 
@@ -136,9 +136,14 @@ for elem in tree.findall('interactions/interaction'):
     ## yifei: extract PMIDs form summary
     interactions[' with '.join(interaction)], ref_interaction = extractPMID(elem.find('interaction-summary').text, PMIDs)
 
-# yifei: If mutation doesn't have interaction, value = None
-    
-    
+# yifei: If mutation doesn't have interaction, value = Not found
+for mutation in Mutation_total_info.keys():
+    try:
+        #print(Mutation_total_info[mutation]['interaction'])
+        Mutation_total_info[mutation]['interaction']
+    except:
+        Mutation_total_info[mutation]['interaction'] = 'Not found'
+      
 # yifei: clean PMID or ref_interaction will be recorded twice    
 PMIDs = []    
     
