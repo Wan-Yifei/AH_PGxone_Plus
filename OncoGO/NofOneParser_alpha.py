@@ -1,20 +1,22 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Thu Jul 26 22:22:09 2018
+Copy created on Thu Jul 26 22:22:09 2018
 
 @author: Dr. Pengfei.yu
 @maintainer: Yifei Wan
 
 Update:
 # =============================================================================
-# 07/26/2018    alpha version 0.0.2
+# 07/26/2018    alpha version 0.0.1
 # @Yifei.wan
 # Summary:
 # Add new blocks into function xml2ActionNew() to extract 'prognosis & diagnosis 
 # level', 'interaction' and corresponding PMIDs.
-# Update #0.0.1 -> 0.0.2:
-# Add new info PL and DL into interactions.
+# =============================================================================
+# 07/27/2018    Update #0.0.1 -> 0.0.2:
+# @Yifei.wan
+# Add new info PL and DL into interactions dictionary.
 # =============================================================================
 """
 
