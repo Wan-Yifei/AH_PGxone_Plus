@@ -9,14 +9,19 @@ Copy created on Thu Jul 26 22:22:09 2018
 Update:
 # =============================================================================
 # 07/26/2018    alpha version 0.0.1
-# @Yifei.wan
+# @Yifei.Wan
 # Summary:
 # Add new blocks into function xml2ActionNew() to extract 'prognosis & diagnosis 
 # level', 'interaction' and corresponding PMIDs.
 # =============================================================================
 # 07/27/2018    Update #0.0.1 -> 0.0.2:
-# @Yifei.wan
+# @Yifei.Wan
 # Add new info PL and DL into interactions dictionary.
+# =============================================================================
+# 07/28/2018    Update #0.0.2 -> 0.0.3:
+# @Yifei.Wan
+# Extract summary of PL/DL and store in Mutation_total_info[mutation][pl|dl]
+# ['Summary'].
 # =============================================================================
 """
 
@@ -274,12 +279,24 @@ def xml2ActionNew(xml):
         
     '''#5. content for the gene description and clinical trials '''
     ''' yifei: PMID of prognosis and dignosis would be updated inside blow loop '''
+    ''' Extract summary of pl/dl would be added below '''
     
     for elem in tree.iter(tag='biomarker-content'):
         Gene = elem.attrib['marker']
         Alteration = elem.attrib['alteration-name']
         Mutation = Gene+"-"+Alteration
         if Mutation not in Mutation_total_info: continue  # remove the variants with no curation
+        # yifei: extract summary for pl and dl
+        try:
+            Mutation_total_info[Mutation]['diagnostic-significance']['Summary'] = elem.find('diagnostic-significance/variant/content/item/text').text
+        except:
+            Mutation_total_info[Mutation]['diagnostic-significance']['Summary'] = 'Unknown'
+        try:    
+            Mutation_total_info[Mutation]['prognostic-significance']['Summary'] = elem.find('prognostic-significance/variant/content/item/text').text
+        except:
+            Mutation_total_info[Mutation]['prognostic-significance']['Summary'] = 'Unknown'
+        
+        
         for ee in tree.iter(tag='glossary-item'):
             if Gene == ee.find('biomarker').text:
                 Mutation_total_info[Mutation]['comment'] = ee.find('description').text
