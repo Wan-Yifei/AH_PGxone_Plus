@@ -501,10 +501,16 @@ for mutation in total_info.keys():
     gene, alteration = mutation.split('-')
     pl = total_info[mutation]['prognostic-significance']
     dl = total_info[mutation]['diagnostic-significance']
+    sum_pl = total_info[mutation]['prognostic-significance']['Summary']
+    sum_dl = total_info[mutation]['diagnostic-significance']['Summary']
     print >>output, '{}\t{}\t{}\t{}\t'.format(Table_n, gene, 'Alteration', alteration)
     print >>output, '{}\t{}\t{}\t{}\t'.format(Table_n, gene, 'Progonostic-significance', pl)
     print >>output, '{}\t{}\t{}\t{}\t'.format(Table_n, gene, 'Diagnostic-significance', dl)
-
+    if sum_pl != 'Unknown' and sum_dl != 'Unknown':   
+        ## yifei: remove mutation doesn't have summary of pl nor dl.
+        print >>output, '{}\t{}\t{}\t{}\t'.format(Table_n, gene, 'Summary of Prognosis', pl)
+        print >>output, '{}\t{}\t{}\t{}\t'.format(Table_n, gene, 'Summary of Diagnosis', dl)
+ 
 # yifei: add table for interactions
 Table_n+=1
 for interaction in interactions.keys():
