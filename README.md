@@ -1,2 +1,4 @@
-# AH_PGxone_Plus
-This project includes multiple objects which are trying to automate analysis of PGxone Plus. 
+# AH_Project
+**This project includes multiple objects:**
+## 1. OncoGo: update and maintain Onco_P_One
+## 2. PGxGo: relative script of PG_O
