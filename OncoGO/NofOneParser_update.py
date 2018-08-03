@@ -115,8 +115,8 @@ for elem in tree.iter(tag='positive-result'):
         continue
     Mutation = elem.attrib['biomarker']+"-"+elem.attrib['result-value']
 
-    Mutation_total_info[Mutation]['diagnostic-significance'] = elem.attrib['diagnostic-level-of-evidence']
-    Mutation_total_info[Mutation]['prognostic-significance'] = elem.attrib['prognostic-level-of-evidence']    
+    Mutation_total_info[Mutation]['diagnostic-significance'] = {'level': elem.attrib['diagnostic-level-of-evidence']}
+    Mutation_total_info[Mutation]['prognostic-significance'] = {'level': elem.attrib['prognostic-level-of-evidence']}
 
 '''#3. Guideline information '''
 for elem in tree.iter(tag="guideline"):
@@ -149,12 +149,23 @@ PMIDs = []
     
 '''#5. content for the gene description and clinical trials '''
 ''' yifei: PMID of prognosis and dignosis would be updated inside blow loop '''
+''' Extract summary of pl/dl would be added below '''
 
 for elem in tree.iter(tag='biomarker-content'):
     Gene = elem.attrib['marker']
     Alteration = elem.attrib['alteration-name']
     Mutation = Gene+"-"+Alteration
     if Mutation not in Mutation_total_info: continue  # remove the variants with no curation
+    # yifei: extract summary for pl and dl
+    try:
+        Mutation_total_info[Mutation]['diagnostic-significance']['Summary'] = elem.find('diagnostic-significance/variant/content/item/text').text
+    except:
+        Mutation_total_info[Mutation]['diagnostic-significance']['Summary'] = 'Unknown'
+    try:    
+        Mutation_total_info[Mutation]['prognostic-significance']['Summary'] = elem.find('prognostic-significance/variant/content/item/text').text
+    except:
+        Mutation_total_info[Mutation]['prognostic-significance']['Summary'] = 'Unknown'
+        
     for ee in tree.iter(tag='glossary-item'):
         if Gene == ee.find('biomarker').text:
             Mutation_total_info[Mutation]['comment'] = ee.find('description').text

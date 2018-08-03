@@ -9,14 +9,19 @@ Copy created on Thu Jul 26 22:22:09 2018
 Update:
 # =============================================================================
 # 07/26/2018    alpha version 0.0.1
-# @Yifei.wan
+# @Yifei.Wan
 # Summary:
 # Add new blocks into function xml2ActionNew() to extract 'prognosis & diagnosis 
 # level', 'interaction' and corresponding PMIDs.
 # =============================================================================
 # 07/27/2018    Update #0.0.1 -> 0.0.2:
-# @Yifei.wan
+# @Yifei.Wan
 # Add new info PL and DL into interactions dictionary.
+# =============================================================================
+# 07/28/2018    Update #0.0.2 -> 0.0.3:
+# @Yifei.Wan
+# Extract summary of PL/DL and store in Mutation_total_info[mutation][pl|dl]
+# ['Summary'].
 # =============================================================================
 """
 
@@ -236,8 +241,8 @@ def xml2ActionNew(xml):
             continue
         Mutation = elem.attrib['biomarker']+"-"+elem.attrib['result-value']
     
-        Mutation_total_info[Mutation]['diagnostic-significance'] = elem.attrib['diagnostic-level-of-evidence']
-        Mutation_total_info[Mutation]['prognostic-significance'] = elem.attrib['prognostic-level-of-evidence']    
+        Mutation_total_info[Mutation]['diagnostic-significance'] = {'level': elem.attrib['diagnostic-level-of-evidence']}
+        Mutation_total_info[Mutation]['prognostic-significance'] = {'level': elem.attrib['prognostic-level-of-evidence']}
     
     '''#3. Guideline information '''
     for elem in tree.iter(tag="guideline"):
@@ -250,16 +255,12 @@ def xml2ActionNew(xml):
     
     ref_interaction = []
     for elem in tree.findall('interactions/interaction'):
-        #print(elem)
+        print(elem)
         interaction = [biomarker.attrib['marker'] + '-' + biomarker.attrib['alteration'] for biomarker in elem.findall('interaction-biomarkers/biomarker')]    
         Mutation_total_info[interaction[0]]['interaction'] = ' with '.join(interaction)
         Mutation_total_info[interaction[1]]['interaction'] = ' with '.join(interaction)
         ## yifei: extract PMIDs form summary
-        summary, ref_interaction = extractPMID(elem.find('interaction-summary').text, PMIDs)
-        ## yifei: PL, DL and summary would be stored as a dictionary
-        interactions[' with '.join(interaction)] = {'prognostic-level-of-evidence': elem.attrib['prognostic-level-of-evidence'],
-                                                'diagnostic-level-of-evidence': elem.attrib['diagnostic-level-of-evidence'],
-                                                'summary': summary}
+        interactions[' with '.join(interaction)], ref_interaction = extractPMID(elem.find('interaction-summary').text, PMIDs)
     
     # yifei: If mutation doesn't have interaction, value = Not found
     for mutation in Mutation_total_info.keys():
@@ -274,12 +275,23 @@ def xml2ActionNew(xml):
         
     '''#5. content for the gene description and clinical trials '''
     ''' yifei: PMID of prognosis and dignosis would be updated inside blow loop '''
+    ''' Extract summary of pl/dl would be added below '''
     
     for elem in tree.iter(tag='biomarker-content'):
         Gene = elem.attrib['marker']
         Alteration = elem.attrib['alteration-name']
         Mutation = Gene+"-"+Alteration
         if Mutation not in Mutation_total_info: continue  # remove the variants with no curation
+        # yifei: extract summary for pl and dl
+        try:
+            Mutation_total_info[Mutation]['diagnostic-significance']['Summary'] = elem.find('diagnostic-significance/variant/content/item/text').text
+        except:
+            Mutation_total_info[Mutation]['diagnostic-significance']['Summary'] = 'Unknown'
+        try:    
+            Mutation_total_info[Mutation]['prognostic-significance']['Summary'] = elem.find('prognostic-significance/variant/content/item/text').text
+        except:
+            Mutation_total_info[Mutation]['prognostic-significance']['Summary'] = 'Unknown'
+            
         for ee in tree.iter(tag='glossary-item'):
             if Gene == ee.find('biomarker').text:
                 Mutation_total_info[Mutation]['comment'] = ee.find('description').text
@@ -332,7 +344,8 @@ def xml2ActionNew(xml):
                 if therapy.find('status-in-this-indication/status').text=="FDA Approved":
                     Mutation_total_info[Mutation]['therapies'][drug]['disease']=", ".join([x.text for x in therapy.findall('status-in-this-indication/disease-list/disease')])
             except:
-                pass    
+                pass
+            
     PMIDs = list(OrderedDict.fromkeys(PMIDs))
     return Mutation_total_info, Guideline, PMIDs, patient_information, interactions
 

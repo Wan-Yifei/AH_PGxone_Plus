@@ -13,6 +13,13 @@ Update:
 # Test code (line#429): 'print Alt' was closed to avoid mistake under Python 3.
 # Hint: work with NofOneParser_alpha.py alpha version 0.0.2.
 # =============================================================================
+# 08/02/2018    alpha version 0.0.2
+# @Yifei.Wan
+# Summary:
+# Fix the output of the dl and pl (table#13). Now the level and summary would be output respectively.
+# Change 'Unknown' as 'Unknown.', the fliter can remove summary with two empty items.
+# Hint: work with NofoneParser_alpha.py alpha version 0.0.3.
+# =============================================================================
 """
 import sys, codecs, subprocess, argparse, os, re
 scriptFolder = os.path.dirname(os.path.abspath(sys.argv[0]))+"/"
@@ -499,12 +506,18 @@ PM.UpdateLocalStorage()
 Table_n+=1
 for mutation in total_info.keys():
     gene, alteration = mutation.split('-')
-    pl = total_info[mutation]['prognostic-significance']
-    dl = total_info[mutation]['diagnostic-significance']
+    pl = total_info[mutation]['prognostic-significance']['level']
+    dl = total_info[mutation]['diagnostic-significance']['level']
+    sum_pl = total_info[mutation]['prognostic-significance']['Summary']
+    sum_dl = total_info[mutation]['diagnostic-significance']['Summary']
     print >>output, '{}\t{}\t{}\t{}\t'.format(Table_n, gene, 'Alteration', alteration)
     print >>output, '{}\t{}\t{}\t{}\t'.format(Table_n, gene, 'Progonostic-significance', pl)
     print >>output, '{}\t{}\t{}\t{}\t'.format(Table_n, gene, 'Diagnostic-significance', dl)
-
+    if sum_pl != 'Unknown.' and sum_dl != 'Unknown.':   
+        ## yifei: remove mutation doesn't have summary of pl nor dl.
+        print >>output, '{}\t{}\t{}\t{}\t'.format(Table_n, gene, 'Summary of Prognosis', sum_pl)
+        print >>output, '{}\t{}\t{}\t{}\t'.format(Table_n, gene, 'Summary of Diagnosis', sum_dl)
+ 
 # yifei: add table for interactions
 Table_n+=1
 for interaction in interactions.keys():
