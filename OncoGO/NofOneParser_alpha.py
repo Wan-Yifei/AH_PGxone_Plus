@@ -255,13 +255,16 @@ def xml2ActionNew(xml):
     
     ref_interaction = []
     for elem in tree.findall('interactions/interaction'):
-        print(elem)
+        #print(elem)
         interaction = [biomarker.attrib['marker'] + '-' + biomarker.attrib['alteration'] for biomarker in elem.findall('interaction-biomarkers/biomarker')]    
         Mutation_total_info[interaction[0]]['interaction'] = ' with '.join(interaction)
         Mutation_total_info[interaction[1]]['interaction'] = ' with '.join(interaction)
-        ## yifei: extract PMIDs form summary
-        interactions[' with '.join(interaction)], ref_interaction = extractPMID(elem.find('interaction-summary').text, PMIDs)
     
+        ## yifei: extract PMIDs form summary
+        interactions[' with '.join(interaction)] = {'diagnostic-level-of-evidence': elem.attrib['diagnostic-level-of-evidence']}
+        interactions[' with '.join(interaction)]['prognostic-level-of-evidence'] = elem.attrib['prognostic-level-of-evidence']
+        interactions[' with '.join(interaction)]['summary'], ref_interaction = extractPMID(elem.find('interaction-summary').text, PMIDs)
+  
     # yifei: If mutation doesn't have interaction, value = Not found
     for mutation in Mutation_total_info.keys():
         try:

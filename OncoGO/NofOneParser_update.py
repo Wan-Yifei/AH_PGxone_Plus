@@ -79,7 +79,7 @@ def parseSectionWithItems(Section, PMIDs):
    
     '''
 #tree = ET.ElementTree(file='/home/ywan/project/AMP demo-AML_COMPLETE.xml')
-tree = ET.ElementTree(file='/home/ywan/project/demo.xml')
+tree = ET.ElementTree(file='demo.xml')
 root = tree.getroot()            
 #PMIDs = []
 
@@ -129,12 +129,15 @@ for elem in tree.iter(tag="guideline"):
 
 ref_interaction = []
 for elem in tree.findall('interactions/interaction'):
-    print(elem)
+    #print(elem)
     interaction = [biomarker.attrib['marker'] + '-' + biomarker.attrib['alteration'] for biomarker in elem.findall('interaction-biomarkers/biomarker')]    
     Mutation_total_info[interaction[0]]['interaction'] = ' with '.join(interaction)
     Mutation_total_info[interaction[1]]['interaction'] = ' with '.join(interaction)
+
     ## yifei: extract PMIDs form summary
-    interactions[' with '.join(interaction)], ref_interaction = extractPMID(elem.find('interaction-summary').text, PMIDs)
+    interactions[' with '.join(interaction)] = {'diagnostic-level-of-evidence': elem.attrib['diagnostic-level-of-evidence']}
+    interactions[' with '.join(interaction)]['progonstic-level-of-evidence'] = elem.attrib['prognostic-level-of-evidence']
+    interactions[' with '.join(interaction)]['summary'], ref_interaction = extractPMID(elem.find('interaction-summary').text, PMIDs)
 
 # yifei: If mutation doesn't have interaction, value = Not found
 for mutation in Mutation_total_info.keys():
