@@ -508,15 +508,32 @@ for mutation in total_info.keys():
     gene, alteration = mutation.split('-')
     pl = total_info[mutation]['prognostic-significance']['level']
     dl = total_info[mutation]['diagnostic-significance']['level']
+	ia = total_info[mutation]['interaction'] ## interaction
     sum_pl = total_info[mutation]['prognostic-significance']['Summary']
     sum_dl = total_info[mutation]['diagnostic-significance']['Summary']
     print >>output, '{}\t{}\t{}\t{}\t'.format(Table_n, gene, 'Alteration', alteration)
     print >>output, '{}\t{}\t{}\t{}\t'.format(Table_n, gene, 'Progonostic-significance', pl)
     print >>output, '{}\t{}\t{}\t{}\t'.format(Table_n, gene, 'Diagnostic-significance', dl)
-    if sum_pl != 'Unknown.' and sum_dl != 'Unknown.':   
-        ## yifei: remove mutation doesn't have summary of pl nor dl.
+	
+	## yifei: logical flag for symbol: diagnosis, prognosis, interaction
+	if pl in ['A', 'B', 'C', 'D', 'B/C', 'C/D']:
+		flag = 'Yes'
+	print >>output, '{}\t{}\t{}\t{}\t'.format(Table_n, gene, 'Symbol of Prognosis', flag)		
+    
+	if dl in ['A', 'B', 'C', 'D', 'B/C', 'C/D']:
+		flag = 'Yes'
+	print >>output, '{}\t{}\t{}\t{}\t'.format(Table_n, gene, 'Symbol of Diagnosis', flag)
+	
+	if ia != 'Not found':
+		flag = 'Yes'
+	print >>output, '{}\t{}\t{}\t{}\t'.format(Table_n, gene, 'Symbol of Interacton', flag)
+	
+	## yifei: output summary
+	if sum_pl != 'Unknown.' and sum_dl != 'Unknown.':   
+        ## remove mutation doesn't have summary of pl nor dl.
         print >>output, '{}\t{}\t{}\t{}\t'.format(Table_n, gene, 'Summary of Prognosis', sum_pl)
         print >>output, '{}\t{}\t{}\t{}\t'.format(Table_n, gene, 'Summary of Diagnosis', sum_dl)
+	
  
 # yifei: add table for interactions
 Table_n+=1
