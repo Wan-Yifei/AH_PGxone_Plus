@@ -20,6 +20,12 @@ Update:
 # Change 'Unknown' as 'Unknown.', the fliter can remove summary with two empty items.
 # Hint: work with NofoneParser_alpha.py alpha version 0.0.3.
 # =============================================================================
+# 08/07/2018    alpha version 0.0.3
+# @Yifei.Wan
+# Summary:   
+# Add logical flags to help map symbols to corresponding alterations. In group 14, 
+# 'Yes' means a symbol should be mapped into 1st-4th panels. Or there is no symbol.  
+# =============================================================================
 """
 import sys, codecs, subprocess, argparse, os, re
 scriptFolder = os.path.dirname(os.path.abspath(sys.argv[0]))+"/"
@@ -508,15 +514,38 @@ for mutation in total_info.keys():
     gene, alteration = mutation.split('-')
     pl = total_info[mutation]['prognostic-significance']['level']
     dl = total_info[mutation]['diagnostic-significance']['level']
+    ia = total_info[mutation]['interaction'] ## interaction
     sum_pl = total_info[mutation]['prognostic-significance']['Summary']
     sum_dl = total_info[mutation]['diagnostic-significance']['Summary']
     print >>output, '{}\t{}\t{}\t{}\t'.format(Table_n, gene, 'Alteration', alteration)
     print >>output, '{}\t{}\t{}\t{}\t'.format(Table_n, gene, 'Prognostic-significance', pl)
     print >>output, '{}\t{}\t{}\t{}\t'.format(Table_n, gene, 'Diagnostic-significance', dl)
+	
+	## yifei: logical flag for symbol: diagnosis, prognosis, interaction
+    if pl in ['A', 'B', 'C', 'D', 'B/C', 'C/D']:
+        fg = 'Yes'
+    else:
+        fg = 'No'
+    print >>output, '{}\t{}\t{}\t{}\t'.format(Table_n, gene, 'Symbol of Prognosis', fg)		
+
+    if dl in ['A', 'B', 'C', 'D', 'B/C', 'C/D']:
+        fg = 'Yes'
+    else:
+        fg = 'No'
+    print >>output, '{}\t{}\t{}\t{}\t'.format(Table_n, gene, 'Symbol of Diagnosis', fg)
+	
+    if ia != 'Not found':
+       fg = 'Yes'
+    else:
+        fg = 'No'
+    print >>output, '{}\t{}\t{}\t{}\t'.format(Table_n, gene, 'Symbol of Interacton', fg)
+	
+	## yifei: output summary
     if sum_pl != 'Unknown.' and sum_dl != 'Unknown.':   
-        ## yifei: remove mutation doesn't have summary of pl nor dl.
+        ## remove mutation doesn't have summary of pl nor dl.
         print >>output, '{}\t{}\t{}\t{}\t'.format(Table_n, gene, 'Summary of Prognosis', sum_pl)
         print >>output, '{}\t{}\t{}\t{}\t'.format(Table_n, gene, 'Summary of Diagnosis', sum_dl)
+	
  
 # yifei: add table for interactions
 Table_n+=1
