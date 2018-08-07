@@ -20,6 +20,12 @@ Update:
 # Change 'Unknown' as 'Unknown.', the fliter can remove summary with two empty items.
 # Hint: work with NofoneParser_alpha.py alpha version 0.0.3.
 # =============================================================================
+# 08/07/2018    alpha version 0.0.3
+# @Yifei.Wan
+# Summary:   
+# Add logical flags to help map symbols to corresponding alterations. In group 14, 
+# 'Yes' means a symbol should be mapped into 1st-4th panels. Or there is no symbol.  
+# =============================================================================
 """
 import sys, codecs, subprocess, argparse, os, re
 scriptFolder = os.path.dirname(os.path.abspath(sys.argv[0]))+"/"
