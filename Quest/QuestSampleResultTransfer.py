@@ -18,7 +18,7 @@ def ParseArg():
     parser_run.set_defaults(func=run)
     parser_sendPWN = subparsers.add_parser('sendPWN', help='send PDF of one sample to PWN')
     parser_sendPWN.add_argument("pdf", type=str, help='path of PDF file to be sent to PWN')
-    parser_sendPWN.add_argument("pwnReq", type=str, help='PWN reqisition ID for this sample, 6-digit number')
+    parser_sendPWN.add_argument("pwnReq", type=str, help='PWN reqisition ID for this sample, 6-digit number') ## yifei: ReqID is 'A-' ID
     parser_sendPWN.add_argument("-n", "--normal", dest='abnormal', help="set the sample as normal when sending to PWN", action='store_false')
     parser_sendPWN.set_defaults(abnormal=True)
     parser_sendPWN.set_defaults(func=sendPWN)
@@ -123,7 +123,7 @@ def outputWarning(WarningFileName):
 def run(args):
     command = 'find %s/ -mtime 0 | grep "PGQD" | grep "pdf"'%args.reportFolder
     run = os.popen(command)
-    daily_reports = [x.split("/")[-1] for x in run.read().strip().split("\n")]
+    daily_reports = [x.split("/")[-1] for x in run.read().strip().split("\n")] ## yifei: extract reports' name from path
     run.close()
     WarningFileName = "Warning"+datetime.datetime.now().strftime('-%m%d%Y%H%M')+".txt"
     for report in daily_reports:
