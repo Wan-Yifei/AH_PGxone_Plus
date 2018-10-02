@@ -502,7 +502,7 @@ for g in Guideline:
     print >>output, "%d\tGuideline\t%s\t%s\t"%(Table_n, g, Guideline[g])
 
 Table_n+=1
-print >>output, "%d\t%s"%(Table_n, "\t".join(Alteration_list_positive))
+print >>output, "%d\t%s\t\t"%(Table_n, "\t".join(Alteration_list_positive))
 
 Table_n+=1
 print >>output, "%d\tN-of-One\t\t\t"%(Table_n)
