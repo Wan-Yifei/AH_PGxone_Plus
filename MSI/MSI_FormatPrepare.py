@@ -9,7 +9,7 @@ Prepare MSI raw count for statistical analysis.
 import glob
 import os
 
-os.chdir('C:/Users/yifei.wan/Desktop/msi')
+os.chdir('C:/Users/yifei.wan/Desktop/Spike-in/msi')
 files = glob.glob('*.txt')
 
 # 1. Input raw data from pipeline
@@ -29,9 +29,10 @@ def Output_count(count_reformed):
 for file in files:
     with open(file) as raw:
         count_raw = raw.readlines()
-        count_reformed = [Change_Format(line) for line in count_raw]        
-        output_path = 'C:/Users/yifei.wan/Desktop/MSI_healthy/{}'.format(file)
-        Output_count(count_reformed)
+        count_reformed = [Change_Format(line) for line in count_raw]
+        count_sorted = sorted(count_reformed, key = lambda line: len(line[2].split(',')), reverse = True)
+        output_path = 'C:/Users/yifei.wan/Desktop/MSI_positive/{}'.format(file)
+        Output_count(count_sorted)
 
 
 #'C:/Users/yifei.wan/Desktop/Msi_raw_count/1_percent_HCT16-Large-RD_S39_msi_array99.txt'
