@@ -48,7 +48,7 @@ freque <- function(raw_count, mark){
 }
 
 ## 2.2 Cutoff function
-## detecte and remove length without count on right side
+## detect and remove length without count on right side
 
 breakcheck <- function(count_row){
   breakpoints = which(sapply(count_row, function(x)(x+1) %in% count_row) == 0)
