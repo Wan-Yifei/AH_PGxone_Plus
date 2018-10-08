@@ -49,14 +49,13 @@ prerep <- function(count_raw){
   }
 }
 
-# 3. Mixture Normal Model
+# 3. Mixture Normal Model Fit
 
 library(mclust)
+
 ModelFit <- function(mark, nsubdis = 2){
-  
   colnames(mark) = paste('Mixture Gauss model of', substr(deparse(substitute(mark)),9,nchar(deparse(substitute(mark))) - 1))
   fit = densityMclust(mark[, 1], G = nsubdis, model = 'V')
-  print(colnames(mark))
   print(summary(fit,parameters = T)[10:12])
   plot(table(mark), xlab = 'Length', ylab = '', main = paste('Density of ', colnames(mark)))
   #barplot(table(mark), xlab = 'Length', ylab = '', main = paste('Density of ', colnames(mark)))
@@ -64,17 +63,47 @@ ModelFit <- function(mark, nsubdis = 2){
   plot(fit, what = 'density', xaxt = 'n', yaxt = 'n', xlab = '', main = '')
 }
 
-MSI_modelfit_main <- function(count_raw){
+MSI_modelfit_main_base <- function(count_raw, model){ ## model: fit_mark, e.g. 'fit_BAT.25'
   set.seed(121)
   count_raw = prestr(count_raw)
   count_raw[, seq(1, 9, 2)] = as.data.frame(sapply(count_raw[, seq(1, 9, 2)], breakcheck))
   prerep(count_raw)
-  
-  fit_BAT.25 = ModelFit(na.omit(BAT.25))
-  fit_BAT.26 = ModelFit(na.omit(BAT.26), nsubdis = 2)
-  fit_NR.21 = ModelFit(na.omit(NR.21), nsubdis = 2)
-  fit_NR.24 = ModelFit(na.omit(NR.24), nsubdis = 2)
-  fit_NR.27 = ModelFit(na.omit(NR.27), nsubdis = 2)
+  switch (model, 
+          fit_BAT.25 = ModelFit(na.omit(BAT.25)), 
+          fit_BAT.26 = ModelFit(na.omit(BAT.26)), 
+          fit_NR.21 = ModelFit(na.omit(NR.21)), 
+          fit_NR.24 = ModelFit(na.omit(NR.24)), 
+          fit_NR.27 = ModelFit(na.omit(NR.27)))
+}
+
+ModelFit_simulate <- function(mark, nsubdis = 2, perturbation, position){
+  colnames(mark) = paste('Mixture Gauss model of', substr(deparse(substitute(mark)),9,nchar(deparse(substitute(mark))) - 1))
+  fit = densityMclust(mark[, 1], G = nsubdis, model = 'V')
+  print(paste('Length =', position, 'Perturbation level = ', seq(0.01, 0.04, 0.01)[perturbation]))
+  print(summary(fit,parameters = T)[10:12])
+  plot(table(mark), xlab = 'Length', ylab = '', main = paste('Perturbation level = ', seq(0.01, 0.04, 0.01)[perturbation]))
+  #barplot(table(mark), xlab = 'Length', ylab = '', main = paste('Density of ', colnames(mark)))
+  par(new = TRUE)
+  plot(fit, what = 'density', xaxt = 'n', yaxt = 'n', xlab = '', main = '')
+}
+
+# 4. Simulation
+
+MSI_simulation <- function(count_raw, mark, position){
+  set.seed(121)
+  count_raw = prestr(count_raw)
+  count_raw[, seq(1, 9, 2)] = as.data.frame(sapply(count_raw[, seq(1, 9, 2)], breakcheck))
+  prerep(count_raw)
+  length <- unique(mark[, 1])
+  intensity <- dim(mark)[1]
+  perturbation <- floor(c(.01*intensity, .02*intensity, .03*intensity, .04*intensity))  
+  assign(paste(deparse(substitute(mark)), '_noise', sep = ""), sapply(perturbation, function(x)c(rep(length[position], x/2), rep(length[position + 1], x), rep(length[position + 2], x/2), mark[, 1])), envir = .GlobalEnv)
+  models = switch (paste(deparse(substitute(mark))), 
+          BAT.25 = sapply(c(1:4), function(i)ModelFit_simulate(na.omit(as.data.frame(BAT.25_noise[[i]])), perturbation = i, position = position)), 
+          BAT.26 = sapply(c(1:4), function(i)ModelFit_simulate(na.omit(as.data.frame(BAT.26_noise[[i]])), perturbation = i, position = position)), 
+          NR.21 = sapply(c(1:4), function(i)ModelFit_simulate(na.omit(as.data.frame(NR.21_noise[[i]])), perturbation = i, position = position)), 
+          NR.24 = sapply(c(1:4), function(i)ModelFit_simulate(na.omit(as.data.frame(NR.24_noise[[i]])), perturbation = i, position = position)), 
+          NR.27 = sapply(c(1:4), function(i)ModelFit_simulate(na.omit(as.data.frame(NR.27_noise[[i]])), perturbation = i, position = position)))  
 }
 ```
 
@@ -82,5 +111,74 @@ MSI_modelfit_main <- function(count_raw){
 
 Following simulationm fits the mixture Gauss model for MSI data with different signal intensity.
 
+```{r read data, echo=FALSE}
+path <- 'C:/Users/wan_yifei/Desktop/MSI'
+files <- list.files(path, pattern = '*.txt')
+```
+
 ## 1. Highest count: 0 ~ 200
 
+Sample: BS_Large-RD-CNV_S2_msi_array
+
+```{r, echo=FALSE}
+count_raw <- read.csv(paste(path, files[2], sep = '/'), sep = '\t', header = FALSE, stringsAsFactors = FALSE)
+```
+### 1.1 Baseline
+```{r, echo=FALSE}
+MSI_modelfit_main_base(count_raw = count_raw, model = 'fit_NR.24')
+```
+### 1.2 Simulation
+
++ At 36~38:
+```{r, echo=FALSE}
+
+MSI_simulation(count_raw, NR.24, 1)
+
+```
+
++ At 37~39
+```{r, echo=FALSE}
+
+MSI_simulation(count_raw, NR.24, 2)
+
+```
+
++ At 38~40
+```{r, echo=FALSE}
+
+MSI_simulation(count_raw, NR.24, 3)
+
+```
+
+## 2. Highest count: 200 ~ 400
+
+```{r, echo=FALSE}
+count_raw <- read.csv(paste(path, files[3], sep = '/'), sep = '\t', header = FALSE, stringsAsFactors = FALSE)
+```
+
+### 2.1 Baseline
+```{r, echo=FALSE}
+MSI_modelfit_main_base(count_raw = count_raw, model = 'fit_NR.21')
+```
+### 2.2 Simulation
+
++ At 36~38:
+```{r, echo=FALSE}
+
+MSI_simulation(count_raw, NR.21, 1)
+
+```
+
++ At 37~39
+```{r, echo=FALSE}
+
+MSI_simulation(count_raw, NR.21, 2)
+
+```
+
++ At 38~40
+```{r, echo=FALSE}
+
+MSI_simulation(count_raw, NR.21, 3)
+
+```
