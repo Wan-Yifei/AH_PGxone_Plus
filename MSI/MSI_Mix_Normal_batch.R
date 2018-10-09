@@ -4,18 +4,18 @@
 setwd('c:/Users/yifei.wan/Desktop')
 #count_raw = read.csv('All_counts.txt', sep = '\t', header = FALSE, stringsAsFactors = FALSE)
 #count_raw = read.csv('Msi_raw_count/1_percent_LoVo_Large-RD_S37_msi_array.txt_counts.txt', sep = '\t', header = FALSE, stringsAsFactors = FALSE)
-count_raw <- read.csv('MSI_positive/1_percent_HCT116_Large-RD_S20_msi_array.txt', sep = '\t', header = FALSE, stringsAsFactors = FALSE)
+#count_raw <- read.csv('MSI_positive/1_percent_HCT116_Large-RD_S20_msi_array.txt', sep = '\t', header = FALSE, stringsAsFactors = FALSE)
 
 path_pos <- 'c:/Users/yifei.wan/Desktop/MSI_positive'
 path_neg <- 'c:/Users/yifei.wan/Desktop/MSI_negative'
 
-input_file <- function(path_way){
-  files = list.files(path_way, pattern = '*.txt')
-  count_all = sapply(files, function(file)read.csv(paste(path_way, file, sep = '/'), header = F, sep = '\t', stringsAsFactors = F))
-  return(count_all)
-}
+# input_file <- function(path_way){
+#   files = list.files(path_way, pattern = '*.txt')
+#   count_all = sapply(files, function(file)read.csv(paste(path_way, file, sep = '/'), header = F, sep = '\t', stringsAsFactors = F))
+#   return(count_all)
+# }
 
-count_all <- input_file(path_pos)
+#count_all <- input_file(path_pos)
 
 ########################################################################################
 ##################################### Functions ########################################
@@ -115,6 +115,41 @@ MSI_modelfit_main <- function(count_raw){
 # 
 # count_normalized <- Normalize(count_raw)
 
+# 5. Variance calculator
+MSI_var <- function(count_raw){
+  set.seed(121)
+  count_raw = prestr(count_raw)
+  count_raw[, seq(1, 9, 2)] = as.data.frame(sapply(count_raw[, seq(1, 9, 2)], breakcheck))
+  prerep(count_raw)
+  
+  var_BAT.25 = var(BAT.25, na.rm = T)
+  var_BAT.26 = var(BAT.26, na.rm = T)
+  var_NR.21 = var(NR.21, na.rm = T)
+  var_NR.24 = var(NR.24, na.rm = T)
+  var_NR.27 = var(NR.27, na.rm = T)
+  var_col = data.frame(c(paste('BAT.25:',var_BAT.25, '\t'), paste('BAT.26:',var_BAT.26, '\t'), paste('NR.21:',var_NR.21, '\t'), paste('NR.24:',var_NR.24, '\t'), paste('NR.27:',var_NR.27, '\t')), stringsAsFactors = F)
+  #rownames(var_col) = c('var_BAT.25', 'var_BAT.26', 'var_NR.21', 'var_NR.24', 'var_NR.27')
+  return(var_col)
+}
+
+################################################################################################
+###################################    Running    ##############################################
+################################################################################################
+
+files = list.files(path_pos, pattern = '*.txt')
 
 
-MSI_modelfit_main(count_raw)
+sink("Variance_pos.txt")
+
+for (i in 1:length(files)){
+  count_raw <- read.csv(paste(path_pos, files[i], sep = '/'), sep = '\t', header = FALSE, stringsAsFactors = FALSE)
+  #cat('\n\n')
+  #print('#################################################################################')
+  #print(paste('Sample: ', gsub(x = files[i], pattern = '.txt', replacement = '') ))
+  cat('\n')
+  cat(c(paste(files[i], '\t'), MSI_var(count_raw)[[1]]))
+}
+
+close("Variance_pos.txt")
+sink()
+
