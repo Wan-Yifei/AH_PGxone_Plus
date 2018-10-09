@@ -4,7 +4,9 @@
 setwd('c:/Users/yifei.wan/Desktop')
 #count_raw = read.csv('All_counts.txt', sep = '\t', header = FALSE, stringsAsFactors = FALSE)
 #count_raw = read.csv('Msi_raw_count/1_percent_LoVo_Large-RD_S37_msi_array.txt_counts.txt', sep = '\t', header = FALSE, stringsAsFactors = FALSE)
-count_raw = read.csv('Msi_raw_count/1_percent_HCT16-Large-RD_S39_msi_array.txt', sep = '\t', header = FALSE, stringsAsFactors = FALSE)
+#count_raw = read.csv('Msi_raw_count/1_percent_HCT16-Large-RD_S39_msi_array.txt', sep = '\t', header = FALSE, stringsAsFactors = FALSE)
+#count_raw <- read.csv('MSI_positive/1_percent_HCT116_Large-RD_S20_msi_array.txt', sep = '\t', header = FALSE, stringsAsFactors = FALSE)
+count_raw <- read.csv('MSI_positive/1_percent_HCT116_Large-RD_S20_msi_array.txt', sep = '\t', header = FALSE, stringsAsFactors = FALSE)
 
 # 2. Prepare structure
 prestr <- function(count_raw){
@@ -37,13 +39,12 @@ count_raw <- prestr(count_raw)
 # count_normalized <- Normalize(count_raw)
 
 # 4. Replicate
-library(plyr)
+#library(plyr)
 
 freque <- function(raw_count, mark){
   count_rep = data.frame()
   raw_count[is.na(raw_count)] = 0
-  #for (i in 1:dim(raw_count)[1]){
-  for (i in 1:dim(count_raw[1])){
+  for (i in 1:dim(count_raw)[1]){
     row = data.frame(rep(raw_count[i, mark], raw_count[i, mark + 1]))
     count_rep = rbind(count_rep, row)
   }
@@ -76,6 +77,7 @@ set.seed(121)
 ModelFit <- function(mark, nsubdis = 2){
 
   fit <- densityMclust(mark[, 1], G = nsubdis, model = 'V')
+  cat('\n\n')
   print(colnames(mark))
   print(summary(fit,parameters = T))
   barplot(table(mark), xlab = 'Length', ylab = '', main = paste('Density of ', colnames(mark)))  
@@ -83,15 +85,22 @@ ModelFit <- function(mark, nsubdis = 2){
   plot(fit, what = 'density', xaxt = 'n', yaxt = 'n', xlab = '', main = '')
 }
 
-MSI_modelfit_main <- function(count_raw){
-  set.seed(121)
-  count_raw <- prestr(count_raw)
-  prerep
-  fit_BAT.25 = ModelFit(BAT.25)
-  fit_BAT.26 = ModelFit(BAT.26, nsubdis = 2)
-  fit_NR.21 = ModelFit(NR.21, nsubdis = 2)
-  fit_NR.24 = ModelFit(NR.24, nsubdis = 2)
-  fit_NR.27 = ModelFit(NR.27, nsubdis = 2)
-}
 
-MSI_modelfit_main(count_raw)
+fit_BAT.25 = ModelFit(BAT.25)
+fit_BAT.26 = ModelFit(BAT.26, nsubdis = 2)
+fit_NR.21 = ModelFit(NR.21, nsubdis = 2)
+fit_NR.24 = ModelFit(NR.24, nsubdis = 2)
+fit_NR.27 = ModelFit(NR.27, nsubdis = 2)
+
+# MSI_modelfit_main <- function(count_raw){
+#   set.seed(121)
+#   count_raw <- prestr(count_raw)
+#   prerep(count_raw)
+#   fit_BAT.25 = ModelFit(BAT.25)
+#   fit_BAT.26 = ModelFit(BAT.26, nsubdis = 2)
+#   fit_NR.21 = ModelFit(NR.21, nsubdis = 2)
+#   fit_NR.24 = ModelFit(NR.24, nsubdis = 2)
+#   fit_NR.27 = ModelFit(NR.27, nsubdis = 2)
+# }
+# 
+# MSI_modelfit_main(count_raw)
