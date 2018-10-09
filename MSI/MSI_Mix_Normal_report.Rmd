@@ -96,7 +96,7 @@ files = list.files(path_neg, pattern = '*.txt')
 for (i in 1:length(files)){
   count_raw <- read.csv(paste(path_neg, files[i], sep = '/'), sep = '\t', header = FALSE, stringsAsFactors = FALSE)
   cat('\n\n')
-  print('#################################################################################################')
+  print('#################################################################################')
   print(paste('Sample: ', gsub(x = files[i], pattern = '.txt', replacement = '') ))
   cat('\n')
   MSI_modelfit_main(count_raw)
