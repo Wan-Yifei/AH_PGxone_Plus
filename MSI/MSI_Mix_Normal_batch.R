@@ -116,7 +116,7 @@ MSI_modelfit_main <- function(count_raw){
 # count_normalized <- Normalize(count_raw)
 
 # 5. Variance calculator
-MSI_var <- function(count_raw){
+MSI_var_output <- function(count_raw){
   set.seed(121)
   count_raw = prestr(count_raw)
   count_raw[, seq(1, 9, 2)] = as.data.frame(sapply(count_raw[, seq(1, 9, 2)], breakcheck))
@@ -132,24 +132,68 @@ MSI_var <- function(count_raw){
   return(var_col)
 }
 
+MSI_var <- function(count_raw){
+  set.seed(121)
+  count_raw = prestr(count_raw)
+  count_raw[, seq(1, 9, 2)] = as.data.frame(sapply(count_raw[, seq(1, 9, 2)], breakcheck))
+  prerep(count_raw)
+  
+  var_BAT.25 = var(BAT.25, na.rm = T)
+  var_BAT.26 = var(BAT.26, na.rm = T)
+  var_NR.21 = var(NR.21, na.rm = T)
+  var_NR.24 = var(NR.24, na.rm = T)
+  var_NR.27 = var(NR.27, na.rm = T)
+  var_col = data.frame(var_BAT.25, var_BAT.26, var_NR.21, var_NR.24, var_NR.27)
+  colnames(var_col) = c('BAT.25', 'BAT.26', 'NR.21', 'NR.24', 'NR.27')
+  return(var_col)
+}
+
 ################################################################################################
 ###################################    Running    ##############################################
 ################################################################################################
 
-files = list.files(path_pos, pattern = '*.txt')
 
 
-sink("Variance_pos.txt")
+# Calculate and output variance
+#files = list.files(path_neg, pattern = '*.txt')
+# sink("Variance_pos.txt")
+# 
+# for (i in 1:length(files)){
+#   count_raw <- read.csv(paste(path_pos, files[i], sep = '/'), sep = '\t', header = FALSE, stringsAsFactors = FALSE)
+#   #cat('\n\n')
+#   #print('#################################################################################')
+#   #print(paste('Sample: ', gsub(x = files[i], pattern = '.txt', replacement = '') ))
+#   cat('\n')
+#   cat(c(paste(files[i], '\t'), MSI_var_output(count_raw)[[1]]))
+# }
+# 
+# close("Variance_pos.txt")
+# sink()
 
+# Summary of variance
+
+## negative control
+
+files = list.files(path_neg, pattern = '*.txt')
+var_neg <- data.frame()
 for (i in 1:length(files)){
-  count_raw <- read.csv(paste(path_pos, files[i], sep = '/'), sep = '\t', header = FALSE, stringsAsFactors = FALSE)
-  #cat('\n\n')
-  #print('#################################################################################')
-  #print(paste('Sample: ', gsub(x = files[i], pattern = '.txt', replacement = '') ))
-  cat('\n')
-  cat(c(paste(files[i], '\t'), MSI_var(count_raw)[[1]]))
+  count_raw <- read.csv(paste(path_neg, files[i], sep = '/'), sep = '\t', header = FALSE, stringsAsFactors = FALSE)
+  tmp = MSI_var(count_raw)
+  rownames(tmp) = files[i]
+  var_neg = rbind(var_neg, tmp)
 }
 
-close("Variance_pos.txt")
-sink()
+boxplot(var_neg)
 
+## positive control
+
+files = list.files(path_pos, pattern = '*.txt')
+var_pos <- data.frame()
+for (i in 1:length(files)){
+  count_raw <- read.csv(paste(path_pos, files[i], sep = '/'), sep = '\t', header = FALSE, stringsAsFactors = FALSE)
+  tmp = MSI_var(count_raw)
+  rownames(tmp) = files[i]
+  var_pos = rbind(var_neg, tmp)
+}
+
+boxplot(var_pos)
