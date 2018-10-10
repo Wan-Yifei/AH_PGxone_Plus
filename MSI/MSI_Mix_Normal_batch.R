@@ -23,12 +23,17 @@ path_neg <- 'c:/Users/yifei.wan/Desktop/MSI_negative'
 
 # 1. Prepare structure
 
+# prestr <- function(count_raw){
+#   count_raw <- t(count_raw)
+#   colnames(count_raw) <- count_raw[1,]
+#   count_raw <- as.data.frame(count_raw[-1, ])
+#   count_raw <- data.frame(sapply(count_raw, as.character), stringsAsFactors = FALSE)
+#   count_raw <- data.frame(sapply(count_raw, as.integer))
+#   return(count_raw)
+# }
+
 prestr <- function(count_raw){
-  count_raw <- t(count_raw)
-  colnames(count_raw) <- count_raw[1,]
-  count_raw <- as.data.frame(count_raw[-1, ])
-  count_raw <- data.frame(sapply(count_raw, as.character), stringsAsFactors = FALSE)
-  count_raw <- data.frame(sapply(count_raw, as.integer))
+  count_raw <- data.frame(t(count_raw))
   return(count_raw)
 }
 
@@ -177,7 +182,7 @@ MSI_var <- function(count_raw){
 files = list.files(path_neg, pattern = '*.txt')
 var_neg <- data.frame()
 for (i in 1:length(files)){
-  count_raw <- read.csv(paste(path_neg, files[i], sep = '/'), sep = '\t', header = FALSE, stringsAsFactors = FALSE)
+  count_raw <- read.csv(paste(path_neg, files[i], sep = '/'), sep = '\t', header = FALSE, stringsAsFactors = FALSE, row.names = 1)
   tmp = MSI_var(count_raw)
   rownames(tmp) = files[i]
   var_neg = rbind(var_neg, tmp)
@@ -190,7 +195,7 @@ boxplot(var_neg)
 files = list.files(path_pos, pattern = '*.txt')
 var_pos <- data.frame()
 for (i in 1:length(files)){
-  count_raw <- read.csv(paste(path_pos, files[i], sep = '/'), sep = '\t', header = FALSE, stringsAsFactors = FALSE)
+  count_raw <- read.csv(paste(path_pos, files[i], sep = '/'), sep = '\t', header = FALSE, stringsAsFactors = FALSE, row.names = 1)
   tmp = MSI_var(count_raw)
   rownames(tmp) = files[i]
   var_pos = rbind(var_neg, tmp)
