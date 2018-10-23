@@ -30,3 +30,4 @@ Use optional argument `-R'
 'find %s/ -mtime 0 | grep "PGQD" | grep "pdf"'%args.reportFolder
 ````
 
+When use subcommand `Run`, the script will serach all today's reports in batch printing folder. No need to input ID.
