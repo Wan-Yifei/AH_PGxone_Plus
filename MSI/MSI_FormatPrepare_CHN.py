@@ -26,7 +26,7 @@ def Output_count(count_reformed):
         output.write('{}_{}\t{}'.format(row[0],row[1].strip(),row[2].replace(', ', '\t')))
     output.close()    
 
-# 3. Excute functions
+# 3. Excutive functions
 for file in files:
     with open(file) as raw:
         count_raw = raw.readlines()
