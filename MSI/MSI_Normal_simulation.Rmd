@@ -1,8 +1,11 @@
 ---
-title: "MSI_Mix_Normal_simulation"
+title: "MSI_single_Normal_simulation"
 author: "Yifei Wan"
-date: "October 6, 2018"
-output: html_document
+date: "October 8, 2018"
+output:
+  word_document: default
+  html_document:
+    df_print: paged
 ---
 
 ```{r function, echo=FALSE}
@@ -48,15 +51,18 @@ prerep <- function(count_raw){
 
 library(mclust)
 
-ModelFit <- function(mark, nsubdis = 2){
+ModelFit <- function(mark, nsubdis = 1){
   colnames(mark) = paste('Mixture Gauss model of', substr(deparse(substitute(mark)),9,nchar(deparse(substitute(mark))) - 1))
   fit = densityMclust(mark[, 1], G = nsubdis, model = 'V')
-  print(summary(fit,parameters = T)[10:12])
-  plot(table(mark), xlab = 'Length', ylab = '', main = paste('Density of ', colnames(mark)))
+  print(summary(fit,parameters = T))
+  print(var(mark, na.rm = T))
+  plot(prop.table(table(mark)), xlab = 'Length', ylab = '', main = paste('Density of ', colnames(mark)))
   #barplot(table(mark), xlab = 'Length', ylab = '', main = paste('Density of ', colnames(mark)))
   par(new = TRUE)
   plot(fit, what = 'density', xaxt = 'n', yaxt = 'n', xlab = '', main = '')
 }
+
+
 
 MSI_modelfit_main_base <- function(count_raw, model){ ## model: fit_mark, e.g. 'fit_BAT.25'
   set.seed(121)
@@ -75,7 +81,7 @@ ModelFit_simulate <- function(mark, nsubdis = 2, perturbation, position){
   colnames(mark) = paste('Mixture Gauss model of', substr(deparse(substitute(mark)),9,nchar(deparse(substitute(mark))) - 1))
   fit = densityMclust(mark[, 1], G = nsubdis, model = 'V')
   print(paste('Length =', position, 'Perturbation level = ', seq(0.01, 0.04, 0.01)[perturbation]))
-  print(summary(fit,parameters = T)[10:12])
+  print(summary(fit,parameters = T))
   plot(table(mark), xlab = 'Length', ylab = '', main = paste('Perturbation level = ', seq(0.01, 0.04, 0.01)[perturbation]))
   #barplot(table(mark), xlab = 'Length', ylab = '', main = paste('Density of ', colnames(mark)))
   par(new = TRUE)
@@ -102,78 +108,90 @@ MSI_simulation <- function(count_raw, mark, position){
 }
 ```
 
-# Simulation of MSI
+# 1. Simulation of MSI
 
-Following simulationm fits the mixture Gauss model for MSI data with different signal intensity.
+Following simulationm fits the Gauss model for MSI data with different signal intensity.
+Sample: 4_percent_HCT116_Large-RD_S18_msi_array
 
 ```{r read data, echo=FALSE}
-path <- 'C:/Users/wan_yifei/Desktop/MSI'
+setwd('c:/Users/yifei.wan/Desktop')
+path <- 'MSI_positive'
 files <- list.files(path, pattern = '*.txt')
+count_raw <- read.csv(paste(path, files[7], sep = '/'), sep = '\t', header = FALSE, stringsAsFactors = FALSE, row.names = 1)
 ```
 
-## 1. Highest count: 0 ~ 200
-
-Sample: BS_Large-RD-CNV_S2_msi_array
+## 1.1 Frequency of NR.27
 
 ```{r, echo=FALSE}
-count_raw <- read.csv(paste(path, files[2], sep = '/'), sep = '\t', header = FALSE, stringsAsFactors = FALSE, row.names = 1)
+plot(t(count_raw[4, -1]), main = 'Frequence of lengths')
 ```
-### 1.1 Baseline
+## 1.2 Fit 1st model
+
 ```{r, echo=FALSE}
-MSI_modelfit_main_base(count_raw = count_raw, model = 'fit_NR.24')
-```
-### 1.2 Simulation
-
-+ At 36~38:
-```{r, echo=FALSE}
-
-MSI_simulation(count_raw, NR.24, 1)
-
+MSI_modelfit_main_base(count_raw, 'fit_NR.27')
+NR.27_original <- NR.27
 ```
 
-+ At 37~39
+## 1.3 Calculate residuals, remove signal and fit 2nd model
+
 ```{r, echo=FALSE}
+#NR.27_original <- NR.27
+fre = prop.table(table(NR.27_original))
+resid_33 <- fre[3] - dnorm(33, mean = 42.35256, sd = sqrt(7.053523))
+resid_34 <- fre[4] - dnorm(33, mean = 42.35256, sd = sqrt(7.053523))
+resid_35 <- fre[5] - dnorm(33, mean = 42.35256, sd = sqrt(7.053523))
 
-MSI_simulation(count_raw, NR.24, 2)
+#resid_33 <- fre[3] - (0.1585936 * dnorm(33, mean = 38.90792, sd = sqrt(12.34342)) + 0.8414064 * dnorm(33, mean = 43.00183, sd = sqrt(3.39840)))
+#resid_34 <- fre[4] - (0.1585936 * dnorm(33, mean = 38.90792, sd = sqrt(12.34342)) + 0.8414064 * dnorm(33, mean = 43.00183, sd = sqrt(3.39840)))
+#resid_35 <- fre[5] - (0.1585936 * dnorm(33, mean = 38.90792, sd = sqrt(12.34342)) + 0.8414064 * dnorm(33, mean = 43.00183, sd = sqrt(3.39840)))
 
+signal_33 <- floor(dim(NR.27_original)[1] * resid_33)
+signal_34 <- floor(dim(NR.27_original)[1] * resid_34)
+signal_35 <- floor(dim(NR.27_original)[1] * resid_35)
+
+count_remove <- count_raw
+inten <- 1
+count_remove[4, 4:6] <- count_remove[4, 4:6] - c(floor(signal_33*inten), floor(signal_34*inten), floor(signal_35*inten))
+MSI_modelfit_main_base(count_remove, 'fit_NR.27')
+
+var(NR.27_original, na.rm = T)
+var(NR.27_remove, na.rm = T)
 ```
 
-+ At 38~40
-```{r, echo=FALSE}
+## 1.3 Calculate variance of residual
 
-MSI_simulation(count_raw, NR.24, 3)
+```{r, echo= FALSE}
+NR.27_remove <- NR.27
+resid_remove <- data.frame(table(NR.27_remove))[, 2]-(dim(NR.27)[1] * dnorm(unique(na.omit(NR.27$V3)), mean = 42.58747, sd = sqrt(5.171227)))
+boxplot(resid_remove)
+resid_remove <- cbind(as.integer(as.character(data.frame(table(NR.27_original))[, 1])), resid_remove)
+plot(resid_remove[,1], resid_remove[,2], main = 'Residual of each length', ylab = 'Residual')
+par(new = TRUE)
+abline(h = 0, lty = 2)
 
-```
-
-## 2. Highest count: 200 ~ 400
-
-```{r, echo=FALSE}
-count_raw <- read.csv(paste(path, files[3], sep = '/'), sep = '\t', header = FALSE, stringsAsFactors = FALSE, row.names = 1)
-```
-
-### 2.1 Baseline
-```{r, echo=FALSE}
-MSI_modelfit_main_base(count_raw = count_raw, model = 'fit_NR.21')
-```
-### 2.2 Simulation
-
-+ At 36~38:
-```{r, echo=FALSE}
-
-MSI_simulation(count_raw, NR.21, 1)
-
-```
-
-+ At 37~39
-```{r, echo=FALSE}
-
-MSI_simulation(count_raw, NR.21, 2)
+resid_sd = sd(resid_remove[, 2])
+count_fit = dim(NR.27)[1] * dnorm(unique(na.omit(NR.27$V3)), mean = 42.58747, sd = sqrt(5.171227))
 
 ```
 
-+ At 38~40
+## 1.4 Shift signal
+
+Shift peak to 39.
 ```{r, echo=FALSE}
+inten <- 1
+count_shift <- count_remove
+count_shift[4, 10:12] <- count_shift[4, 10:12] + c(floor(signal_33*inten), floor(signal_34*inten), floor(signal_35*inten))
+MSI_modelfit_main_base(count_shift, 'fit_NR.27')
+```
+## 1.5 Caculate shifted residual
 
-MSI_simulation(count_raw, NR.21, 3)
-
+```{r, echo= FALSE}
+NR.27_shift <- NR.27
+fre_shift <- data.frame(table(NR.27_shift))
+fre_shift$NR.27_shift = as.integer(as.character(fre_shift$NR.27_shift))
+## residual of length 39
+resid_peak <- fre_shift[which(fre_shift$NR.27_shift == 39), 2] - count_fit[which(fre_shift$NR.27_shift == 39)]
+resid_peak_std <- resid_peak/resid_sd
+pnorm(resid_peak_std, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)
+var(NR.27_shift, na.rm = T)
 ```

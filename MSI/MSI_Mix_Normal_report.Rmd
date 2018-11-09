@@ -12,11 +12,7 @@ output:
 # 1. Prepare structure
 
 prestr <- function(count_raw){
-  count_raw <- t(count_raw)
-  colnames(count_raw) <- count_raw[1,]
-  count_raw <- as.data.frame(count_raw[-1, ])
-  count_raw <- data.frame(sapply(count_raw, as.character), stringsAsFactors = FALSE)
-  count_raw <- data.frame(sapply(count_raw, as.integer))
+  count_raw <- data.frame(t(count_raw))
   return(count_raw)
 }
 
@@ -61,7 +57,8 @@ ModelFit <- function(mark, nsubdis = 2){
   fit = densityMclust(mark[, 1], G = nsubdis, model = 'V')
   print(colnames(mark))
   print(summary(fit,parameters = T)[10:12])
-  plot(table(mark), xlab = 'Length', ylab = '', main = paste('Density of ', colnames(mark)))
+  #plot(unique(mark)[, 1] + 1, as.data.frame(table(mark))[, 2], xlab = 'Length', ylab = '', main = paste('Density of ', colnames(mark)))
+  plot(table(mark + 0), xlab = 'Length', ylab = '', main = paste('Density of ', colnames(mark)))
   #barplot(table(mark), xlab = 'Length', ylab = '', main = paste('Density of ', colnames(mark)))
   par(new = TRUE)
   plot(fit, what = 'density', xaxt = 'n', yaxt = 'n', xlab = '', main = '')
@@ -92,9 +89,9 @@ path_pos <- 'c:/Users/yifei.wan/Desktop/MSI_positive'
 path_neg <- 'c:/Users/yifei.wan/Desktop/MSI_negative'
 
 
-files = list.files(path_neg, pattern = '*.txt')
-for (i in 1:length(files)){
-  count_raw <- read.csv(paste(path_neg, files[i], sep = '/'), sep = '\t', header = FALSE, stringsAsFactors = FALSE)
+files = list.files(path_pos, pattern = '*.txt')
+for (i in 1:2){
+  count_raw <- read.csv(paste(path_pos, files[i], sep = '/'), sep = '\t', header = FALSE, stringsAsFactors = FALSE, row.names = 1)
   cat('\n\n')
   print('#################################################################################')
   print(paste('Sample: ', gsub(x = files[i], pattern = '.txt', replacement = '') ))

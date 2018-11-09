@@ -23,12 +23,17 @@ path_neg <- 'c:/Users/yifei.wan/Desktop/MSI_negative'
 
 # 1. Prepare structure
 
+# prestr <- function(count_raw){
+#   count_raw <- t(count_raw)
+#   colnames(count_raw) <- count_raw[1,]
+#   count_raw <- as.data.frame(count_raw[-1, ])
+#   count_raw <- data.frame(sapply(count_raw, as.character), stringsAsFactors = FALSE)
+#   count_raw <- data.frame(sapply(count_raw, as.integer))
+#   return(count_raw)
+# }
+
 prestr <- function(count_raw){
-  count_raw <- t(count_raw)
-  colnames(count_raw) <- count_raw[1,]
-  count_raw <- as.data.frame(count_raw[-1, ])
-  count_raw <- data.frame(sapply(count_raw, as.character), stringsAsFactors = FALSE)
-  count_raw <- data.frame(sapply(count_raw, as.integer))
+  count_raw <- data.frame(t(count_raw))
   return(count_raw)
 }
 
@@ -116,10 +121,10 @@ MSI_modelfit_main <- function(count_raw){
 # count_normalized <- Normalize(count_raw)
 
 # 5. Variance calculator
-MSI_var <- function(count_raw){
+MSI_var_output <- function(count_raw){
   set.seed(121)
   count_raw = prestr(count_raw)
-  count_raw[, seq(1, 9, 2)] = as.data.frame(sapply(count_raw[, seq(1, 9, 2)], breakcheck))
+  #count_raw[, seq(1, 9, 2)] = as.data.frame(sapply(count_raw[, seq(1, 9, 2)], breakcheck))
   prerep(count_raw)
   
   var_BAT.25 = var(BAT.25, na.rm = T)
@@ -127,29 +132,126 @@ MSI_var <- function(count_raw){
   var_NR.21 = var(NR.21, na.rm = T)
   var_NR.24 = var(NR.24, na.rm = T)
   var_NR.27 = var(NR.27, na.rm = T)
-  var_col = data.frame(c(paste('BAT.25:',var_BAT.25, '\t'), paste('BAT.26:',var_BAT.26, '\t'), paste('NR.21:',var_NR.21, '\t'), paste('NR.24:',var_NR.24, '\t'), paste('NR.27:',var_NR.27, '\t')), stringsAsFactors = F)
+  var_col = data.frame(c(paste(var_BAT.25, '\t'), paste(var_BAT.26, '\t'), paste(var_NR.21, '\t'), paste(var_NR.24, '\t'), paste(var_NR.27, '\t')), stringsAsFactors = F)
   #rownames(var_col) = c('var_BAT.25', 'var_BAT.26', 'var_NR.21', 'var_NR.24', 'var_NR.27')
   return(var_col)
 }
 
+MSI_count_output <- function(count_raw){
+  set.seed(121)
+  count_raw = prestr(count_raw)
+  #count_raw[, seq(1, 9, 2)] = as.data.frame(sapply(count_raw[, seq(1, 9, 2)], breakcheck))
+  prerep(count_raw)
+  
+  sum_BAT.25 = dim(na.omit(BAT.25))[1]
+  sum_BAT.26 = dim(na.omit(BAT.26))[1]
+  sum_NR.21 = dim(na.omit(NR.21))[1]
+  sum_NR.24 = dim(na.omit(NR.24))[1]
+  sum_NR.27 = dim(na.omit(NR.27))[1]
+  sum_col = data.frame(c(paste(sum_BAT.25, '\t'), paste(sum_BAT.26, '\t'), paste(sum_NR.21, '\t'), paste(sum_NR.24, '\t'), paste(sum_NR.27, '\t')), stringsAsFactors = F)
+  #rownames(var_col) = c('var_BAT.25', 'var_BAT.26', 'var_NR.21', 'var_NR.24', 'var_NR.27')
+  return(sum_col)
+}
+
+
+MSI_var <- function(count_raw){
+  set.seed(121)
+  count_raw = prestr(count_raw)
+  #count_raw[, seq(1, 9, 2)] = as.data.frame(sapply(count_raw[, seq(1, 9, 2)], breakcheck))
+  prerep(count_raw)
+  
+  var_BAT.25 = var(BAT.25, na.rm = T)
+  var_BAT.26 = var(BAT.26, na.rm = T)
+  var_NR.21 = var(NR.21, na.rm = T)
+  var_NR.24 = var(NR.24, na.rm = T)
+  var_NR.27 = var(NR.27, na.rm = T)
+  var_col = data.frame(var_BAT.25, var_BAT.26, var_NR.21, var_NR.24, var_NR.27)
+  colnames(var_col) = c('BAT.25', 'BAT.26', 'NR.21', 'NR.24', 'NR.27')
+  return(var_col)
+}
+
+MSI_sd <- function(count_raw){
+  set.seed(121)
+  count_raw = prestr(count_raw)
+  #count_raw[, seq(1, 9, 2)] = as.data.frame(sapply(count_raw[, seq(1, 9, 2)], breakcheck))
+  prerep(count_raw)
+  
+  var_BAT.25 = sd(BAT.25, na.rm = T)
+  var_BAT.26 = sd(BAT.26, na.rm = T)
+  var_NR.21 = sd(NR.21, na.rm = T)
+  var_NR.24 = sd(NR.24, na.rm = T)
+  var_NR.27 = sd(NR.27, na.rm = T)
+  var_col = data.frame(var_BAT.25, var_BAT.26, var_NR.21, var_NR.24, var_NR.27)
+  colnames(var_col) = c('BAT.25', 'BAT.26', 'NR.21', 'NR.24', 'NR.27')
+  return(var_col)
+}
 ################################################################################################
 ###################################    Running    ##############################################
 ################################################################################################
 
-files = list.files(path_pos, pattern = '*.txt')
 
 
-sink("Variance_pos.txt")
+# Calculate and output variance
+files = list.files(path_neg, pattern = '*.txt')
+sink("Variance_neg.txt")
 
 for (i in 1:length(files)){
-  count_raw <- read.csv(paste(path_pos, files[i], sep = '/'), sep = '\t', header = FALSE, stringsAsFactors = FALSE)
+  count_raw <- read.csv(paste(path_neg, files[i], sep = '/'), sep = '\t', header = FALSE, stringsAsFactors = FALSE, row.names = 1)
   #cat('\n\n')
   #print('#################################################################################')
   #print(paste('Sample: ', gsub(x = files[i], pattern = '.txt', replacement = '') ))
   cat('\n')
-  cat(c(paste(files[i], '\t'), MSI_var(count_raw)[[1]]))
+  cat(c(paste(files[i], '\t'), MSI_var_output(count_raw)[[1]]))
 }
 
-close("Variance_pos.txt")
 sink()
+
+## Chinese sample
+path_CHN <- 'c:/Users/yifei.wan/Desktop/MSI development/MSI_CHN'
+files <- list.files(path_CHN, pattern = '*.txt')
+sink("Variance_CHN.txt")
+cat(paste('Sample', 'BAT.25_var', 'BAT.26_var', 'NR.21_var', 'NR.24_var', 'NR.27_var', 'BAT.25_sum', 'BAT.26_sum', 'NR.21_sum', 'NR.24_sum', 'NR.27_sum', sep = '\t'))
+for (i in 1:length(files)){
+  count_raw <- read.csv(paste(path_CHN, files[i], sep = '/'), sep = '\t', header = FALSE, stringsAsFactors = FALSE, row.names = 1)
+  cat('\n')
+  name <- unlist(strsplit(files[i], '_'))[1]
+  cat(c(paste(name, '\t'), MSI_var_output(count_raw)[[1]], MSI_count_output(count_raw)[[1]]))
+}
+
+sink()
+
+# Summary of variance
+
+## negative control
+
+files = list.files(path_neg, pattern = '*.txt')
+var_neg <- data.frame()
+for (i in 1:length(files)){
+  count_raw <- read.csv(paste(path_neg, files[i], sep = '/'), sep = '\t', header = FALSE, stringsAsFactors = FALSE, row.names = 1)
+  tmp = MSI_var(count_raw)
+  rownames(tmp) = files[i]
+  var_neg = rbind(var_neg, tmp)
+}
+
+
+boxplot(var_neg)
+
+
+sapply(var_neg, var)
+sapply(var_neg, sd)
+sapply(var_neg, mean)
+
+## positive control
+
+files = list.files(path_pos, pattern = '*.txt')
+var_pos <- data.frame()
+for (i in 1:length(files)){
+  count_raw <- read.csv(paste(path_pos, files[i], sep = '/'), sep = '\t', header = FALSE, stringsAsFactors = FALSE, row.names = 1)
+  tmp = MSI_var(count_raw)
+  rownames(tmp) = files[i]
+  var_pos = rbind(var_neg, tmp)
+}
+
+boxplot(var_pos)
+
 

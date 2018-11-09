@@ -3,18 +3,14 @@
 # 1. Input data
 setwd('c:/Users/yifei.wan/Desktop')
 #count_raw = read.csv('All_counts.txt', sep = '\t', header = FALSE, stringsAsFactors = FALSE)
-#count_raw = read.csv('Msi_raw_count/1_percent_LoVo_Large-RD_S37_msi_array.txt_counts.txt', sep = '\t', header = FALSE, stringsAsFactors = FALSE)
-#count_raw = read.csv('Msi_raw_count/1_percent_HCT16-Large-RD_S39_msi_array.txt', sep = '\t', header = FALSE, stringsAsFactors = FALSE)
-#count_raw <- read.csv('MSI_positive/1_percent_HCT116_Large-RD_S20_msi_array.txt', sep = '\t', header = FALSE, stringsAsFactors = FALSE)
-count_raw <- read.csv('MSI_positive/1_percent_HCT116_Large-RD_S20_msi_array.txt', sep = '\t', header = FALSE, stringsAsFactors = FALSE)
+#count_raw = read.csv('Msi_raw_count/1_percent_LoVo_Large-RD_S37_msi_array.txt_counts.txt', sep = '\t', header = FALSE, stringsAsFactors = FALSE, row.names = 1)
+#count_raw = read.csv('Msi_raw_count/1_percent_HCT16-Large-RD_S39_msi_array.txt', sep = '\t', header = FALSE, stringsAsFactors = FALSE, row.names = 1)
+#count_raw <- read.csv('MSI_positive/1_percent_HCT116_Large-RD_S20_msi_array.txt', sep = '\t', header = FALSE, stringsAsFactors = FALSE, row.names = 1)
+count_raw <- read.csv('MSI_positive/1_percent_HCT116_Large-RD_S20_msi_array.txt', sep = '\t', header = FALSE, stringsAsFactors = FALSE, row.names = 1)
 
 # 2. Prepare structure
 prestr <- function(count_raw){
-  count_raw <- t(count_raw)
-  colnames(count_raw) <- count_raw[1,]
-  count_raw <- as.data.frame(count_raw[-1, ])
-  count_raw <- data.frame(sapply(count_raw, as.character), stringsAsFactors = FALSE)
-  count_raw <- data.frame(sapply(count_raw, as.integer))
+  count_raw <- data.frame(t(count_raw))
   return(count_raw)
 }
 
