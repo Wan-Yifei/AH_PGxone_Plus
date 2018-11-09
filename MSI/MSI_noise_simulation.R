@@ -62,10 +62,10 @@ Random_signal <- function(window = 15, skewness, intensity = 0.03, count = 1e6, 
   signal_tail_left <- sort(signal_tails[-group_index])
   signal_pro <- c(signal_tail_left, signal_max, signal_tail_right)
   #print(signal_pro)
-  signal_count <- sample(1:window, 1e6, replace = T, prob = signal_pro)
+  signal_count <- sample(1:window, 1e5, replace = T, prob = signal_pro)
   signal_freq <- table(signal_count)
   #print(sum(signal_freq/1e7*count*0.03))
-  signal_count_scaled <- unlist(sapply(1:window, function(index){rep(index, ceiling(unname(signal_freq)[index] / 1e6 * count * intensity))}))
+  signal_count_scaled <- unlist(sapply(1:window, function(index){rep(index, ceiling(unname(signal_freq)[index] / 1e5 * count * intensity))}))
   #plot(table(signal_count_scaled))
   return(signal_count_scaled)
 }
@@ -120,7 +120,7 @@ MSI_sample_sim <- function(count, total_count, intensity = 0.03, site, window = 
   boundary_right = peak_ori + right_tail - site ## right boundary of area should be processed  
   boundary_left = boundary_right - window + 1 ## left boundary of area should be processed
   range_insert = unique(count)[, 1]
- 
+  
   boundary_right = ifelse(boundary_right > index_ori_max, index_ori_max, boundary_right)
   boundary_left = ifelse(boundary_left < 1, 1, boundary_left)
   #print(boundary_left)
@@ -153,11 +153,11 @@ MSI_batch_sim <- function(count_raw){
   
   count_total = MSI_var_count() ## total count for each mark
   sites = c(1:4)
-  counts_insert25 = sapply(sites, function(site){MSI_sample_sim(BAT.25, total_count = count_total[1], site = site, right_tail = 5)})
-  counts_insert26 = sapply(sites, function(site){MSI_sample_sim(BAT.26, total_count = count_total[2], site = site, right_tail = 5)})
-  counts_insert21 = sapply(sites, function(site){MSI_sample_sim(NR.21, total_count = count_total[3], site = site, right_tail = 5)})
-  counts_insert24 = sapply(sites, function(site){MSI_sample_sim(NR.24, total_count = count_total[4], site = site, right_tail = 5)})
-  counts_insert27 = sapply(sites, function(site){MSI_sample_sim(NR.27, total_count = count_total[5], site = site, right_tail = 5)})
+  counts_insert25 = sapply(sites, function(site){MSI_sample_sim(BAT.25, total_count = count_total[1], window = 5, site = site, right_tail = 2)})
+  counts_insert26 = sapply(sites, function(site){MSI_sample_sim(BAT.26, total_count = count_total[2], window = 5, site = site, right_tail = 2)})
+  counts_insert21 = sapply(sites, function(site){MSI_sample_sim(NR.21, total_count = count_total[3], window = 5, site = site, right_tail = 2)})
+  counts_insert24 = sapply(sites, function(site){MSI_sample_sim(NR.24, total_count = count_total[4], window = 5, site = site, right_tail = 2)})
+  counts_insert27 = sapply(sites, function(site){MSI_sample_sim(NR.27, total_count = count_total[5], window = 5, site = site, right_tail = 2)})
   
   sink('Simulation.txt', append = T)
   cat('Site-3', counts_insert25[1], counts_insert26[1], counts_insert21[1], counts_insert24[1], counts_insert27[1], sep = '\t')
@@ -172,6 +172,7 @@ MSI_batch_sim <- function(count_raw){
   gc()
   #return(counts_insert)
 }
+
 
 
 ################################################################################################
@@ -199,13 +200,16 @@ files <- list.files(path_neg, pattern = '*.txt')
 
 start <- proc.time()
 print(proc.time())
+
+
+
 sink('Simulation.txt', append = T)
 cat('Distance/Mark', 'BAT.25', 'BAT.26', 'NR.21', 'NR.24', 'NR.27', sep = '\t')
 cat('\n')
 sink()
 
 count_raw <- read.csv(paste(path_neg, files[1], sep = '/'), sep = '\t', header = FALSE, stringsAsFactors = FALSE, row.names = 1)
-sapply(c(1:1000), function(i){MSI_batch_sim(count_raw = count_raw)})
+sapply(c(1), function(i){MSI_batch_sim(count_raw = count_raw)})
 
 print(proc.time())
 print(proc.time() - start)
