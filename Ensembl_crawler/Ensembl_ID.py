@@ -18,9 +18,9 @@ def ParseArg():
     p = argparse.ArgumentParser(description="Query Ensembl ID by gene name")
     p.add_argument("Species",type=str, help="Indicate the species")
     p.add_argument("Genes",type=str, help="The path of gene list")
-    p.add_argument("Output",type=str,help="output file name")
+    p.add_argument("Output",type=str,help="The path of output file")
     if len(sys.argv)==1:
-        print >>sys.stderr,p.print_help()
+        sys.stderr.write(p.print_help())
         sys.exit(0)
     return p.parse_args()
 
@@ -62,7 +62,7 @@ class EnsemblRestClient(object):
             #print(request)
             response = urllib2.urlopen(request) ## open the response from server
             #print(type(response))
-            content = response.read()
+            content = response.read().decode('utf8')
             if content:
                 data = json.loads(content)
             self.req_count += 1
