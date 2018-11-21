@@ -10,22 +10,14 @@ Automate low coverage QC of PGxOne
 # 1. Import files
 import os
 import re
-#run_path = os.path.realpath(__file__) ## path of run folder
-#os.chdir(run_path)
-os.chdir('T:/PGxOne_V3/Testing/BI_Data_Analysis/181112_CLIA_Plus_Run723_M01519_0042_000000000-C2LBF')
+import argparse
 
-QC_check = 'sample_QC_low_coverage.txt' ## sample_QC_low_coverage file
-Accession = 'sample_codes_drugs_accession.txt' ## sample accession file
-Drug_info = 'PGxOneV3_drug_action.txt' ## gene and corresponding ICD codes
+def ParseArg():
+    
+    p = argparse.ArgumentParse(description = 'Automatically check low coverage amplicon')
+    p.add_argument("Run_Name",type=str, help="Full name of run folder")
 
-with open(QC_check) as raw:
-    QC_record = raw.readlines()
-    
-with open(Accession) as raw:
-    patient_ICD = raw.readlines()
-    
-with open(Drug_info) as raw:
-    drug_ICD = raw.readlines()
+
     
 # 2. Create dictionary of samples with low covergae amplicon
 #%%
@@ -39,9 +31,7 @@ def Low_coverage_filter(QC_record):
         if float(newline[3]) > 5 : continue ## remove coverage larger than 5 counts
         newline = [newline[0][0:newline[0].rfind('_')], newline[1][0:newline[1].rfind('_')], newline[2], float(newline[3])]
         QC_filtered.append(newline)
-    return(QC_filtered)
-        
-QC_filtered = Low_coverage_filter(QC_record)
+    return(QC_filtered)      
 
 #%%
 ## 2.2 dict of low_coverage amplicon #, name of amplicon, low_CYP2D6
@@ -59,8 +49,6 @@ def Low_coverage_dict(QC_filter):
             low_CYP2D6[line[0]] = low_CYP2D6.get(line[0], 0) + 1
     low_coverage_amp ={k:list(set(v)) for (k, v) in low_coverage_amp.items()}
     return low_coverage_count, low_coverage_amp, low_CYP2D6
-
-low_coverage_count, low_coverage_amp, low_CYP2D6 = Low_coverage_dict(QC_filtered)
          
 ## 2.3 Completely failed and potentially filed on critical amplicons 
 #%%
@@ -68,11 +56,9 @@ def Fail_samples(low_coverage_count, low_CYP2D6):
     sample_failed_complete = {sample:count for sample, count in low_coverage_count.items() if count > 19 and low_CYP2D6.get(sample, 0)/count < 0.5}
     sample_failed_amplicon = {sample:count for sample, count in low_coverage_count.items() if count < 20 and low_CYP2D6.get(sample, 0)/count < 0.5}
     sample_CYP2D6_check = [sample for sample, count in low_CYP2D6.items() if low_CYP2D6[sample]/low_coverage_count[sample] > 0.5 and sample in sample_failed_complete.keys()]
-    print(sample_CYP2D6_check)
+    #print(sample_CYP2D6_check)
     return sample_failed_complete.keys(), sample_failed_amplicon.keys(), sample_CYP2D6_check
 ## return valuse: completely failed samples, potentially failed samples, CYP2D6 manual check list	
-failed_complete, failed_amplicon, sample_CYP2D6_check = Fail_samples(low_coverage_count, low_CYP2D6)
-
 
 #%%
 ## 2.4 ICDs of samples which potentially failed on critical amplicon
@@ -87,9 +73,6 @@ def Sample_ICD(patient_ICD, failed_amplicon):
             sample_ICD[newline[0]] = set([re.sub('\..*', '', icd) for icd in newline[1].split(', ')])
             #print(newline[1].split(', '))
     return sample_ICD
-
-sample_ICD = Sample_ICD(patient_ICD, failed_amplicon) ## samples with corresponding ICDs from accession
-
 
 #%%
 
@@ -111,9 +94,6 @@ def Gene_ICD(failed_amplicon):
 #        sum_failed_ICD[sample.strip('B')] = set(icds) ## failed ICDs for each sample   
     return failed_amp_gene, gene_ICD
 
-failed_amp_gene, gene_ICD= Gene_ICD(failed_amplicon)
-
-
 #%%
 
 ## 2.6. Generate ICD check list to help manual review failed on critical amplicons
@@ -134,15 +114,33 @@ def ICD_check():
     failed_on_amplicon = [sample for sample in failed_checklist.keys() if len(failed_checklist[sample]['ICD'] & {icd for icds in (list(failed_checklist[sample]['Low coverage amplicon'].values())) for icd in icds})]
     return failed_checklist, failed_on_amplicon
 
-failed_checklist, failed_on_amplicon = ICD_check()
+if __name__ == '__main__':
+    args = ParseArg()
+    folder = args.Run_Name
+    os.chdir('/data/CLIA-Data/PGxOne_V3/Production/%s'%folder)
+    QC_check = 'sample_QC_low_coverage.txt' ## sample_QC_low_coverage file
+    Accession = 'sample_codes_drugs_accession.txt' ## sample accession file
+    Drug_info = 'PGxOneV3_drug_action.txt' ## gene and corresponding ICD codes
+    
+    with open(QC_check) as raw:
+        QC_record = raw.readlines()
+        
+    with open(Accession) as raw:
+        patient_ICD = raw.readlines()
+        
+    with open(Drug_info) as raw:
+        drug_ICD = raw.readlines()
 
-
-print('Completely failed sample: {}\n'.format('\t'.join(list(failed_complete))))
-print('Failed on critical amplicons: {}\n'.format('\t'.join(failed_on_amplicon)))
-for gene in failed_on_amplicon:
-    print('Checklist:{}'.format(gene))
-    print('ICD: {}\n'.format(failed_checklist[gene]['ICD']))
-    print('Low coverage amplicon: {}\n'.format(failed_checklist[gene]['Low coverage amplicon']))
-
-
-
+    QC_filtered = Low_coverage_filter(QC_record)
+    low_coverage_count, low_coverage_amp, low_CYP2D6 = Low_coverage_dict(QC_filtered)
+    failed_complete, failed_amplicon, sample_CYP2D6_check = Fail_samples(low_coverage_count, low_CYP2D6)
+    sample_ICD = Sample_ICD(patient_ICD, failed_amplicon) ## samples with corresponding ICDs from accession
+    failed_amp_gene, gene_ICD= Gene_ICD(failed_amplicon)
+    failed_checklist, failed_on_amplicon = ICD_check()
+    print('Completely failed sample: {}\t'.format('\t'.join(list(failed_complete))))
+    print('Failed on critical amplicons: {}\t'.format('\t'.join(failed_on_amplicon)))
+    for gene in failed_on_amplicon:
+        print('Check Low coverage:{}'.format(gene))
+        print('ICD: {}\n'.format(failed_checklist[gene]['ICD']))
+        for gene_icds in failed_checklist[gene]['Low coverage amplicon'].items():
+            print('Low coverage amplicon: {}\n'.format(gene_icds))
