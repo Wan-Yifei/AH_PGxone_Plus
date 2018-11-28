@@ -124,7 +124,7 @@ def ICD_check():
             #print('**'+sample)
             failed_checklist[sample]['Low coverage amplicon'] = {Gene:list(set(gene_ICD[Gene])) for Gene in failed_amp_gene[sample] if Gene != 'CYP2D8'}
     ## find the sample failed on critical amplicon by insertion between sets
-    failed_on_amplicon = [sample for sample in failed_checklist.keys() if len(failed_checklist[sample]['ICD'] & {icd for icds in (list(failed_checklist[sample]['Low coverage amplicon'].values())) for icd in icds})]
+    failed_on_amplicon = [sample for sample in failed_checklist.keys() if bool(failed_checklist[sample]['ICD'] & {icd for icds in (list(failed_checklist[sample]['Low coverage amplicon'].values())) for icd in icds})]
     return failed_checklist, failed_on_amplicon
 
 if __name__ == '__main__':
@@ -135,7 +135,7 @@ if __name__ == '__main__':
     #os.chdir('T:/PGxOne_V3/Production/BI_Data_Analysis/%s'%folder)
 #    QC_check = 'T:/PGxOne_V3/Production/BI_Data_Analysis/%s/sample_QC_low_coverage.txt'%folder ## sample_QC_low_coverage file
 #    Accession = 'T:/PGxOne_V3/Production/BI_Data_Analysis/%s/sample_codes_drugs_accession.txt'%folder ## sample accession file
-    Drug_info = 'T:/PGxOne_V3/Production/BI_Data_Analysis/%s/PGxOneV3_drug_action.txt'%folder ## gene and corresponding ICD codes
+#    Drug_info = 'T:/PGxOne_V3/Production/BI_Data_Analysis/%s/PGxOneV3_drug_action.txt'%folder ## gene and corresponding ICD codes
     QC_check = '/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/%s/sample_QC_low_coverage.txt'%folder ## sample_QC_low_coverage file
     Accession = '/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/%s/sample_codes_drugs_accession.txt'%folder ## sample accession file
     Drug_info = '/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/%s/PGxOneV3_drug_action.txt'%folder ## gene and corresponding ICD codes
@@ -159,7 +159,7 @@ if __name__ == '__main__':
     print('**********************************')
     print('Completely failed sample: CYP2D6%\n')
     for line in failed_complete.items():
-        print('Sample: {1}, CYP2D6%: {2:.f}'.format(line[0], line[1]))
+        print('Sample: {0}, CYP2D6%: {1:.2f}'.format(line[0], line[1]))
     print('\n')
     print('**********************************')
     print('**********************************')
@@ -172,5 +172,6 @@ if __name__ == '__main__':
         print('ICD: {}\n'.format(failed_checklist[gene]['ICD']))
         print('ICD of low coverage amplicons:')
         for gene_icds in failed_checklist[gene]['Low coverage amplicon'].items():
-            pprint.pprint(gene_icds, width=1000)
+            if bool(set(gene_icds[1]) & set(failed_checklist[gene]['ICD'])):
+                pprint.pprint(gene_icds, width=1000)
         print('**********************************')
