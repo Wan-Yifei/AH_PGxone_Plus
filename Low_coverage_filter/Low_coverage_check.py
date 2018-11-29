@@ -155,17 +155,17 @@ if __name__ == '__main__':
     sample_ICD = Sample_ICD(patient_ICD, failed_amplicon) ## samples with corresponding ICDs from accession
     failed_amp_gene, gene_ICD= Gene_ICD(failed_amplicon)
     failed_checklist, failed_on_amplicon = ICD_check()
-    print('**********************************')
-    print('**********************************')
+    print('********************************************************************')
+    print('********************************************************************')
     print('Completely failed sample: CYP2D6%\n')
     for line in failed_complete.items():
         print('Sample: {0}, CYP2D6%: {1:.2f}'.format(line[0], line[1]))
     print('\n')
-    print('**********************************')
-    print('**********************************')
+    print('********************************************************************')
+    print('********************************************************************')
     print('\n')
     print('Failed on critical amplicons: \n{}'.format('\n'.join(failed_on_amplicon)))
-    print('**********************************')
+    print('********************************************************************')
     for gene in failed_on_amplicon:
         print('\n')
         print('Check Low coverage:{}'.format(gene))
@@ -174,4 +174,4 @@ if __name__ == '__main__':
         for gene_icds in failed_checklist[gene]['Low coverage amplicon'].items():
             if bool(set(gene_icds[1]) & set(failed_checklist[gene]['ICD'])):
                 pprint.pprint(gene_icds, width=1000)
-        print('**********************************')
+        print('********************************************************************')
