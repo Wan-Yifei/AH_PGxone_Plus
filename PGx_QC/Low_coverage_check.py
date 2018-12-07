@@ -127,6 +127,12 @@ def ICD_check():
 	failed_on_amplicon = [sample for sample in failed_checklist.keys() if bool(failed_checklist[sample]['ICD'] & {icd for icds in list(failed_checklist[sample]['Low coverage amplicon'].values()) for icd in icds if icd != ''})]
 	return failed_checklist, failed_on_amplicon
 
+## 2.7 Check genotypes of controls
+def Control_check():
+	control_genotype = {line.strip().split('\t')[0]:line.strip().split('\t')[1:] for line in sample_genotypes if 'NA' in line.strip().split('\t')[0]}
+	print(control_genotype.values())
+
+## 3. Run script
 if __name__ == '__main__':
 	args = ParseArg()
 	folder = args.Run_Name
@@ -140,7 +146,8 @@ if __name__ == '__main__':
 	QC_check = '/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/%s/sample_QC_low_coverage.txt'%folder ## sample_QC_low_coverage file
 	Accession = '/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/%s/sample_codes_drugs_accession.txt'%folder ## sample accession file
 	Drug_info = '/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/%s/PGxOneV3_drug_action.txt'%folder ## gene and corresponding ICD codes
-	
+	Genotypes = '/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/%s/sample_output_genotype.txt'%folder ## genotypes of all samples
+
 	with open(QC_check) as raw:
 		QC_record = raw.readlines()
 		
@@ -150,6 +157,9 @@ if __name__ == '__main__':
 	with open(Drug_info) as raw:
 		drug_ICD = raw.readlines()
 
+	with open(Genotypes) as raw:
+		sample_genotypes = raw.readlines()	
+
 	QC_filtered = Low_coverage_filter(QC_record)
 	low_coverage_count, low_coverage_amp, low_CYP2D6 = Low_coverage_dict(QC_filtered)
 	failed_complete, failed_amplicon, sample_CYP2D6_check = Fail_samples(low_coverage_count, low_CYP2D6)
@@ -158,6 +168,7 @@ if __name__ == '__main__':
 	failed_checklist, failed_on_amplicon = ICD_check()
 	print('********************************************************************')
 	print('********************************************************************')
+	Control_check()
 	print('Completely failed sample: CYP2D6%\n')
 	print('Completely failed sample:', file = open('%s_QC.txt'%Run, 'w+'))
 	n = 1 ## count for failed samples
