@@ -119,10 +119,10 @@ def ICD_check():
 		   #print(sample, sample+ 'B')
 			sample_b = sample + 'B'
 			failed_checklist[sample_b] = failed_checklist.pop(sample) ## Update the key, add B back to ID
-			failed_checklist[sample_b]['Low coverage amplicon'] = {Gene:list(set(gene_ICD[Gene])) for Gene in failed_amp_gene[sample_b] if Gene != 'CYP2D8'}
+			failed_checklist[sample_b]['Low coverage amplicon'] = {Gene:list(set(gene_ICD[Gene])) for Gene in failed_amp_gene[sample_b] if Gene != 'CYP2D8' and Gene != 'RPPH1'}
 		else:
 			#print('**'+sample)
-			failed_checklist[sample]['Low coverage amplicon'] = {Gene:list(set(gene_ICD[Gene])) for Gene in failed_amp_gene[sample] if Gene != 'CYP2D8'}
+			failed_checklist[sample]['Low coverage amplicon'] = {Gene:list(set(gene_ICD[Gene])) for Gene in failed_amp_gene[sample] if Gene != 'CYP2D8' and Gene != 'RPPH1'}
 	## find the sample failed on critical amplicon by insertion between sets
 	failed_on_amplicon = [sample for sample in failed_checklist.keys() if bool(failed_checklist[sample]['ICD'] & {icd for icds in list(failed_checklist[sample]['Low coverage amplicon'].values()) for icd in icds if icd != ''})]
 	return failed_checklist, failed_on_amplicon
@@ -183,4 +183,4 @@ if __name__ == '__main__':
 			if bool(set(gene_icds[1]) & set(failed_checklist[gene]['ICD'])):
 				pprint.pprint(gene_icds, width=1000)
 		print('********************************************************************')
-	n += 1
+		n += 1
