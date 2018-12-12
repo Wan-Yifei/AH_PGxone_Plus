@@ -140,12 +140,13 @@ def Control_check():
 			control_QC[control] = len([g_control for g_standard, g_control in zip(NA17244, control_genotype[control]) if g_standard != g_control])
 		if 'NA17281' in control:
 			control_QC[control] = len([g_control for g_standard, g_control in zip(NA17281, control_genotype[control]) if g_standard != g_control])
-	print('====================================================================')
-	print('====================================================================')
+	print(Fore.RESET + '====================================================================')
 	print('Check genotype of controls:')
+	print('\n')
 	for control in control_QC:
 		if control_QC[control] > 3: print(Fore.RED + 'Warning: %s may failed!! Manual check required!!'%control)
 		else: print(Fore.GREEN + '%s passed!'%control)
+	print('\n')
 	print('====================================================================')
 
 ## 3. Run script
@@ -164,7 +165,7 @@ if __name__ == '__main__':
 	Drug_info = '/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/%s/PGxOneV3_drug_action.txt'%folder ## gene and corresponding ICD codes
 	#Genotypes = '/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/%s/sample_output_genotype_test.txt'%folder ## genotypes of all samples: test file Run743, Run755
 	Genotypes = '/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/%s/sample_output_genotype.txt'%folder ## genotypes of all samples
-
+	LIS = '/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/%s/LIS'%folder ## path of LIS folder 
 
 	with open(QC_check) as raw:
 		QC_record = raw.readlines()
@@ -184,6 +185,13 @@ if __name__ == '__main__':
 	sample_ICD = Sample_ICD(patient_ICD, failed_amplicon) ## samples with corresponding ICDs from accession
 	failed_amp_gene, gene_ICD= Gene_ICD(failed_amplicon)
 	failed_checklist, failed_on_amplicon = ICD_check()
+	print('====================================================================')
+	print('====================================================================')
+	print('\n')
+	LIS_n = len([name for name in os.listdir('.') if os.path.isfile(name)])
+	if LIS_n == 44: print(Fore.GREEN + 'LIS # check: %d'%LIS_n)
+	else: print(Fore.RED + 'LIS # check: %d'%LIS_n)
+	print('\n')
 	Control_check()
 	print('Completely failed sample: CYP2D6%\n')
 	print('Completely failed sample:', file = open('%s_QC.txt'%Run, 'w+'))
@@ -193,8 +201,7 @@ if __name__ == '__main__':
 		print('%s'%line[0], file = open('%s_QC.txt'%Run, 'a+'))
 		n += 1
 	print('\n')
-	print('********************************************************************')
-	print('********************************************************************')
+	print('====================================================================')
 	print('\n')
 	print('Failed on critical amplicons: \n{}'.format('\n'.join(failed_on_amplicon)))
 	print('********************************************************************')
