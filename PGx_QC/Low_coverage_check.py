@@ -127,6 +127,26 @@ def ICD_check():
 	failed_on_amplicon = [sample for sample in failed_checklist.keys() if bool(failed_checklist[sample]['ICD'] & {icd for icds in list(failed_checklist[sample]['Low coverage amplicon'].values()) for icd in icds if icd != ''})]
 	return failed_checklist, failed_on_amplicon
 
+## 2.7 Check genotypes of controls
+def Control_check():
+	control_genotype = {line.strip().split('\t')[0]:line.strip().split('\t')[1:] for line in sample_genotypes if 'NA' in line.strip().split('\t')[0]}
+	NA17244 = ['c.3435T>C/c.3435T>C/c.2677T>G/c.2677T>G', 'WT/WT', 'WT/c.-1252G>C', 'WT/c.*86A>C', 'WT/WT', 'WT/WT', 'WT/c.175-5285G>T', 'WT/c.-451C>T', 'WT/c.428G>A', 'WT/WT', 'WT/c.472G>A', '*1A/*1F', 'A785G/G516T', '*1/*1', '*1/*1', '*1/*1', '*2xN/*4', '*1A/*1A', '*3A/*3A', '*1/*1', '*1/*9A', 'WT/c.-48G>A', 'WT/WT', 'WT/WT', 'WT/WT', 'WT/WT', 'WT/WT', 'WT/WT', 'c.83-10039T>C/c.83-10039T>C', 'WT/c.313A>G', 'WT/WT', 'WT/WT', 'WT/c.614-2211T>C', 'c.551-3008C>G/c.551-3008C>G', 'WT/WT', 'WT/WT', 'WT/c.2155T>C', 'WT/C677T', '*5/*6/*12/*13', 'WT/c.106-38510G>T', 'WT/c.559C>T', 'WT/c.118A>G', 'WT/WT', '*1/*1', '*1/*1', '*1/*1', '*1/*2', '-1639G>A/-1639G>A', 'WT/c.1196A>G']
+	NA17281 = ['WT/c.2677T>G', 'WT/WT', 'WT/c.-1252G>C', 'WT/c.*86A>C', 'WT/A1', 'WT/WT', 'WT/WT', 'WT/c.-451C>T', 'WT/WT', 'WT/c.*3475A>G', 'WT/c.472G>A', '*1F/*1F', 'A785G/G516T', '*1/*17', '*1/*1', '*1/*1', '*5/*9', '*1A/*1A', '*3A/*3A', '*1/*1', '*5/*5/*9A', 'WT/c.-48G>A', 'WT/WT', 'WT/WT', 'WT/WT', 'WT/WT', 'WT/WT', 'WT/WT', 'WT/c.83-10039T>C', 'WT/WT', 'WT/WT', 'WT/c.-1019G>C', 'c.614-2211T>C/c.614-2211T>C', 'c.551-3008C>G/c.551-3008C>G', 'WT/WT', 'WT/c.124+21A>C', 'c.2155T>C/c.2155T>C', 'C677T/A1298C', '*5/*6/*13', 'c.106-38510G>T/c.178-20044C>T/c.178-13122C>T', 'WT/WT', 'WT/WT', 'WT/WT', '*1/*5', '*1/*1', '*1/*28', '*1/*2', 'WT/-1639G>A', 'c.1196A>G/c.1196A>G']
+	control_QC = {}
+	for control in control_genotype.keys():
+		if 'NA17244' in control:
+			control_QC[control] = len([g_control for g_standard, g_control in zip(NA17244, control_genotype[control]) if g_standard != g_control])
+		if 'NA17281' in control:
+			control_QC[control] = len([g_control for g_standard, g_control in zip(NA17281, control_genotype[control]) if g_standard != g_control])
+	print('====================================================================')
+	print('====================================================================')
+	print('Check genotype of controls:')
+	for control in control_QC:
+		if control_QC[control] > 3: print('Warning: %s may failed!! Manual check required!!'%control)
+		else: print('%s passed!'%control)
+	print('====================================================================')
+
+## 3. Run script
 if __name__ == '__main__':
 	args = ParseArg()
 	folder = args.Run_Name
@@ -140,7 +160,10 @@ if __name__ == '__main__':
 	QC_check = '/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/%s/sample_QC_low_coverage.txt'%folder ## sample_QC_low_coverage file
 	Accession = '/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/%s/sample_codes_drugs_accession.txt'%folder ## sample accession file
 	Drug_info = '/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/%s/PGxOneV3_drug_action.txt'%folder ## gene and corresponding ICD codes
-	
+	#Genotypes = '/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/%s/sample_output_genotype_test.txt'%folder ## genotypes of all samples
+	Genotypes = '/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/%s/sample_output_genotype.txt'%folder ## genotypes of all samples
+
+
 	with open(QC_check) as raw:
 		QC_record = raw.readlines()
 		
@@ -150,14 +173,16 @@ if __name__ == '__main__':
 	with open(Drug_info) as raw:
 		drug_ICD = raw.readlines()
 
+	with open(Genotypes) as raw:
+		sample_genotypes = raw.readlines()
+
 	QC_filtered = Low_coverage_filter(QC_record)
 	low_coverage_count, low_coverage_amp, low_CYP2D6 = Low_coverage_dict(QC_filtered)
 	failed_complete, failed_amplicon, sample_CYP2D6_check = Fail_samples(low_coverage_count, low_CYP2D6)
 	sample_ICD = Sample_ICD(patient_ICD, failed_amplicon) ## samples with corresponding ICDs from accession
 	failed_amp_gene, gene_ICD= Gene_ICD(failed_amplicon)
 	failed_checklist, failed_on_amplicon = ICD_check()
-	print('********************************************************************')
-	print('********************************************************************')
+	Control_check()
 	print('Completely failed sample: CYP2D6%\n')
 	print('Completely failed sample:', file = open('%s_QC.txt'%Run, 'w+'))
 	n = 1 ## count for failed samples
