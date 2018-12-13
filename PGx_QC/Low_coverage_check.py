@@ -188,7 +188,7 @@ if __name__ == '__main__':
 	print('====================================================================')
 	print('====================================================================')
 	print('\n')
-	LIS_n = len([name for name in os.listdir(LIS)])
+	LIS_n = len([name for name in os.listdir(LIS) if os.path.isfile(LIS + '/' + name)])
 	if LIS_n == 44: print(Fore.GREEN + 'LIS # check: %d'%LIS_n)
 	else: print(Fore.RED + 'LIS # check: %d'%LIS_n)
 	print('\n')
