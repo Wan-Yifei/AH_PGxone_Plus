@@ -1,0 +1,27 @@
+set shortmess=atI  "Don’t show the intro message when starting Vim
+highlight Normal ctermbg=16
+set list listchars=tab:>-
+set background=dark
+set showcmd 
+syntax on 
+set tabstop=4  
+set softtabstop=4
+set shiftwidth=4  
+set autoindent  
+autocmd InsertLeave * se nocul 
+autocmd InsertEnter * se cul 
+set ruler 
+set mouse=a 
+set number "the index of line
+highlight LineNr cterm=bold ctermfg=red
+set laststatus=2 
+if has('gui_running')
+    set t_Co=256
+endif
+set guifont=Mono
+set autoread 
+"set ignorecase 
+set foldmethod=syntax
+set nofoldenable 
+colorscheme industry
+"highlight Normal ctermbg=232
