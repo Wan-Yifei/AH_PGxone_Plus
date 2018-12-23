@@ -3,14 +3,14 @@ set -e # exit when error occur
 cd /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$1/
 echo "Run folder: $1"
 perl PGxOneV3_Phenotype.pl
-echo "1. Phenotype down!"
+echo "1. Phenotype done!"
 perl PGxOneV3_Create_DrugList.pl
-echo "2. Create_DrugList down!"
+echo "2. Create_DrugList done!"
 perl PGxOneV3_DrugAction.pl
-echo "3. DrugAction down!"
+echo "3. DrugAction done!"
 perl PGxOneV3_DrugAction_LIS.pl
-echo "4. DrugAction_LIS down!"
+echo "4. DrugAction_LIS done!"
 python PGxOneV3_Drug_Cleanup.py
-echo "5. Cleanup down!"
+echo "5. Cleanup done!"
 python PGxOneV3_Drug_DDI.py
-echo "6. DDI down!"
+echo "6. DDI done!"
