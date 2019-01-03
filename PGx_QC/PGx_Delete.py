@@ -35,6 +35,10 @@ for sample in CaseID_Del:
 		print('{}.Action file: {}/{} has been deleted!'.format(n, sample, CaseID))
 		n += 1
 
-
-
-	
+for sample in ReqID_CaseID.keys():
+	if sample.startswith('RM'):
+		CaseID = ReqID_CaseID[sample]
+		if os.path.isfile('{}/LIS/{}.txt'.format(Run_folder,CaseID)): 
+			os.remove('{}/LIS/{}.txt'.format(Run_folder,CaseID))
+			print('{}.Action file: {}/{} has been deleted!'.format(n, sample, CaseID))
+			n += 1
