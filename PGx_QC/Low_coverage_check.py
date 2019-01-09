@@ -162,6 +162,30 @@ def CYP_check():
 	print('\n')
 	print('====================================================================')
 
+## 2.9 Check the CNV of controls
+def CNV_check():
+	print('====================================================================')
+	print('CNV check for CYP2D6')
+	print('\n')
+	for sample in CNV_checklist:
+		if 'Sample ID' in sample: continue;
+		if 'NA17244' in sample.strip().split('\t')[0]:
+			ID = sample.strip().split('\t')[0]
+			CNV = float(sample.strip().split('\t')[1])
+			if CNV > 2.10 or CNV < 1.90:
+				print(Fore.RED + 'CNV of {}: {}, please check!'.format(ID, CNV))
+			else:
+				print(Fore.GREEN + 'CNV of %s pass!'%ID)
+		if 'NA17281' in sample: 
+			ID = sample.strip().split('\t')[0]
+			CNV = float(sample.strip().split('\t')[1])
+			if CNV > 0.59 or CNV < 0.41:
+				print(Fore.RED + 'CNV of {}: {} please check!'.format(ID, CNV))
+			else:
+				print(Fore.GREEN + 'CNV of %s pass!'%ID)
+	print('\n')
+	print('====================================================================')
+
 ## 3. Run script
 if __name__ == '__main__':
 	init(autoreset = True)
@@ -181,6 +205,10 @@ if __name__ == '__main__':
 	Genotypes = '/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/%s/sample_output_genotype.txt'%folder ## genotypes of all samples
 	LIS = '/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/%s/LIS'%folder ## path of LIS folder 
 	CYP_hom = '/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/%s/sample_QC_CYP2D6_deletion_hom.txt'%folder ## samples need to be checked the genotype of CYP2D6
+	CNV_output = '/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/%s/sample_output_cnv.txt'%folder
+
+	with open(CNV_output) as raw:
+		CNV_checklist = raw.readlines()
 
 	with open(CYP_hom) as raw:
 		CYP_checklist = raw.readlines()
@@ -212,6 +240,7 @@ if __name__ == '__main__':
 	print('\n')
 	Control_check()
 	CYP_check()
+	CNV_check()
 	print('Completely failed sample: CYP2D6%\n')
 	print('Completely failed sample:', file = open('%s_QC.txt'%Run, 'w+'))
 	n = 1 ## count for failed samples
