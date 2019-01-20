@@ -8,8 +8,9 @@ do
 	do
 		dirname $path >> tmp.txt
 	done
-	runfolder=$(sort -u -t_ -rk4 tmp.txt | head -n 1 | cut -d / -f7)
-	run_index=$(echo $runfolder | cut -d _ -f4)
+	runfolder=$(sort -u -t_ -rk4 tmp.txt | head -n 1 | cut -d / -f7) ## pathway of run folder
+	run_index=$(echo $runfolder | cut -d _ -f4) ## e.g. Run700
+	rm tmp.txt ## delet tmp
 	echo Amend $ID from $run_index 
 ## Amend report
 	#python3 PGx_report_amend.py $runfolder $TYPE $MED $ICD
@@ -18,7 +19,7 @@ do
 		echo The $TYPE list of $ID from $run_index has been updated!
 	elif [ $TYPE = "ICD" ]
 	then 
-		echo The $TYPE of $ID from $run_index has been updated!
+		echo The $TYPE codes of $ID from $run_index has been updated!
 	elif [ $TYPE = "Both" ]
 		echo The ICD and Medication of $ID from $run_index have been updated!
 	else
