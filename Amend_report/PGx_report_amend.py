@@ -32,12 +32,12 @@ def Update(Run_folder, ID, Type, Med_added, ICD_added):
 			line = sample.strip().split('\t')
 			if line[0] == ID:
 				print(line)
-				if Type == 'Medication':
+				if 'Medication' in Type and 'ICD' in Type:
+					line[1] = line[1] + ', ' + ICD_added
 					line[2] = line[2] + ', ' + Med_added
-				elif Type == 'ICD':
+				elif 'ICD' in Type:
 					line[1] = line[1] + ', ' + ICD_added
-				elif Type == 'Both':
-					line[1] = line[1] + ', ' + ICD_added
+				elif 'Medication' in Type:
 					line[2] = line[2] + ', ' + Med_added
 				else:
 					print('The {} of {} has been updated, please check!'.format(Type, ID))
