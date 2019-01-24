@@ -1,4 +1,8 @@
 #! /bin/bash
+#To do: rm processed sample from request file
+#To do: move new action file to batch uploading folder 
+#To do: Update Type to accept all kinds of amending request
+
 set -e
 ## message for Lab director
 MESSAGE="Please resign with \"Update"
@@ -22,17 +26,11 @@ do
 	echo -e
 
 ## Amend report
-	python3 PGx_report_amend.py $runfolder $ID $TYPE -M $MED -I $ICD
+	#python3 PGx_report_amend.py $runfolder $ID $TYPE -M $MED -I $ICD
 	bash /home/yifei.wan/AH_PGxOne_Plus/PGx_Run/PGxOne_Scripts.sh $runfolder
-	if [ $TYPE = "Medication" ]
+	if [[ $TYPE == *"Medication"* && $Type == *"ICD"* ]]
 	then
-		echo `date`	The $TYPE list of $ID from $run_index has been updated! $MESSAGE $TYPE\". | tee Amend_log.txt | mail -s "Pleas resign $ID" yifei.wan@admerahealth.com zhuosheng.gu@admerahealth.com 
-	elif [ $TYPE = "ICD" ]
-	then 
-		echo `date`	The $TYPE codes of $ID from $run_index has been updated! $MESSAGE $TYPE\". | tee Amend_log.txt | mail -s "Pleas resign $ID" yifei.wan@admerahealth.com
-	elif [ $TYPE = "Both" ]
-	then
-		echo `date`>The ICD and Medication of $ID from $run_index have been updated! $MESSAGE $TYPE\". | tee Amend_log.txt | mail -s "Pleas resign $ID" yifei.wan@admerahealth.com
+		echo `date`	The content: $TYPE of $ID from $run_index has been updated! $MESSAGE $TYPE\". | tee Amend_log.txt | mail -s "Pleas resign $ID" yifei.wan@admerahealth.com zhuosheng.gu@admerahealth.com 
 	else
 		echo `date`	$TYPE of $ID has been update. Please check! | tee Amend_log.txt | mail -s "Pleas check $ID" yifei.wan@admerahealth.com
 	fi
