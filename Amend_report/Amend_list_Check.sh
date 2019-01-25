@@ -1,7 +1,6 @@
 #! /bin/bash
 #To do: rm processed sample from request file
 #To do: move new action file to batch uploading folder 
-#To do: Update Type to accept all kinds of amending request
 
 set -e
 ## message for Lab director
@@ -26,12 +25,19 @@ do
 	echo -e
 
 ## Amend report
-	#python3 PGx_report_amend.py $runfolder $ID $TYPE -M $MED -I $ICD
-	bash /home/yifei.wan/AH_PGxOne_Plus/PGx_Run/PGxOne_Scripts.sh $runfolder
-	if [[ $TYPE == *"Medication"* && $Type == *"ICD"* ]]
+	if [ ! -z $runfolder ]
 	then
-		echo `date`	The content: $TYPE of $ID from $run_index has been updated! $MESSAGE $TYPE\". | tee Amend_log.txt | mail -s "Pleas resign $ID" yifei.wan@admerahealth.com zhuosheng.gu@admerahealth.com 
+		python3 PGx_report_amend.py $runfolder $ID $TYPE -M $MED -I $ICD
+		sed -i '/$ID/d' $1
 	else
-		echo `date`	$TYPE of $ID has been update. Please check! | tee Amend_log.txt | mail -s "Pleas check $ID" yifei.wan@admerahealth.com
+		echo Cannot find any run folder including $ID 
+		continue
+	fi
+	bash /home/yifei.wan/AH_PGxOne_Plus/PGx_Run/PGxOne_Scripts.sh $runfolder
+	if [[ $TYPE == *"Medication"* || $Type == *"ICD"* ]]
+	then
+		echo [`date`] The content: $TYPE of $ID from $run_index has been updated! $MESSAGE $TYPE\". | tee Amend_log.txt | mail -s "Pleas resign $ID" yifei.wan@admerahealth.com zhuosheng.gu@admerahealth.com 
+	else
+		echo [`date`] $TYPE of $ID has been update. Please check! | tee Amend_log.txt | mail -s "Pleas check $ID" yifei.wan@admerahealth.com
 	fi
 done
