@@ -1,7 +1,3 @@
-#To do: Can handle empty filed
-#To do: remove dulplicate drugs or ICD codes
-#To do: can handle multiple amending, e.g. ICD + address. --> add to bash: Amend_list_Check.sh
-
 import argparse 
 import sys
 
@@ -35,10 +31,14 @@ def Update(Run_folder, ID, Type, Med_added, ICD_added):
 				if 'Medication' in Type and 'ICD' in Type:
 					line[1] = line[1] + ', ' + ICD_added
 					line[2] = line[2] + ', ' + Med_added
+					line[1] = ', '.join(set(line[1].strip(', ').split(', '))) ## remove additional space if original filed is empty and remove duplicate content
+					line[2] = ', '.join(set(line[2].strip(', ').split(', ')))
 				elif 'ICD' in Type:
 					line[1] = line[1] + ', ' + ICD_added
+					line[1] = ', '.join(set(line[1].strip(', ').split(', ')))
 				elif 'Medication' in Type:
 					line[2] = line[2] + ', ' + Med_added
+					line[2] = ', '.join(set(line[2].strip(', ').split(', ')))
 				else:
 					print('The {} of {} has been updated, please check!'.format(Type, ID))
 				line = '\t'.join(line) + '\n'
@@ -59,7 +59,11 @@ def Main():
 	Type = args.Type
 	ICD_added = args.I
 	Med_added = args.M
-	Update(Run_folder, ID, Type, Med_added, ICD_added)
+	if 'ICD' in Type or 'Medication' in Type:
+		Update(Run_folder, ID, Type, Med_added, ICD_added)
+		print('The accession file has been updated!')
+	else:
+		print('No need to update the accession file!')
 
 # 4. Run script
 
