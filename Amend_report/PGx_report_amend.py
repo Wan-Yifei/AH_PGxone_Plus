@@ -59,11 +59,7 @@ def Main():
 	Type = args.Type
 	ICD_added = args.I
 	Med_added = args.M
-	if 'ICD' in Type or 'Medication' in Type:
-		Update(Run_folder, ID, Type, Med_added, ICD_added)
-		print('The accession file has been updated!')
-	else:
-		print('No need to update the accession file!')
+	Update(Run_folder, ID, Type, Med_added, ICD_added)
 
 # 4. Run script
 
