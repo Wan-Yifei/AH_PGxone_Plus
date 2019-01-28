@@ -29,7 +29,7 @@ do
 		if [[ $TYPE == *"Medication"* && $TYPE == *"ICD"* ]]
 		then
 			echo cond1:Both
-			python3 PGx_report_amend.py $runfolder $ID $TYPE -M $MED -I $ICD
+			python3 PGx_report_amend.py $runfolder $ID $TYPE -M "$MED" -I "$ICD"
 			bash /home/yifei.wan/AH_PGxOne_Plus/PGx_Run/PGxOne_Scripts.sh $runfolder
 			#cp /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS
 			sed -i "/$ID/d" $1 ## remove processed sample from request file
@@ -42,7 +42,7 @@ do
 		elif [[ $TYPE == *"ICD"* ]]
 		then
 			echo cond3:ICD
-			python3 PGx_report_amend.py $runfolder $ID $TYPE -I $ICD
+			python3 PGx_report_amend.py $runfolder $ID $TYPE -I "$ICD"
 			bash /home/yifei.wan/AH_PGxOne_Plus/PGx_Run/PGxOne_Scripts.sh $runfolder
 			sed -i "/$ID/dt " $1 ## remove processed sample from request file
 		else
