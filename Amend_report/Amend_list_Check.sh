@@ -6,7 +6,7 @@ set -e
 MESSAGE="Please resign with \"Update"
 
 ## Read amend requirement from require list
-awk -F '\t' '{if($1~/A-*/){print $1,$2,$3,$4}}' $1 | while read ID TYPE MED ICD
+awk -F '\t' 'BEGIN {OFS = ";"} {if($1~/A-*/){print $1,$2,$3,$4}}' $1 | while IFS=';' read ID TYPE ICD MED 
 do
 ## Find run folder based on ID
 	find /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/ -name "$ID*.vcf" | while read path
@@ -20,7 +20,7 @@ do
 	echo ================================================================
 	echo ================================================================
 	echo -e
-	echo Amend $ID from $run_index 
+	echo Amend $ID from $runfolder
 	echo -e
 
 ## Amend report
@@ -28,19 +28,23 @@ do
 	then
 		if [[ $TYPE == *"Medication"* && $TYPE == *"ICD"* ]]
 		then
+			echo cond1:Both
 			python3 PGx_report_amend.py $runfolder $ID $TYPE -M $MED -I $ICD
 			bash /home/yifei.wan/AH_PGxOne_Plus/PGx_Run/PGxOne_Scripts.sh $runfolder
-			sed -i '/$ID/d' $1 ## remove processed sample from request file
+			#cp /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS
+			sed -i "/$ID/d" $1 ## remove processed sample from request file
 		elif [[ $TYPE == *"Medication"* ]]
 		then
-			python3 PGx_report_amend.py $runfolder $ID $TYPE -M $MED
+			echo cond2:Med
+			python3 PGx_report_amend.py $runfolder $ID $TYPE -M "$MED"
 			bash /home/yifei.wan/AH_PGxOne_Plus/PGx_Run/PGxOne_Scripts.sh $runfolder
-			sed -i '/$ID/d' $1 ## remove processed sample from request file
+			sed -i "/$ID/d" $1 ## remove processed sample from request file
 		elif [[ $TYPE == *"ICD"* ]]
 		then
+			echo cond3:ICD
 			python3 PGx_report_amend.py $runfolder $ID $TYPE -I $ICD
 			bash /home/yifei.wan/AH_PGxOne_Plus/PGx_Run/PGxOne_Scripts.sh $runfolder
-			sed -i '/$ID/d' $1 ## remove processed sample from request file
+			sed -i "/$ID/dt " $1 ## remove processed sample from request file
 		else
 			continue
 		fi
@@ -49,7 +53,7 @@ do
 		sed -i '/$ID/d' $1 ## remove processed sample from request file
 		continue
 	fi
-	if [[ $TYPE == *"Medication"* || $Type == *"ICD"* ]]
+	if [[ $TYPE == *"Medication"* || $TYPE == *"ICD"* ]]
 	then
 		echo [`date`] The content: $TYPE of $ID from $run_index has been updated! $MESSAGE $TYPE\". | tee -a Amend_log.txt | mail -s "Pleas resign $ID" yifei.wan@admerahealth.com zhuosheng.gu@admerahealth.com 
 	else
