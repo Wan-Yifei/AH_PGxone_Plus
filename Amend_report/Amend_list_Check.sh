@@ -31,19 +31,25 @@ do
 			echo cond1:Both
 			python3 PGx_report_amend.py $runfolder $ID $TYPE -M "$MED" -I "$ICD"
 			bash /home/yifei.wan/AH_PGxOne_Plus/PGx_Run/PGxOne_Scripts.sh $runfolder
-			#cp /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS
+			CASE_ID=$(awk -F"\t" '$1 == $ID {print $4}' /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/sample_codes_drugs.txt)
+			echo CASE_ID
+			cp /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt .
 			sed -i "/$ID/d" $1 ## remove processed sample from request file
 		elif [[ $TYPE == *"Medication"* ]]
 		then
 			echo cond2:Med
 			python3 PGx_report_amend.py $runfolder $ID $TYPE -M "$MED"
 			bash /home/yifei.wan/AH_PGxOne_Plus/PGx_Run/PGxOne_Scripts.sh $runfolder
+			CASE_ID=$(awk -F"\t" '$1 == $ID {print $4}' /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/sample_codes_drugs.txt)
+			echo CASE_ID
 			sed -i "/$ID/d" $1 ## remove processed sample from request file
 		elif [[ $TYPE == *"ICD"* ]]
 		then
 			echo cond3:ICD
 			python3 PGx_report_amend.py $runfolder $ID $TYPE -I "$ICD"
 			bash /home/yifei.wan/AH_PGxOne_Plus/PGx_Run/PGxOne_Scripts.sh $runfolder
+			CASE_ID=$(awk -F"\t" '$1 == $ID {print $4}' /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/sample_codes_drugs.txt)
+			echo CASE_ID
 			sed -i "/$ID/dt " $1 ## remove processed sample from request file
 		else
 			continue
