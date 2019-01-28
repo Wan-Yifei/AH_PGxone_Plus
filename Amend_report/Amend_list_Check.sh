@@ -30,13 +30,13 @@ do
 		python3 PGx_report_amend.py $runfolder $ID $TYPE -M $MED -I $ICD
 		sed -i '/$ID/d' $1
 	else
-		echo Cannot find any run folder including $ID 
+		echo Cannot find any run folder including $ID | tee -a Amend_log.txt 
 		continue
 	fi
 	bash /home/yifei.wan/AH_PGxOne_Plus/PGx_Run/PGxOne_Scripts.sh $runfolder
 	if [[ $TYPE == *"Medication"* || $Type == *"ICD"* ]]
 	then
-		echo [`date`] The content: $TYPE of $ID from $run_index has been updated! $MESSAGE $TYPE\". | tee Amend_log.txt | mail -s "Pleas resign $ID" yifei.wan@admerahealth.com zhuosheng.gu@admerahealth.com 
+		echo [`date`] The content: $TYPE of $ID from $run_index has been updated! $MESSAGE $TYPE\". | tee -a Amend_log.txt | mail -s "Pleas resign $ID" yifei.wan@admerahealth.com zhuosheng.gu@admerahealth.com 
 	else
 		echo [`date`] $TYPE of $ID has been update. Please check! | tee Amend_log.txt | mail -s "Pleas check $ID" yifei.wan@admerahealth.com
 	fi
