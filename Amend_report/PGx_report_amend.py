@@ -17,26 +17,26 @@ def ParseArg():
 
 # 2. Update info in accession file
 
-def Update(Run_folder, ID, Type, Med_added, ICD_added):
-	print('test')
+def Update(Run_folder, ID, Type, Med_added = None, ICD_added = None):
 	accession_new = ''
 	## Update required filed of sample
-	with open('%s/sample_codes_drugs_accession.txt'%Run_folder, 'r') as accession: 
-		print(accession)
+	with open('/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/%s/sample_codes_drugs_accession.txt'%Run_folder, 'r') as accession: 
 		accession_ori = accession.readlines()
 		for sample in accession_ori:
 			line = sample.strip().split('\t')
 			if line[0] == ID:
 				print(line)
 				if 'Medication' in Type and 'ICD' in Type:
-					line[1] = line[1] + ', ' + ICD_added
+					#line[1] = line[1] + ', ' + ICD_added
 					line[2] = line[2] + ', ' + Med_added
-					line[1] = ', '.join(set(line[1].strip(', ').split(', '))) ## remove additional space if original filed is empty and remove duplicate content
+					#line[1] = ', '.join(set(line[1].strip(', ').split(', '))) ## remove additional space if original filed is empty and remove duplicate content
 					line[2] = ', '.join(set(line[2].strip(', ').split(', ')))
 				elif 'ICD' in Type:
-					line[1] = line[1] + ', ' + ICD_added
-					line[1] = ', '.join(set(line[1].strip(', ').split(', ')))
+					#line[1] = line[1] + ', ' + ICD_added
+					#line[1] = ', '.join(set(line[1].strip(', ').split(', ')))
+					line[1] = ICD_added ## ICD required full list of ICD codes rather new ones.
 				elif 'Medication' in Type:
+					print(Med_added)
 					line[2] = line[2] + ', ' + Med_added
 					line[2] = ', '.join(set(line[2].strip(', ').split(', ')))
 				else:
@@ -47,7 +47,7 @@ def Update(Run_folder, ID, Type, Med_added, ICD_added):
 				line = '\t'.join(line) + '\n'
 				accession_new += line 
 	## Save new accession file
-	with open('%s/sample_codes_drugs_accession.txt'%Run_folder, 'w') as accession: 
+	with open('/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/%s/sample_codes_drugs_accession.txt'%Run_folder, 'w') as accession: 
 		accession.writelines(accession_new)
 
 # 3. Main function
