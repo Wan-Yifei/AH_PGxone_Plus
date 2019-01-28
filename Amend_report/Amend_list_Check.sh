@@ -1,5 +1,4 @@
 #! /bin/bash
-#To do: rm processed sample from request file
 #To do: move new action file to batch uploading folder 
 
 set -e
@@ -28,9 +27,10 @@ do
 	if [ ! -z $runfolder ]
 	then
 		python3 PGx_report_amend.py $runfolder $ID $TYPE -M $MED -I $ICD
-		sed -i '/$ID/d' $1
+		sed -i '/$ID/d' $1 ## remove processed sample from request file
 	else
-		echo Cannot find any run folder including $ID | tee -a Amend_log.txt 
+		echo Cannot find any run folder including $ID | tee -a Amend_log.txt | mail -s "Cannot find $ID" yifei.wan@admerahealth.com zhuosheng.gu@admerahealth.com ## generate log file and send remindering e-mail 
+		sed -i '/$ID/d' $1 ## remove processed sample from request file
 		continue
 	fi
 	bash /home/yifei.wan/AH_PGxOne_Plus/PGx_Run/PGxOne_Scripts.sh $runfolder
