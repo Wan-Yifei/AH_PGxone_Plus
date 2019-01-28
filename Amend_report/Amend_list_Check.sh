@@ -6,7 +6,7 @@ set -e
 MESSAGE="Please resign with \"Update"
 
 ## Read amend requirement from require list
-awk '{if($1~/A-*/){print $1,$2,$3}}' $1 | while read ID TYPE MED ICD
+awk -F '\t' '{if($1~/A-*/){print $1,$2,$3,$4}}' $1 | while read ID TYPE MED ICD
 do
 ## Find run folder based on ID
 	find /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/ -name "$ID*.vcf" | while read path
@@ -26,9 +26,24 @@ do
 ## Amend report
 	if [ ! -z $runfolder ]
 	then
-		python3 PGx_report_amend.py $runfolder $ID $TYPE -M $MED -I $ICD
-		bash /home/yifei.wan/AH_PGxOne_Plus/PGx_Run/PGxOne_Scripts.sh $runfolder
-		sed -i '/$ID/d' $1 ## remove processed sample from request file
+		if [[ $TYPE == *"Medication"* && $TYPE == *"ICD"* ]]
+		then
+			python3 PGx_report_amend.py $runfolder $ID $TYPE -M $MED -I $ICD
+			bash /home/yifei.wan/AH_PGxOne_Plus/PGx_Run/PGxOne_Scripts.sh $runfolder
+			sed -i '/$ID/d' $1 ## remove processed sample from request file
+		elif [[ $TYPE == *"Medication"* ]]
+		then
+			python3 PGx_report_amend.py $runfolder $ID $TYPE -M $MED
+			bash /home/yifei.wan/AH_PGxOne_Plus/PGx_Run/PGxOne_Scripts.sh $runfolder
+			sed -i '/$ID/d' $1 ## remove processed sample from request file
+		elif [[ $TYPE == *"ICD"* ]]
+		then
+			python3 PGx_report_amend.py $runfolder $ID $TYPE -I $ICD
+			bash /home/yifei.wan/AH_PGxOne_Plus/PGx_Run/PGxOne_Scripts.sh $runfolder
+			sed -i '/$ID/d' $1 ## remove processed sample from request file
+		else
+			continue
+		fi
 	else
 		echo Cannot find any run folder including $ID | tee -a Amend_log.txt | mail -s "Cannot find $ID" yifei.wan@admerahealth.com zhuosheng.gu@admerahealth.com ## generate log file and send remindering e-mail 
 		sed -i '/$ID/d' $1 ## remove processed sample from request file
