@@ -20,6 +20,7 @@
 #
 # **Dependence**
 # PGx_report_amend.py	Beta version 0.0.1
+# PGx_Run/PGxOne_Scripts.sh
 # ===================================================================================================
 
 set -e
