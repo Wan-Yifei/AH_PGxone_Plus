@@ -36,7 +36,7 @@ def Update(Run_folder, ID, Type, Med_added = None, ICD_added = None):
 					#line[1] = ', '.join(set(line[1].strip(', ').split(', ')))
 					line[1] = ICD_added ## ICD required full list of ICD codes rather new ones.
 				elif 'Medication' in Type:
-					print(Med_added)
+					#print(Med_added)
 					line[2] = line[2] + ', ' + Med_added
 					line[2] = ', '.join(set(line[2].strip(', ').split(', ')))
 				else:
