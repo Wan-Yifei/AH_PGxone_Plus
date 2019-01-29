@@ -8,7 +8,7 @@
 # The bash script Amend_list_check.sh is use to automatically amend PGxOne reports.
 #
 # ** Input files**
-# 1. Amend_request.txt: Accessioners input sample ID, amending content type and new added content.
+# 1. Amend_request.csv: Accessioners input sample ID, amending content type and new added content.
 #	1.1 For ICD: Input all ICD codes the sample having;
 #	1.2 For MED: Input new medications or all medications of the sample, and use comma as delimiter;
 #	1.3 For TYPE: Which kind of content requires amending? ICD? Medication? Address...
