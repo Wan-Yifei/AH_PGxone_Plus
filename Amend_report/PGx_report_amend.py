@@ -1,3 +1,14 @@
+# @author: Yifei Wan
+
+# ================================================================================================
+# 01/29/2019	Beat version 0.0.1
+# Summary:
+# The Python3 script PGx_report_amend.py updates sample information for each sample. 
+# 
+# Input: See ParseArg() function and find more details at the top of script: Amend_list_check.sh.
+# Output: new sample codes_drugs_accession.txt for required samples.
+# ================================================================================================
+
 import argparse 
 import sys
 
