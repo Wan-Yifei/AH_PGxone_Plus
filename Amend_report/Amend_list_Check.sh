@@ -31,32 +31,34 @@ do
 			echo cond1:Both
 			python3 PGx_report_amend.py $runfolder $ID $TYPE -M "$MED" -I "$ICD"
 			bash /home/yifei.wan/AH_PGxOne_Plus/PGx_Run/PGxOne_Scripts.sh $runfolder
-			CASE_ID=$(awk -F"\t" '$1 == $ID {print $4}' /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/sample_codes_drugs.txt)
-			echo CASE_ID
-			cp /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt .
+			CASE_ID=$(awk -F"\t" -v ID=$ID '$1 == ID {print $4}' /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/sample_codes_drugs.txt) ## find corresponding CASE ID based on requistion ID
+			#echo /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt
+			cp /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt /xinfin/result-data/$CASE_ID.txt 
 			sed -i "/$ID/d" $1 ## remove processed sample from request file
 		elif [[ $TYPE == *"Medication"* ]]
 		then
 			echo cond2:Med
 			python3 PGx_report_amend.py $runfolder $ID $TYPE -M "$MED"
 			bash /home/yifei.wan/AH_PGxOne_Plus/PGx_Run/PGxOne_Scripts.sh $runfolder
-			CASE_ID=$(awk -F"\t" '$1 == $ID {print $4}' /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/sample_codes_drugs.txt)
-			echo CASE_ID
+			CASE_ID=$(awk -F"\t" -v ID=$ID '$1 == ID {print $4}' /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/sample_codes_drugs.txt) ## find corresponding CASE ID based on requistion ID
+			#echo /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt
+			cp /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt /xinfin/result-data/$CASE_ID.txt 
 			sed -i "/$ID/d" $1 ## remove processed sample from request file
 		elif [[ $TYPE == *"ICD"* ]]
 		then
 			echo cond3:ICD
 			python3 PGx_report_amend.py $runfolder $ID $TYPE -I "$ICD"
 			bash /home/yifei.wan/AH_PGxOne_Plus/PGx_Run/PGxOne_Scripts.sh $runfolder
-			CASE_ID=$(awk -F"\t" '$1 == $ID {print $4}' /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/sample_codes_drugs.txt)
-			echo CASE_ID
-			sed -i "/$ID/dt " $1 ## remove processed sample from request file
+			CASE_ID=$(awk -F"\t" -v ID=$ID '$1 == ID {print $4}' /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/sample_codes_drugs.txt) ## find corresponding CASE ID based on requistion ID
+			#echo /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt
+			cp /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt /xinfin/result-data/$CASE_ID.txt 
+			sed -i "/$ID/d" $1 ## remove processed sample from request file
 		else
 			continue
 		fi
 	else
 		echo Cannot find any run folder including $ID | tee -a Amend_log.txt | mail -s "Cannot find $ID" yifei.wan@admerahealth.com zhuosheng.gu@admerahealth.com ## generate log file and send remindering e-mail 
-		sed -i '/$ID/d' $1 ## remove processed sample from request file
+		sed -i "/$ID/d" $1 ## remove processed sample from request file
 		continue
 	fi
 	if [[ $TYPE == *"Medication"* || $TYPE == *"ICD"* ]]
