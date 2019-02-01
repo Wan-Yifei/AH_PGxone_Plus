@@ -74,9 +74,15 @@ def Main():
 	args = ParseArg()
 	Run_folder = args.Run_folder
 	ID = args.ID
+	ID = ID.strip()
 	Type = args.Type
+	Type = Type.strip()
 	ICD_added = args.I
+	if ICD_added:
+		ICD_added = ICD_added.strip()
 	Med_added = args.M
+	if Med_added:
+		Med_added = Med_added.strip()
 
 	Update(Run_folder, ID, Type, Med_added, ICD_added)
 
