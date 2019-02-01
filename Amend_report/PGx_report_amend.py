@@ -1,7 +1,7 @@
 # @author: Yifei Wan
 
 # ================================================================================================
-# 01/29/2019	Beat version 0.0.1
+# 01/29/2019	Beta version 0.0.1
 # Summary:
 # The Python3 script PGx_report_amend.py updates sample information in accession file for each sample. 
 # 
@@ -10,7 +10,7 @@
 # ================================================================================================
 # 01/31/2019	Beta version 0.0.2
 # Fix:
-# Remove "\r" from new line when inseted content if too long.
+# Remove "\r" from new line when inserted content if too long.
 # ================================================================================================
 
 import argparse 
