@@ -8,6 +8,10 @@
 # Input: See ParseArg() function and find more details at the top of script: Amend_list_check.sh.
 # Output: new sample codes_drugs_accession.txt for required samples.
 # ================================================================================================
+# 01/31/2019	Beta version 0.0.2
+# Fix:
+# Remove "\r" from new line when inseted content if too long.
+# ================================================================================================
 
 import argparse 
 import sys
@@ -36,20 +40,23 @@ def Update(Run_folder, ID, Type, Med_added = None, ICD_added = None):
 		for sample in accession_ori:
 			line = sample.strip().split('\t')
 			if line[0] == ID:
-				print(line)
+				#print(line)
 				if 'Medication' in Type and 'ICD' in Type:
 					#line[1] = line[1] + ', ' + ICD_added
+					line[1] = ICD_added ## ICD required full list of ICD codes rather new ones.
+					line[1] = line[1].replace('\r', '') ## ICD required full list of ICD codes rather new ones.
 					line[2] = line[2] + ', ' + Med_added
-					#line[1] = ', '.join(set(line[1].strip(', ').split(', '))) ## remove additional space if original filed is empty and remove duplicate content
-					line[2] = ', '.join(set(line[2].strip(', ').split(', ')))
+					line[2] = ', '.join(set(line[2].strip(', ').split(', '))).replace('\r', '') ## remove additional space if original filed is empty and remove duplicate content
 				elif 'ICD' in Type:
 					#line[1] = line[1] + ', ' + ICD_added
 					#line[1] = ', '.join(set(line[1].strip(', ').split(', ')))
 					line[1] = ICD_added ## ICD required full list of ICD codes rather new ones.
+					line[1] = line[1].replace('\r', '') ## ICD required full list of ICD codes rather new ones.
 				elif 'Medication' in Type:
-					#print(Med_added)
+					#print(line[2])
 					line[2] = line[2] + ', ' + Med_added
-					line[2] = ', '.join(set(line[2].strip(', ').split(', ')))
+					line[2] = ', '.join(set(line[2].strip(', ').split(', '))).replace('\r', '')
+
 				else:
 					print('The {} of {} has been updated, please check!'.format(Type, ID))
 				line = '\t'.join(line) + '\n'
@@ -70,6 +77,7 @@ def Main():
 	Type = args.Type
 	ICD_added = args.I
 	Med_added = args.M
+
 	Update(Run_folder, ID, Type, Med_added, ICD_added)
 
 # 4. Run script
