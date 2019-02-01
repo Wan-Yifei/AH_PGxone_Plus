@@ -19,8 +19,16 @@
 # 2. E-mail: This script would send reminder to Zhuosheng and Yifei.
 #
 # **Dependence**
-# PGx_report_amend.py	Beta version 0.0.1
+# PGx_report_amend.py	Beta version 0.0.2
 # PGx_Run/PGxOne_Scripts.sh
+# ===================================================================================================
+# 02/01/2019	Beta version 0.1.0
+# Feature:
+# 1. Recode content in request file to record file;
+# 2. Send an additional e-mail to remind client care team.
+#
+# **Dependence**
+# PGx_report_amend.py	Beta version 0.0.3
 # ===================================================================================================
 
 set -e
@@ -56,6 +64,7 @@ do
 			CASE_ID=$(awk -F"\t" -v ID=$ID '$1 == ID {print $4}' /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/sample_codes_drugs.txt) ## find corresponding CASE ID based on requistion ID
 			#echo /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt
 			cp /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt /xifin/result-data/$CASE_ID.txt 
+			awk -F '\t' -v ID=$ID '$1 == ID {print $0}' $1 >> Amend_record.txt
 			sed -i "/$ID/d" $1 ## remove processed sample from request file
 		elif [[ "$TYPE" == *"Medication"* ]]
 		then
@@ -65,6 +74,7 @@ do
 			CASE_ID=$(awk -F"\t" -v ID=$ID '$1 == ID {print $4}' /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/sample_codes_drugs.txt) ## find corresponding CASE ID based on requistion ID
 			#echo /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt
 			cp /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt /xifin/result-data/$CASE_ID.txt 
+			awk -F '\t' -v ID=$ID '$1 == ID {print $0}' $1 >> Amend_record.txt
 			sed -i "/$ID/d" $1 ## remove processed sample from request file
 		elif [[ $TYPE == *"ICD"* ]]
 		then
@@ -74,18 +84,21 @@ do
 			CASE_ID=$(awk -F"\t" -v ID=$ID '$1 == ID {print $4}' /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/sample_codes_drugs.txt) ## find corresponding CASE ID based on requistion ID
 			#echo /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt
 			cp /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt /xifin/result-data/$CASE_ID.txt 
+			awk -F '\t' -v ID=$ID '$1 == ID {print $0}' $1 >> Amend_record.txt
 			sed -i "/$ID/d" $1 ## remove processed sample from request file
 		else
 			continue
 		fi
 	else
 		echo Cannot find any run folder including $ID | tee -a Amend_log.txt | mail -s "Cannot find $ID" yifei.wan@admerahealth.com zhuosheng.gu@admerahealth.com ## generate log file and send remindering e-mail 
+		awk -F '\t' -v ID=$ID '$1 == ID {print $0}' $1 >> Amend_record.txt
 		sed -i "/$ID/d" $1 ## remove processed sample from request file
 		continue
 	fi
 	if [[ $TYPE == *"Medication"* || $TYPE == *"ICD"* ]]
 	then
-		echo [`date`] The content: $TYPE of $ID from $run_index has been updated! $MESSAGE $TYPE\". | tee -a Amend_log.txt | mail -s "Pleas resign $ID" yifei.wan@admerahealth.com zhuosheng.gu@admerahealth.com 
+		echo [`date`] The content: $TYPE of $ID from $run_index has been updated! $MESSAGE $TYPE\". | tee -a Amend_log.txt | mail -s "Pleas resign $ID" yifei.wan@admerahealth.com zhuosheng.gu@admerahealth.com
+		echo [`date`] $TYPE of $ID from $run_index has been sent to sign. | mail -s "Amending: $ID" yifei.wan@admerahealth.com frances.ramos@admerahealth.com shadae.waiters@admerahealth.com ## send reminder to client care team 
 	else
 		echo [`date`] $TYPE of $ID has been update. Please check! | tee Amend_log.txt | mail -s "Pleas check $ID" yifei.wan@admerahealth.com
 	fi
