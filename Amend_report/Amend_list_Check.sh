@@ -28,7 +28,7 @@ set -e
 MESSAGE="Please resign with \"Update"
 
 ## Read amend requirement from require list
-awk -F '\t' 'BEGIN {OFS = ";"} {if($1~/A-*/){print $1,$2,$3,$4}}' $1 | while IFS=';' read ID TYPE ICD MED 
+sed 's/"//g' $1 | awk -F '\t' 'BEGIN {OFS = ";"} {if($1~/A-*/){print $1,$2,$3,$4}}' | while IFS=';' read ID TYPE ICD MED 
 do
 ## Find run folder based on ID
 	find /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/ -name "$ID*.vcf" | while read path
