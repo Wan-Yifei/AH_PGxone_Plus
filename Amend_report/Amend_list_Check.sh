@@ -106,6 +106,6 @@ do
 	if [[ $TYPE == *"Medication"* || $TYPE == *"ICD"* ]]
 	then
 		echo [`date`] The content: $TYPE of $ID from $run_index has been updated! $MESSAGE $TYPE\". | tee -a Amend_log.txt | mail -s "Pleas resign $ID" yifei.wan@admerahealth.com zhuosheng.gu@admerahealth.com
-		echo [`date`] $TYPE of $ID from $run_index has been sent to sign. | mail -s "Amending: $ID" yifei.wan@admerahealth.com frances.ramos@admerahealth.com shadae.waiters@admerahealth.com ## send reminder to client care team 
+		echo [`date`] $TYPE of $ID from $run_index has been updated and sent to sign. | mail -s "Amending: $ID" yifei.wan@admerahealth.com frances.ramos@admerahealth.com shadae.waiters@admerahealth.com ## send reminder to client care team 
 	fi
 done
