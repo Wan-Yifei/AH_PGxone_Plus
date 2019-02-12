@@ -34,7 +34,12 @@
 # Fix:
 # If there is no MED and ICD, send reminder e-mail and record corresponding message.
 # ===================================================================================================
-
+# 02/12/2019	Beta version 0.1.2
+# Fix:
+# 1. Check that does tmp.txt exist before checking runfolder;
+# 2. Correct the content of e-mail for client care team;
+# 3. Don't rm content from Amend_request.txt if cannot find corresponding ID.
+# ===================================================================================================
 
 set -e
 ## message for Lab director
@@ -48,15 +53,22 @@ do
 	do
 		dirname $path >> tmp.txt
 	done
-	runfolder=$(sort -u -t_ -rk4 tmp.txt | head -n 1 | cut -d / -f7) ## pathway of run folder, select the newest folder
-	run_index=$(echo $runfolder | cut -d _ -f4) ## e.g. Run700
-	rm tmp.txt ## delet tmp
-	echo -e
-	echo ================================================================
-	echo ================================================================
-	echo -e
-	echo Amend $ID from $runfolder
-	echo -e
+	if [ -f tmp.txt ]
+	then
+		runfolder=$(sort -u -t_ -rk4 tmp.txt | head -n 1 | cut -d / -f7) ## pathway of run folder, select the newest folder
+		run_index=$(echo $runfolder | cut -d _ -f4) ## e.g. Run700
+		rm tmp.txt ## delet tmp	echo -e
+		echo ================================================================
+		echo ================================================================
+		echo -e
+		echo Amend $ID from $runfolder
+		echo -e
+	else
+		echo -e
+		echo ================================================================
+		echo ================================================================
+		echo Cannot find $ID
+	fi
 
 ## Amend report
 	if [ ! -z $runfolder ]
@@ -98,14 +110,13 @@ do
 			sed -i "/$ID/d" $1 ## remove processed sample from request file
 		fi
 	else
-		echo Cannot find any run folder including $ID | tee -a Amend_log.txt | mail -s "Cannot find $ID" yifei.wan@admerahealth.com zhuosheng.gu@admerahealth.com ## generate log file and send remindering e-mail 
-		awk -F '\t' -v ID=$ID '$1 == ID {print $0}' $1 >> Amend_record.txt
-		sed -i "/$ID/d" $1 ## remove processed sample from request file
-		continue
+		echo [`date`] Cannot find any run folder including $ID | tee -a Amend_log.txt | mail -s "Cannot find $ID" yifei.wan@admerahealth.com zhuosheng.gu@admerahealth.com ## generate log file and send remindering e-mail 
 	fi
 	if [[ $TYPE == *"Medication"* || $TYPE == *"ICD"* ]]
 	then
 		echo [`date`] The content: $TYPE of $ID from $run_index has been updated! $MESSAGE $TYPE\". | tee -a Amend_log.txt | mail -s "Pleas resign $ID" yifei.wan@admerahealth.com zhuosheng.gu@admerahealth.com
-		echo [`date`] $TYPE of $ID from $run_index has been updated and sent to sign. | mail -s "Amending: $ID" yifei.wan@admerahealth.com frances.ramos@admerahealth.com shadae.waiters@admerahealth.com ## send reminder to client care team 
+		echo [`date`] $TYPE of $ID from $run_index has been updated and $ID has been sent to sign. | mail -s "Amending: $ID" yifei.wan@admerahealth.com frances.ramos@admerahealth.com shadae.waiters@admerahealth.com ## send reminder to client care team 
 	fi
+	unset runfolder
+	unset TYPE
 done
