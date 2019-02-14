@@ -73,7 +73,7 @@ do
 ## Amend report
 	if [ ! -z $runfolder ]
 	then
-		if [[ $TYPE == *"Medication"* && $TYPE == *"ICD"* ]]
+		if [[ $TYPE == *"edication"* && $TYPE == *"ICD"* ]]
 		then
 			echo cond1:Both
 			python3 PGx_report_amend.py $runfolder $ID "$TYPE" -M "$MED" -I "$ICD"
@@ -83,7 +83,7 @@ do
 			cp /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt /xifin/result-data/$CASE_ID.txt 
 			awk -F '\t' -v ID=$ID '$1 == ID {print $0}' $1 >> Amend_record.txt
 			sed -i "/$ID/d" $1 ## remove processed sample from request file
-		elif [[ "$TYPE" == *"Medication"* ]]
+		elif [[ "$TYPE" == *"edication"* ]]
 		then
 			echo cond2:Med
 			python3 PGx_report_amend.py $runfolder $ID "$TYPE" -M "$MED"
@@ -112,7 +112,7 @@ do
 	else
 		echo [`date`] Cannot find any run folder including $ID | tee -a Amend_log.txt | mail -s "Cannot find $ID" yifei.wan@admerahealth.com zhuosheng.gu@admerahealth.com ## generate log file and send remindering e-mail 
 	fi
-	if [[ $TYPE == *"Medication"* || $TYPE == *"ICD"* ]]
+	if [[ $TYPE == *"edication"* || $TYPE == *"ICD"* ]]
 	then
 		echo [`date`] The content: $TYPE of $ID from $run_index has been updated! $MESSAGE $TYPE\". | tee -a Amend_log.txt | mail -s "Pleas resign $ID" yifei.wan@admerahealth.com zhuosheng.gu@admerahealth.com
 		echo [`date`] $TYPE of $ID from $run_index has been updated and $ID has been sent to sign. | mail -s "Amending: $ID" yifei.wan@admerahealth.com frances.ramos@admerahealth.com shadae.waiters@admerahealth.com ## send reminder to client care team 
