@@ -40,6 +40,11 @@
 # 2. Correct the content of e-mail for client care team;
 # 3. Don't rm content from Amend_request.txt if cannot find corresponding ID.
 # ===================================================================================================
+# 02/18/2019	Beta version 0.1.3
+# Feat:
+# Check PGxOneV3_Drug_List_not_covered_for_DDI.txt after run PGx_One_Scripts.sh to ensure that all
+# drugs are covered.
+# ===================================================================================================
 
 set -e
 ## message for Lab director
@@ -71,6 +76,9 @@ do
 	fi
 
 ## Amend report
+
+DDI_check=/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/PGxOneV3_Drug_List_not_covered_for_DDI.txt
+
 	if [ ! -z $runfolder ]
 	then
 		if [[ $TYPE == *"edication"* && $TYPE == *"ICD"* ]]
@@ -78,31 +86,76 @@ do
 			echo cond1:Both
 			python3 PGx_report_amend.py $runfolder $ID "$TYPE" -M "$MED" -I "$ICD"
 			bash /home/yifei.wan/AH_PGxOne_Plus/PGx_Run/PGxOne_Scripts.sh $runfolder
+<<<<<<< HEAD
+			DDI_count=$(wc -l $DDI_check | cut -d " " -f -1)
+			if [[ $DDI_count < 2 ]]
+			then
+				CASE_ID=$(awk -F"\t" -v ID=$ID '$1 == ID {print $4}' /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/sample_codes_drugs.txt) ## find corresponding CASE ID based on requistion ID
+				#echo /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt
+				cp /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt /xifin/result-data/$CASE_ID.txt 
+				awk -F '\t' -v ID=$ID '$1 == ID {print $0}' $1 >> Amend_record.txt
+				sed -i "/$ID/d" $1 ## remove processed sample from request file
+				status=1
+			else
+				status=0
+			fi
+=======
 			CASE_ID=$(awk -F"\t" -v ID=$ID '$1 == ID {print $4}' /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/sample_codes_drugs.txt) ## find corresponding CASE ID based on requistion ID
 			#echo /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt
 			cp /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt /xifin/result-data/$CASE_ID.txt 
 			awk -F '\t' -v ID=$ID '$1 == ID {print $0}' $1 >> Amend_record.txt
 			sed -i "/$ID/d" $1 ## remove processed sample from request file
+>>>>>>> 0ec6852893d2bfdec6e7412e599b0c354e126003
 		elif [[ "$TYPE" == *"edication"* ]]
 		then
 			echo cond2:Med
 			python3 PGx_report_amend.py $runfolder $ID "$TYPE" -M "$MED"
 			bash /home/yifei.wan/AH_PGxOne_Plus/PGx_Run/PGxOne_Scripts.sh $runfolder
+<<<<<<< HEAD
+			DDI_count=$(wc -l $DDI_check | cut -d " " -f -1)
+			if [[ $DDI_count < 2 ]]
+			then
+				CASE_ID=$(awk -F"\t" -v ID=$ID '$1 == ID {print $4}' /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/sample_codes_drugs.txt) ## find corresponding CASE ID based on requistion ID
+				#echo /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt
+				cp /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt /xifin/result-data/$CASE_ID.txt 
+				awk -F '\t' -v ID=$ID '$1 == ID {print $0}' $1 >> Amend_record.txt
+				sed -i "/$ID/d" $1 ## remove processed sample from request file
+				status=1
+			else
+				status=0
+			fi
+=======
 			CASE_ID=$(awk -F"\t" -v ID=$ID '$1 == ID {print $4}' /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/sample_codes_drugs.txt) ## find corresponding CASE ID based on requistion ID
 			#echo /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt
 			cp /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt /xifin/result-data/$CASE_ID.txt 
 			awk -F '\t' -v ID=$ID '$1 == ID {print $0}' $1 >> Amend_record.txt
 			sed -i "/$ID/d" $1 ## remove processed sample from request file
+>>>>>>> 0ec6852893d2bfdec6e7412e599b0c354e126003
 		elif [[ $TYPE == *"ICD"* ]]
 		then
 			echo cond3:ICD
 			python3 PGx_report_amend.py $runfolder $ID "$TYPE" -I "$ICD"
 			bash /home/yifei.wan/AH_PGxOne_Plus/PGx_Run/PGxOne_Scripts.sh $runfolder
+<<<<<<< HEAD
+			DDI_count=$(wc -l $DDI_check | cut -d " " -f -1)
+			if [[ $DDI_count < 2 ]]
+			then
+				CASE_ID=$(awk -F"\t" -v ID=$ID '$1 == ID {print $4}' /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/sample_codes_drugs.txt) ## find corresponding CASE ID based on requistion ID
+				#echo /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt
+				cp /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt /xifin/result-data/$CASE_ID.txt 
+				awk -F '\t' -v ID=$ID '$1 == ID {print $0}' $1 >> Amend_record.txt
+				sed -i "/$ID/d" $1 ## remove processed sample from request file
+				status=1
+			else
+				status=0
+			fi
+=======
 			CASE_ID=$(awk -F"\t" -v ID=$ID '$1 == ID {print $4}' /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/sample_codes_drugs.txt) ## find corresponding CASE ID based on requistion ID
 			#echo /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt
 			cp /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt /xifin/result-data/$CASE_ID.txt 
 			awk -F '\t' -v ID=$ID '$1 == ID {print $0}' $1 >> Amend_record.txt
 			sed -i "/$ID/d" $1 ## remove processed sample from request file
+>>>>>>> 0ec6852893d2bfdec6e7412e599b0c354e126003
 		else
 			echo cond4:Check
 			echo [`date`] $TYPE of $ID has been update. Please check! | tee -a  Amend_log.txt | mail -s "Pleas check $ID" yifei.wan@admerahealth.com
@@ -112,11 +165,25 @@ do
 	else
 		echo [`date`] Cannot find any run folder including $ID | tee -a Amend_log.txt | mail -s "Cannot find $ID" yifei.wan@admerahealth.com zhuosheng.gu@admerahealth.com ## generate log file and send remindering e-mail 
 	fi
+<<<<<<< HEAD
+
+# Final e-mail
+	if [[ $TYPE == *"edication"* || $TYPE == *"ICD"* ]] && [[ $status == 1 ]]
+	then
+		echo [`date`] The content: $TYPE of $ID from $run_index has been updated! $MESSAGE $TYPE\". | tee -a Amend_log.txt | mail -s "Pleas resign $ID" yifei.wan@admerahealth.com zhuosheng.gu@admerahealth.com
+		echo [`date`] $TYPE of $ID from $run_index has been updated and $ID has been sent to sign. | mail -s "Amending: $ID" yifei.wan@admerahealth.com frances.ramos@admerahealth.com shadae.waiters@admerahealth.com ## send reminder to client care team 
+	elif [[ $status == 0 ]]
+	then
+		echo Please check DDI file for $ID in $run_index! | tee -a Amend_log.txt |  mail -s "Please check DDI" yifei.wan@admerahealth.com
+	fi
+
+=======
 	if [[ $TYPE == *"edication"* || $TYPE == *"ICD"* ]]
 	then
 		echo [`date`] The content: $TYPE of $ID from $run_index has been updated! $MESSAGE $TYPE\". | tee -a Amend_log.txt | mail -s "Pleas resign $ID" yifei.wan@admerahealth.com zhuosheng.gu@admerahealth.com
 		echo [`date`] $TYPE of $ID from $run_index has been updated and $ID has been sent to sign. | mail -s "Amending: $ID" yifei.wan@admerahealth.com frances.ramos@admerahealth.com shadae.waiters@admerahealth.com ## send reminder to client care team 
 	fi
+>>>>>>> 0ec6852893d2bfdec6e7412e599b0c354e126003
 	unset runfolder
 	unset TYPE
 done
