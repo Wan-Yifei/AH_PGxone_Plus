@@ -105,6 +105,9 @@ DDI_check=/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/PGxOn
 			cp /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt /xifin/result-data/$CASE_ID.txt 
 			awk -F '\t' -v ID=$ID '$1 == ID {print $0}' $1 >> Amend_record.txt
 			sed -i "/$ID/d" $1 ## remove processed sample from request file
+<<<<<<< HEAD
+>>>>>>> 0ec6852893d2bfdec6e7412e599b0c354e126003
+=======
 >>>>>>> 0ec6852893d2bfdec6e7412e599b0c354e126003
 		elif [[ "$TYPE" == *"edication"* ]]
 		then
@@ -166,6 +169,7 @@ DDI_check=/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/PGxOn
 		echo [`date`] Cannot find any run folder including $ID | tee -a Amend_log.txt | mail -s "Cannot find $ID" yifei.wan@admerahealth.com zhuosheng.gu@admerahealth.com ## generate log file and send remindering e-mail 
 	fi
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 # Final e-mail
 	if [[ $TYPE == *"edication"* || $TYPE == *"ICD"* ]] && [[ $status == 1 ]]
@@ -177,6 +181,13 @@ DDI_check=/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/PGxOn
 		echo Please check DDI file for $ID in $run_index! | tee -a Amend_log.txt |  mail -s "Please check DDI" yifei.wan@admerahealth.com
 	fi
 
+=======
+	if [[ $TYPE == *"edication"* || $TYPE == *"ICD"* ]]
+	then
+		echo [`date`] The content: $TYPE of $ID from $run_index has been updated! $MESSAGE $TYPE\". | tee -a Amend_log.txt | mail -s "Pleas resign $ID" yifei.wan@admerahealth.com zhuosheng.gu@admerahealth.com
+		echo [`date`] $TYPE of $ID from $run_index has been updated and $ID has been sent to sign. | mail -s "Amending: $ID" yifei.wan@admerahealth.com frances.ramos@admerahealth.com shadae.waiters@admerahealth.com ## send reminder to client care team 
+	fi
+>>>>>>> 0ec6852893d2bfdec6e7412e599b0c354e126003
 =======
 	if [[ $TYPE == *"edication"* || $TYPE == *"ICD"* ]]
 	then
