@@ -10,10 +10,6 @@ min_depth=20
 min_qual = 35
 min_freq = 0.02
 max_freq = 0.90
-vcf_file = sys.argv[1]
-File = open(vcf_file,'r')
-vcf = VCFReader(File)
-output = open(vcf_file.replace("_eff_clinvar_dbnsfp.vcf",".anno.txt"), 'w')
 
 general_header = ["CHROM", "POS", "ID", "REF", "ALT"]
 CLN_header = ["CLNACC", "CLNSIG","CLNSRC","CLNSRCID","CLNDBN","CLNDSDB","CLNDSDBID"]
@@ -65,25 +61,7 @@ Comments='''
 ##INFO=<ID=OncoGxKB_id,Number=A,Type=String,Description="ID of the variant at Admera's OncoGxKB database (https://agis.admerahealth.com/OncoGxKB)">
 '''
 
-user_file = open("/home/pengfei.yu/API_user.txt","r")
-user_info = user_file.read().split("\n")[0]
-username = user_info.split("\t")[0]
-password = user_info.split("\t")[1]
-headers = {
-  'Accept': 'application/json'
-}
-request = Request('https://agis.admerahealth.com/OncoGxKB/default/user/jwt?username=%s&password=%s'%(username,password), headers=headers)
-data = urlopen(request).read()
-TOKEN = json.loads(data)["token"]
 
-headers2 = {
-  'Accept': 'application/json',
-  'Authorization':'Bearer %s'%TOKEN
-}
-##########################################
-request = Request("https://agis.admerahealth.com/OncoGxKB/api/api/Variant", headers=headers2)
-response_body = urlopen(request).read()
-request_variant_list = json.loads(response_body)
 
 
 
@@ -94,7 +72,7 @@ def getInfo(Dict, key):
         return Dict[key]
     else:
         return "."
-def MutationsFromVCF(sample, output):
+def MutationsFromVCF(sample, output, request_variant_list):
     '''  extract actionable mutations from VCF '''
     mutations={}
     pathogenic_mutations=[]
@@ -168,8 +146,47 @@ def MutationsFromVCF(sample, output):
         mutations[mutation] = mutation_eff
     return mutations,pathogenic_mutations
 
-print >>output, Comments.strip()
-print >>output, header_line+"\tOncoGxKB_id"
-point_result, patho_result = MutationsFromVCF(vcf, output)
-output.close()
-File.close()
+def main():
+    ## Receive VCF from argument 
+    vcf_file = sys.argv[1]
+
+    ## Log in OncoGxKB
+    user_file = open("/home/pengfei.yu/API_user.txt","r")
+    user_info = user_file.read().split("\n")[0]
+    username = user_info.split("\t")[0]
+    password = user_info.split("\t")[1]
+    headers = {
+      'Accept': 'application/json'
+    }
+    request = Request('https://agis.admerahealth.com/OncoGxKB/default/user/jwt?username=%s&password=%s'%(username,password), headers=headers)
+    data = urlopen(request).read()
+    TOKEN = json.loads(data)["token"]
+
+    headers2 = {
+      'Accept': 'application/json',
+      'Authorization':'Bearer %s'%TOKEN
+    }
+    
+    ## Request OncoGxKB
+    request = Request("https://agis.admerahealth.com/OncoGxKB/api/api/Variant", headers=headers2)
+    response_body = urlopen(request).read()
+    request_variant_list = json.loads(response_body)
+
+    ## Output results
+    with open(vcf_file,"r") as File:
+        vcf = VCFReader(File)
+        output = open(vcf_file.replace("_eff_clinvar_dbnsfp.vcf",".anno.txt"), 'w')
+        print >>output, Comments.strip()
+        print >>output, header_line+"\tOncoGxKB_id"
+        point_result, patho_result = MutationsFromVCF(vcf, output, request_variant_list)
+        output.close()
+        File.close()
+ 
+##################################################################################################
+##################################################################################################
+
+# Run script
+
+if __name__ == '__main__':
+    main()
+
