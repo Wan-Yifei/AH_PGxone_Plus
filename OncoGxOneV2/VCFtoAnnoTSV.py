@@ -1,7 +1,3 @@
-#To do: Question- when value doesn't exit, how to handle.
-#To do: If AF has two values, use which one?
-
-
 ##################################################################################################
 # 2/20/2019    Basic version 0.0.1
 #
@@ -20,6 +16,12 @@
 #
 # **Output file**
 # %ID.anno.txt
+##################################################################################################
+# 2/21/2019 Basic version 0.0.2
+#
+# Feat:
+# 1. Pass when feature doesn't exit;
+# 2. Try to filter TOPMED and CAF when ref larger than (1 - population frequency).
 ##################################################################################################
 
 import sys, subprocess, argparse, os, re, json
@@ -104,11 +106,20 @@ def MutationsFromVCF(sample, output, request_variant_list, pop_freq):
 	## Filter AF, CAF, TOPMED:
 		try:
 			flag_AF = AF_filter(v, pop_freq)
-			flag_CAF = CAF_filter(v, pop_freq)
-			flag_TOPMED = TOPMED_filter(v, pop_freq)
-			if not(all([flag_AF, flag_CAF, flag_TOPMED])): continue
 		except:
-			continue
+			flag_AF = True
+		try:
+			flag_CAF = CAF_filter(v, pop_freq)
+		except:
+			flag_CAF = True
+		try:
+			flag_TOPMED = TOPMED_filter(v, pop_freq)
+		except:
+			flag_TOPMED = True
+
+		#print [flag_AF, flag_CAF, flag_TOPMED]
+		#print not(all([flag_AF, flag_CAF, flag_TOPMED]))
+		if not(all([flag_AF, flag_CAF, flag_TOPMED])): continue
 
 		if set(['AD', 'AF']) < set(v.samples[0].keys()) and 'DP' not in v.samples[0].keys():
 			depth = sum(v.samples[0]['AD'])  #MuTect2
@@ -193,15 +204,15 @@ def MutationsFromVCF(sample, output, request_variant_list, pop_freq):
 ##################################################################################################
 
 def AF_filter(variant, pop_freq):
-	keys = [key for key in variant.__dict__['INFO'].keys() if '_AF' in key]
-	#print '1.%s'%bool(keys)
+	keys = [key for key in variant.__dict__['INFO'].keys() if '_AF' in key and 'AFR' not in key]
 	if bool(keys):
-		flag_test = [float(variant.__dict__['INFO'][key][0]) for key in keys]
+		#print variant.__dict__['ID']
+		#flag_test = [(key, len(variant.__dict__['INFO'][key])) for key in keys]
 		#print flag_test
-		flag_AF = all([bool(float(variant.__dict__['INFO'][key][0]) > pop_freq) for key in keys])
+		## All AF values should be less than population frequency
+		flag_AF = all([bool(float(variant.__dict__['INFO'][key][0]) < pop_freq) for key in keys])
 	else:
-		flag_AF = bool(keys)
-	#print '2.%s'%flag_AF
+		flag_AF = True
 	return flag_AF
 
 ##################################################################################################
@@ -215,11 +226,15 @@ def AF_filter(variant, pop_freq):
 ##################################################################################################
 
 def CAF_filter(variant, pop_freq):
-	if variant.__dict__['INFO']['CAF'].split(',')[1].replace('.', "").isdigit():
-		flag_CAF = bool(float(variant.__dict__['INFO']['CAF'].split(',')[1]) > pop_freq)
+	if variant.__dict__['INFO']['CAF'].split(',')[0].replace('.', "").isdigit():
+		flag_CAF = bool(float(variant.__dict__['INFO']['CAF'].split(',')[0]) > 1 - pop_freq)
+		#print variant.__dict__['ID']
+		#print variant.__dict__['INFO']['CAF'].split(',')[0]
+		#print flag_CAF
 	else:
-		flag_CAF = False
-	#print variant.__dict__['INFO']['CAF'].split(',')[1]
+		flag_CAF = True 
+	#print variant.__dict__['ID']
+	#print variant.__dict__['INFO']['CAF'].split(',')[0]
 	#print flag_CAF
 	return flag_CAF
 
@@ -234,11 +249,11 @@ def CAF_filter(variant, pop_freq):
 ##################################################################################################
 
 def TOPMED_filter(variant, pop_freq):
-	if variant.__dict__['INFO']['TOPMED'].split(',')[1].replace('.', "").isdigit():
-		flag_TOPMED = bool(float(variant.__dict__['INFO']['TOPMED'].split(',')[1]) > pop_freq)
+	if variant.__dict__['INFO']['TOPMED'].split(',')[0].replace('.', "").isdigit():
+		flag_TOPMED = bool(float(variant.__dict__['INFO']['TOPMED'].split(',')[0]) > 1 - pop_freq)
 	else:
-		flag_TOPMED = False
-	#print variant.__dict__['INFO']['TOPMED'].split(',')[1]
+		flag_TOPMED = True 
+	#print variant.__dict__['INFO']['TOPMED'].split(',')
 	#print flag_TOPMED
 	return flag_TOPMED
 
@@ -294,6 +309,6 @@ if __name__ == '__main__':
 	min_qual = 35
 	min_freq = 0.02
 	max_freq = 0.90
-	pop_freq = 0.002
+	pop_freq = 0.001
 	main()
 
