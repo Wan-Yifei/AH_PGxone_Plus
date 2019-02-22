@@ -1,3 +1,5 @@
+#To do: rs ID and COSMIC ID check
+
 ##################################################################################################
 # 2/20/2019    Basic version 0.0.1
 #
@@ -22,6 +24,12 @@
 # Feat:
 # 1. Pass when feature doesn't exit;
 # 2. Try to filter TOPMED and CAF when ref larger than (1 - population frequency).
+##################################################################################################
+# 2/22/2019 Basic version 0.0.3
+# 
+# Feat:
+# 1. Check rs ID and COSMIC ID;
+# 2. Update pop_freq as 0.002.
 ##################################################################################################
 
 import sys, subprocess, argparse, os, re, json
@@ -116,10 +124,17 @@ def MutationsFromVCF(sample, output, request_variant_list, pop_freq):
 			flag_TOPMED = TOPMED_filter(v, pop_freq)
 		except:
 			flag_TOPMED = True
+		flag_COSMIC = COSMIC_filter(v)
+
+	## Test block 
+		#print '%s, %s'%(v.__dict__['CHROM'], v.__dict__['POS'])
+		#print '%s, %s, %s, %s'%(flag_AF, flag_CAF, flag_TOPMED, flag_COSMIC)
+		#print not(all([flag_AF, flag_CAF, flag_TOPMED, flag_COSMIC]))
 
 		#print [flag_AF, flag_CAF, flag_TOPMED]
 		#print not(all([flag_AF, flag_CAF, flag_TOPMED]))
-		if not(all([flag_AF, flag_CAF, flag_TOPMED])): continue
+		## merge and judge all flags
+		if not(all([flag_AF, flag_CAF, flag_TOPMED, flag_COSMIC])): continue
 
 		if set(['AD', 'AF']) < set(v.samples[0].keys()) and 'DP' not in v.samples[0].keys():
 			depth = sum(v.samples[0]['AD'])  #MuTect2
@@ -257,6 +272,27 @@ def TOPMED_filter(variant, pop_freq):
 	#print flag_TOPMED
 	return flag_TOPMED
 
+##################################################################################################
+# Check the rs ID and COSMIC:
+#
+# If an allele has rs ID, it also is required a COSMIC ID or it should be removed.
+#
+# Input:
+# 1. variant: a line from Record object (an iteration);
+#
+# Output: a boolean flag for ID.
+##################################################################################################
+
+def COSMIC_filter(variant):
+	#print variant.__dict__['ID'].split(';')[-1]
+	#print variant.__dict__['ID']
+	if 'rs' in variant.__dict__['ID']:
+		flag_COSMIC = 'dbNSFP_COSMIC_ID' in  variant.__dict__['INFO']
+		#print flag_COSMIC
+	else:
+		flag_COSMIC = True 
+	#print flag_COSMIC
+	return flag_COSMIC
 
 ##################################################################################################
 # Main function
@@ -305,10 +341,10 @@ def main():
 # Run script
 
 if __name__ == '__main__':
-	min_depth=20
+	min_depth= 20
 	min_qual = 35
 	min_freq = 0.02
 	max_freq = 0.90
-	pop_freq = 0.001
+	pop_freq = 0.002
 	main()
 
