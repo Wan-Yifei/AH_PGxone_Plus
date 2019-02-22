@@ -45,6 +45,10 @@
 # Check PGxOneV3_Drug_List_not_covered_for_DDI.txt after run PGx_One_Scripts.sh to ensure that all
 # drugs are covered.
 # ===================================================================================================
+# 02/21/2019	Beta version 0.1.4
+# Feat:
+# Update the pathway of PGxOne_Scripts.sh
+# ===================================================================================================
 
 set -e
 ## message for Lab director
@@ -85,7 +89,7 @@ DDI_check=/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/PGxOn
 		then
 			echo cond1:Both
 			python3 PGx_report_amend.py $runfolder $ID "$TYPE" -M "$MED" -I "$ICD"
-			bash /home/yifei.wan/AH_PGxOne_Plus/PGx_Run/PGxOne_Scripts.sh $runfolder
+			bash /home/yifei.wan/AH_Project/PGx_Run/PGxOne_Scripts.sh $runfolder
 			DDI_count=$(wc -l $DDI_check | cut -d " " -f -1)
 			if [[ $DDI_count < 2 ]]
 			then
@@ -102,7 +106,7 @@ DDI_check=/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/PGxOn
 		then
 			echo cond2:Med
 			python3 PGx_report_amend.py $runfolder $ID "$TYPE" -M "$MED"
-			bash /home/yifei.wan/AH_PGxOne_Plus/PGx_Run/PGxOne_Scripts.sh $runfolder
+			bash /home/yifei.wan/AH_Project/PGx_Run/PGxOne_Scripts.sh $runfolder
 			DDI_count=$(wc -l $DDI_check | cut -d " " -f -1)
 			if [[ $DDI_count < 2 ]]
 			then
@@ -119,7 +123,7 @@ DDI_check=/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/PGxOn
 		then
 			echo cond3:ICD
 			python3 PGx_report_amend.py $runfolder $ID "$TYPE" -I "$ICD"
-			bash /home/yifei.wan/AH_PGxOne_Plus/PGx_Run/PGxOne_Scripts.sh $runfolder
+			bash /home/yifei.wan/AH_Project/PGx_Run/PGxOne_Scripts.sh $runfolder
 			DDI_count=$(wc -l $DDI_check | cut -d " " -f -1)
 			if [[ $DDI_count < 2 ]]
 			then
