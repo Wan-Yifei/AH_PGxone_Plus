@@ -29,6 +29,11 @@
 # 1. Check rs ID and COSMIC ID;
 # 2. Update pop_freq as 0.002.
 ##################################################################################################
+# 2/23/2019 Basic version 0.0.4
+# 
+# Fix:
+# Finding "_AF" failed. Apply str.endswith() to find the "AF" at the end of string.
+##################################################################################################
 
 import sys, subprocess, argparse, os, re, json
 sys.path.append("/home/pengfei.yu/OncoGxOne/pipeline")
@@ -217,7 +222,7 @@ def MutationsFromVCF(sample, output, request_variant_list, pop_freq):
 ##################################################################################################
 
 def AF_filter(variant, pop_freq):
-	keys = [key for key in variant.__dict__['INFO'].keys() if '_AF' in key and 'AFR' not in key]
+	keys = [key for key in variant.__dict__['INFO'].keys() if key.endswith("_AF")]
 	if bool(keys):
 		#print variant.__dict__['ID']
 		#flag_test = [(key, len(variant.__dict__['INFO'][key])) for key in keys]
