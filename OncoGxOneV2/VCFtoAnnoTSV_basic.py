@@ -32,7 +32,7 @@
 # 2/23/2019 Basic version 0.0.4
 # 
 # Fix:
-# Finding "_AF" failed. Apply str.endswith() to find the "AF" at the end of string.
+# Finding "_AF" failed. Apply str.endswith() to find keys ending with "AF".
 ##################################################################################################
 
 import sys, subprocess, argparse, os, re, json
