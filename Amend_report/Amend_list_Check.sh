@@ -49,13 +49,18 @@
 # Feat:
 # Update the pathway of PGxOne_Scripts.sh
 # ===================================================================================================
+# 02/22/2019	Beta version 0.1.5
+# Feat:
+# 1. Remove the trailing space from file to avoid find() command returning NA;
+# 2. Add * to ID when remove line form Amend_request file.
+# ===================================================================================================
 
 set -e
 ## message for Lab director
 MESSAGE="Please resign with \"Update"
 
 ## Read amend requirement from require list
-sed 's/"//g' $1 | awk -F '\t' 'BEGIN {OFS = ";"} {if($1~/A-*/){print $1,$2,$3,$4}}' | while IFS=';' read ID TYPE ICD MED 
+sed 's/"//g' $1 | sed 's/ \t/\t/g' | awk -F '\t' 'BEGIN {OFS = ";"} {if($1~/A-*/){print $1,$2,$3,$4}}' | while IFS=';' read ID TYPE ICD MED 
 do
 ## Find run folder based on ID
 	find /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/ -name "$ID*.vcf" | while read path
@@ -97,7 +102,7 @@ DDI_check=/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/PGxOn
 				#echo /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt
 				cp /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt /xifin/result-data/$CASE_ID.txt 
 				awk -F '\t' -v ID=$ID '$1 == ID {print $0}' $1 >> Amend_record.txt
-				sed -i "/$ID/d" $1 ## remove processed sample from request file
+				sed -i "/$ID*/d" $1 ## remove processed sample from request file
 				status=1
 			else
 				status=0
@@ -114,7 +119,7 @@ DDI_check=/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/PGxOn
 				#echo /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt
 				cp /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt /xifin/result-data/$CASE_ID.txt 
 				awk -F '\t' -v ID=$ID '$1 == ID {print $0}' $1 >> Amend_record.txt
-				sed -i "/$ID/d" $1 ## remove processed sample from request file
+				sed -i "/$ID*/d" $1 ## remove processed sample from request file
 				status=1
 			else
 				status=0
@@ -131,7 +136,7 @@ DDI_check=/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/PGxOn
 				#echo /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt
 				cp /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt /xifin/result-data/$CASE_ID.txt 
 				awk -F '\t' -v ID=$ID '$1 == ID {print $0}' $1 >> Amend_record.txt
-				sed -i "/$ID/d" $1 ## remove processed sample from request file
+				sed -i "/$ID*/d" $1 ## remove processed sample from request file
 				status=1
 			else
 				status=0
@@ -140,7 +145,7 @@ DDI_check=/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/PGxOn
 			echo cond4:Check
 			echo [`date`] $TYPE of $ID has been update. Please check! | tee -a  Amend_log.txt | mail -s "Pleas check $ID" yifei.wan@admerahealth.com
 			awk -F '\t' -v ID=$ID '$1 == ID {print $0}' $1 >> Amend_record.txt
-			sed -i "/$ID/d" $1 ## remove processed sample from request file
+			sed -i "/$ID*/d" $1 ## remove processed sample from request file
 		fi
 	else
 		echo [`date`] Cannot find any run folder including $ID | tee -a Amend_log.txt | mail -s "Cannot find $ID" yifei.wan@admerahealth.com zhuosheng.gu@admerahealth.com ## generate log file and send remindering e-mail 
