@@ -1,5 +1,3 @@
-#To do: rs ID and COSMIC ID check
-
 ##################################################################################################
 # 2/20/2019    Basic version 0.0.1
 #
@@ -333,7 +331,6 @@ def main():
 		print >>output, header_line+"\tOncoGxKB_id"
 		point_result, patho_result = MutationsFromVCF(vcf, output, request_variant_list, pop_freq)
 		output.close()
-		File.close()
  
 ##################################################################################################
 ##################################################################################################
