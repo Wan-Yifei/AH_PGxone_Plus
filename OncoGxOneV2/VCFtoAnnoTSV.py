@@ -6,6 +6,7 @@
 # VCFtoAnnoTSV.py
 # Filter the vcf to txt for OncoGxV2.
 #
+# Contribution:
 # @author: Dr. Cai Chen
 # @maintain: Yifei Wan
 #
@@ -30,6 +31,11 @@
 # Feat:
 # 1. Check rs ID and COSMIC ID;
 # 2. Update pop_freq as 0.002.
+##################################################################################################
+# 2/24/2019 Basic version 0.1.0
+#
+# Feat:
+# 1. Update the function of COSMIC_filter(): consider effect of mutation.
 ##################################################################################################
 
 import sys, subprocess, argparse, os, re, json
@@ -284,14 +290,18 @@ def TOPMED_filter(variant, pop_freq):
 ##################################################################################################
 
 def COSMIC_filter(variant):
+	SNP_effect = ["missense_variant","stop_lost","stop_gained","splice_acceptor_variant","splice_donor_variant","frameshift_variant","inframe_insertion","inframe_deletion","disruptive_inframe_insertion","disruptive_inframe_deletion"]
 	#print variant.__dict__['ID'].split(';')[-1]
-	#print variant.__dict__['ID']
-	if 'rs' in variant.__dict__['ID']:
-		flag_COSMIC = 'dbNSFP_COSMIC_ID' in  variant.__dict__['INFO']
-		#print flag_COSMIC
-	else:
+	print 'ID%s'%variant.__dict__['ID']
+	if 'COSM' in variant.__dict__['ID']:
 		flag_COSMIC = True 
-	#print flag_COSMIC
+		print '1. %s'%flag_COSMIC
+	elif 'rs' in variant.__dict__['ID']:
+		flag_COSMIC = False
+	else:
+		print variant.__dict__['INFO']['EFF'].split('(')[0]
+		flag_COSMIC = variant.__dict__['INFO']['EFF'].split('(')[0] in SNP_effect
+	print '2. %s'%flag_COSMIC
 	return flag_COSMIC
 
 ##################################################################################################
