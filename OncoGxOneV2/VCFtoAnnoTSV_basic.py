@@ -40,6 +40,12 @@
 # Feat:
 # 1. Update the function of COSMIC_filter(): consider effect of mutation.
 ##################################################################################################
+# 2/25/2019 Basic version 0.2.0
+# 
+# Feat:
+# 1. Update conditions of COSMIC_filter();
+# 2. Redirect the output: output the mutation having COSMIC and RS to the review txt file.
+##################################################################################################
 
 import sys, subprocess, argparse, os, re, json
 sys.path.append("/home/pengfei.yu/OncoGxOne/pipeline")
@@ -112,7 +118,7 @@ def getInfo(Dict, key):
 	else:
 		return "."
 
-def MutationsFromVCF(sample, output, request_variant_list, pop_freq):
+def MutationsFromVCF(sample, output, review_output, request_variant_list, pop_freq):
 	'''  extract actionable mutations from VCF '''
 	mutations={}
 	pathogenic_mutations=[]
@@ -138,12 +144,14 @@ def MutationsFromVCF(sample, output, request_variant_list, pop_freq):
 	## Test block 
 		#print '%s, %s'%(v.__dict__['CHROM'], v.__dict__['POS'])
 		#print '%s, %s, %s, %s'%(flag_AF, flag_CAF, flag_TOPMED, flag_COSMIC)
+		#print v.__dict__['ID']
 		#print not(all([flag_AF, flag_CAF, flag_TOPMED, flag_COSMIC]))
-
-		#print [flag_AF, flag_CAF, flag_TOPMED]
+		#print [flag_AF, flag_CAF, flag_TOPMED, flag_COSMIC]
 		#print not(all([flag_AF, flag_CAF, flag_TOPMED]))
+
 		## merge and judge all flags
 		if not(all([flag_AF, flag_CAF, flag_TOPMED, flag_COSMIC])): continue
+		#print v.__dict__['ID']
 
 		if set(['AD', 'AF']) < set(v.samples[0].keys()) and 'DP' not in v.samples[0].keys():
 			depth = sum(v.samples[0]['AD'])  #MuTect2
@@ -168,6 +176,7 @@ def MutationsFromVCF(sample, output, request_variant_list, pop_freq):
 		if depth<min_depth: continue
 		if freq > max_freq: continue
 		if freq < min_freq: continue
+		#print v.__dict__['ID']
 		GT_convert = {'0/1':'HET', "1/1":'HOM', '0/0': "NONE"}
 		general_info = [getattr(v, h) for h in general_header]
 		CLN_info = [getInfo(v.INFO, h) for h in CLN_header]
@@ -187,8 +196,15 @@ def MutationsFromVCF(sample, output, request_variant_list, pop_freq):
 			OncoGxKB_id = mutation_eff.Mutation_Name.replace("-"," / ")
 		else:
 			OncoGxKB_id = "."
-		print >>output, result_line+"\t"+OncoGxKB_id
-		if 'CLNACC' not in v.INFO and 'EFF' not in v.INFO: continue		  
+
+		## Output review required mutations
+		if flag_COSMIC == 'Review':
+			print >> review_output, result_line + '\t' + OncoGxKB_id
+		else:
+			print >>output, result_line+"\t"+OncoGxKB_id
+
+		if 'CLNACC' not in v.INFO and 'EFF' not in v.INFO: continue  
+		#print v.__dict__['ID']
 		if 'CLNACC' in v.INFO:
 			variant=v.INFO["CLNACC"].split(",")[0].split(".")[0]
 			try:
@@ -200,8 +216,10 @@ def MutationsFromVCF(sample, output, request_variant_list, pop_freq):
 		else:
 			if mutation_eff.AA_change==None: continue
 			mutation=mutation_eff.Mutation_Name
+		#print v.__dict__['ID']
 
 		if mutation.endswith("="): continue  # bypass synonymous mutation
+		#print v.__dict__['ID']
 		Gene = mutation_eff.Gene_Name
 		if len(v.REF)!=len(v.ALT) and Gene in ['EGFR','ERBB2']:  # check deletion or insertion on EGFR exons
 			Gene = mutation_eff.Gene_Name
@@ -294,16 +312,23 @@ def TOPMED_filter(variant, pop_freq):
 
 def COSMIC_filter(variant):
 	SNP_effect = ["missense_variant","stop_lost","stop_gained","splice_acceptor_variant","splice_donor_variant","frameshift_variant","inframe_insertion","inframe_deletion","disruptive_inframe_insertion","disruptive_inframe_deletion"]
+	SNP_eff_plus = SNP_effect + ["synonymous_variant"]
+	#print SNP_eff_plus
 	#print variant.__dict__['ID'].split(';')[-1]
 	#print 'ID%s'%variant.__dict__['ID']
-	if 'COSM' in variant.__dict__['ID']:
+	#print variant.__dict__['INFO']['EFF'].split('(')[0]
+	if 'COSM' in variant.__dict__['ID'] and 'rs' not in variant.__dict__['ID'] and variant.__dict__['INFO']['EFF'].split('(')[0] in SNP_eff_plus:
 		flag_COSMIC = True 
 		#print '1. %s'%flag_COSMIC
-	elif 'rs' in variant.__dict__['ID']:
+	elif 'rs' in variant.__dict__['ID'] and 'COSM' not in variant.__dict__['ID']:
 		flag_COSMIC = False
-	else:
+	elif 'COSM' not in variant.__dict__['ID'] and 'rs' not in variant.__dict__['ID']:
 		#print variant.__dict__['INFO']['EFF'].split('(')[0]
 		flag_COSMIC = variant.__dict__['INFO']['EFF'].split('(')[0] in SNP_effect
+	elif 'COSM' in variant.__dict__['ID'] and 'rs' in variant.__dict__['ID']:
+		flag_COSMIC = 'Review'
+	else:
+		flag_cosMIS = False
 	#print '2. %s'%flag_COSMIC
 	return flag_COSMIC
 
@@ -314,6 +339,8 @@ def COSMIC_filter(variant):
 def main():
 	## Receive VCF from argument 
 	vcf_file = sys.argv[1]
+	output_path = vcf_file.replace("_eff_clinvar_dbnsfp.vcf", ".anno.txt") 
+	review_path = vcf_file.replace("_eff_clinvar_dbnsfp.vcf", ".review.txt")
 
 	## Log in OncoGxKB
 	user_file = open("/home/pengfei.yu/API_user.txt","r")
@@ -338,14 +365,11 @@ def main():
 	request_variant_list = json.loads(response_body)
 
 	## Output results
-	with open(vcf_file,"r") as File:
+	with open(vcf_file,"r") as File, open(output_path, 'w') as output, open(review_path, 'w') as review_output:
 		vcf = VCFReader(File)
-		output_path = vcf_file.replace("_eff_clinvar_dbnsfp.vcf",".anno.txt") 
-		output = open(output_path, 'w')
 		print >>output, Comments.strip()
 		print >>output, header_line+"\tOncoGxKB_id"
-		point_result, patho_result = MutationsFromVCF(vcf, output, request_variant_list, pop_freq)
-		output.close()
+		point_result, patho_result = MutationsFromVCF(vcf, output, review_output, request_variant_list, pop_freq)
  
 ##################################################################################################
 ##################################################################################################
