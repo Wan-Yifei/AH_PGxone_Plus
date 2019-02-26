@@ -46,6 +46,11 @@
 # 1. Update conditions of COSMIC_filter();
 # 2. Redirect the output: output the mutation having COSMIC and RS to the review txt file.
 ##################################################################################################
+# 2/26/2019 Basic version 0.2.1
+# 
+# Feat:
+# 1. Update the COSMIC_filter: When RS and COSMIC exist, check the effect of mutation.
+##################################################################################################
 
 import sys, subprocess, argparse, os, re, json
 sys.path.append("/home/pengfei.yu/OncoGxOne/pipeline")
@@ -311,6 +316,7 @@ def TOPMED_filter(variant, pop_freq):
 ##################################################################################################
 
 def COSMIC_filter(variant):
+	## effect of mutations
 	SNP_effect = ["missense_variant","stop_lost","stop_gained","splice_acceptor_variant","splice_donor_variant","frameshift_variant","inframe_insertion","inframe_deletion","disruptive_inframe_insertion","disruptive_inframe_deletion"]
 	SNP_eff_plus = SNP_effect + ["synonymous_variant"]
 	#print SNP_eff_plus
@@ -325,10 +331,11 @@ def COSMIC_filter(variant):
 	elif 'COSM' not in variant.__dict__['ID'] and 'rs' not in variant.__dict__['ID']:
 		#print variant.__dict__['INFO']['EFF'].split('(')[0]
 		flag_COSMIC = variant.__dict__['INFO']['EFF'].split('(')[0] in SNP_effect
-	elif 'COSM' in variant.__dict__['ID'] and 'rs' in variant.__dict__['ID']:
+	elif 'COSM' in variant.__dict__['ID'] and 'rs' in variant.__dict__['ID'] and variant.__dict__['INFO']['EFF'].split('(')[0] in SNP_eff_plus:
 		flag_COSMIC = 'Review'
+		#print variant.__dict__['INFO']['EFF'].split('(')[0] in SNP_eff_plus
 	else:
-		flag_cosMIS = False
+		flag_COSMIC = False
 	#print '2. %s'%flag_COSMIC
 	return flag_COSMIC
 
