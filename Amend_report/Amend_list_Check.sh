@@ -54,6 +54,10 @@
 # 1. Remove the trailing space from file to avoid find() command returning NA;
 # 2. Add * to ID when remove line form Amend_request file.
 # ===================================================================================================
+# 03/01/2019	Beta version 0.1.5
+# Feat:
+# Update the path of PGx_report_amend.py as complete path.
+# ===================================================================================================
 
 set -e
 ## message for Lab director
@@ -93,7 +97,7 @@ DDI_check=/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/PGxOn
 		if [[ $TYPE == *"edication"* && $TYPE == *"ICD"* ]]
 		then
 			echo cond1:Both
-			python3 PGx_report_amend.py $runfolder $ID "$TYPE" -M "$MED" -I "$ICD"
+			python3 /home/yifei.wan/AH_Project/Amend_report/PGx_report_amend.py $runfolder $ID "$TYPE" -M "$MED" -I "$ICD"
 			bash /home/yifei.wan/AH_Project/PGx_Run/PGxOne_Scripts.sh $runfolder
 			DDI_count=$(wc -l $DDI_check | cut -d " " -f -1)
 			if [[ $DDI_count < 2 ]]
@@ -110,7 +114,7 @@ DDI_check=/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/PGxOn
 		elif [[ "$TYPE" == *"edication"* ]]
 		then
 			echo cond2:Med
-			python3 PGx_report_amend.py $runfolder $ID "$TYPE" -M "$MED"
+			python3 /home/yifei.wan/AH_Project/Amend_report/PGx_report_amend.py $runfolder $ID "$TYPE" -M "$MED"
 			bash /home/yifei.wan/AH_Project/PGx_Run/PGxOne_Scripts.sh $runfolder
 			DDI_count=$(wc -l $DDI_check | cut -d " " -f -1)
 			if [[ $DDI_count < 2 ]]
@@ -127,7 +131,7 @@ DDI_check=/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/PGxOn
 		elif [[ $TYPE == *"ICD"* ]]
 		then
 			echo cond3:ICD
-			python3 PGx_report_amend.py $runfolder $ID "$TYPE" -I "$ICD"
+			python3 /home/yifei.wan/AH_Project/Amend_report/PGx_report_amend.py $runfolder $ID "$TYPE" -I "$ICD"
 			bash /home/yifei.wan/AH_Project/PGx_Run/PGxOne_Scripts.sh $runfolder
 			DDI_count=$(wc -l $DDI_check | cut -d " " -f -1)
 			if [[ $DDI_count < 2 ]]
