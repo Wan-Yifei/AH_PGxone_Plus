@@ -54,7 +54,7 @@
 # 1. Remove the trailing space from file to avoid find() command returning NA;
 # 2. Add * to ID when remove line form Amend_request file.
 # ===================================================================================================
-# 03/01/2019	Beta version 0.1.5
+# 03/01/2019	Beta version 0.1.6
 # Feat:
 # Update the path of PGx_report_amend.py as complete path.
 # ===================================================================================================
