@@ -1,3 +1,8 @@
+## To do: Add API to cosmic filter
+## To do: Add Indel check to cosmic filter
+## To do: Use stricter pop_fre for mutation with cosmic & rs & synonymous
+## To do: Add a timer for API!!!!!!!
+
 ##################################################################################################
 # 2/20/2019    Basic version 0.0.1
 #
@@ -132,6 +137,7 @@ def MutationsFromVCF(sample, output, review_output, request_variant_list, pop_fr
 		if v.QUAL<min_qual: continue
 
 	## Filter AF, CAF, TOPMED:
+		Indel_Check(v)
 		try:
 			flag_AF = AF_filter(v, pop_freq)
 		except:
@@ -147,6 +153,7 @@ def MutationsFromVCF(sample, output, review_output, request_variant_list, pop_fr
 		flag_COSMIC = COSMIC_filter(v)
 
 	## Test block 
+		#print v.__dict__
 		#print '%s, %s'%(v.__dict__['CHROM'], v.__dict__['POS'])
 		#print '%s, %s, %s, %s'%(flag_AF, flag_CAF, flag_TOPMED, flag_COSMIC)
 		#print v.__dict__['ID']
@@ -338,6 +345,56 @@ def COSMIC_filter(variant):
 		flag_COSMIC = False
 	#print '2. %s'%flag_COSMIC
 	return flag_COSMIC
+
+
+##################################################################################################
+# COSMIC websit API
+# Visit COSMIC websit to check the real-time data of mutation.
+#
+# Input:
+# 1. variant object.
+##################################################################################################
+
+def COSMIC_API(variant):
+	
+	COSMIC_ID = variant.__dict__['ID'].split(';')[-1]
+	 
+	## url of COSMIC website
+	url = 'https://cancer.sanger.ac.uk/cosmic/mutation/overview?id='
+	## pass ID to url
+	url_ID = '%s%s'%(url, COSMIC_ID)
+	## generte request
+	request = urllib2.Request(url_req)
+	## open url
+	response = urllib2.urlopen(request)
+	page = response.read()
+
+	if 'flagged as a SNP' or 'was not found in our database' in page:
+		flag_online = False
+	else:
+		flag_online = True
+	return flag_online
+	
+
+
+##################################################################################################
+# Indle check
+# Check is this mutation an indel.
+# 
+# Input:
+# 1. variant object.
+##################################################################################################
+
+def Indel_Check(variant):
+	## bases on reference
+	ref = variant.__dict__['REF']
+	alt = variant.__dict__['ALT']
+
+	print ref
+	print alt
+
+
+
 
 ##################################################################################################
 # Main function
