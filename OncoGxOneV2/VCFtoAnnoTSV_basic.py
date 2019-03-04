@@ -1,7 +1,3 @@
-## To do: Add API to cosmic filter
-## To do: Add Indel check to cosmic filter
-## To do: Use stricter pop_fre for mutation with cosmic & rs & synonymous
-## To do: Add a timer for API!!!!!!!
 
 ##################################################################################################
 # 2/20/2019    Basic version 0.0.1
@@ -21,7 +17,9 @@
 # %ID_eff_clinvar_dbnsfp.vcf
 #
 # **Output file**
-# %ID.anno.txt
+# 1. %ID.anno.txt
+# 2. review.txt
+# 3. Indel_HLA.txt
 ##################################################################################################
 # 2/21/2019 Basic version 0.0.2
 #
@@ -56,14 +54,22 @@
 # Feat:
 # 1. Update the COSMIC_filter: When RS and COSMIC exist, check the effect of mutation.
 ##################################################################################################
+# 3/4/2019 Basic version 0.3.0
+#
+# Feat:
+# 1. COSMIC API: query COSMIC website;
+# 2. Add Indel check to cosmic filter;
+# 3. Apply stricter pop_fre for mutation with cosmic & rs & synonymous;
+# 4. Add HLA filter;
+# 5. Move indel and HLA alternates to Indel_HLA.txt
+##################################################################################################
 
-import sys, subprocess, argparse, os, re, json
+import sys, subprocess, argparse, os, re, json, time
 sys.path.append("/home/pengfei.yu/OncoGxOne/pipeline")
 from VCFmodules.VCFutility import *
 from VCFmodules.SnpEff import *
 from ClinAccToMutationName import *
-from urllib2 import Request, urlopen
-
+from urllib2 import Request, urlopen, HTTPError
 
 general_header = ["CHROM", "POS", "ID", "REF", "ALT"]
 CLN_header = ["CLNACC", "CLNSIG","CLNSRC","CLNSRCID","CLNDBN","CLNDSDB","CLNDSDBID"]
@@ -128,7 +134,7 @@ def getInfo(Dict, key):
 	else:
 		return "."
 
-def MutationsFromVCF(sample, output, review_output, request_variant_list, pop_freq):
+def MutationsFromVCF(sample, output, review_output, Indel_HLA_output, request_variant_list, pop_freq):
 	'''  extract actionable mutations from VCF '''
 	mutations={}
 	pathogenic_mutations=[]
@@ -158,7 +164,7 @@ def MutationsFromVCF(sample, output, review_output, request_variant_list, pop_fr
 		#print '%s, %s, %s, %s'%(flag_AF, flag_CAF, flag_TOPMED, flag_COSMIC)
 		#print v.__dict__['ID']
 		#print not(all([flag_AF, flag_CAF, flag_TOPMED, flag_COSMIC]))
-		#print [flag_AF, flag_CAF, flag_TOPMED, flag_COSMIC]
+		print [flag_AF, flag_CAF, flag_TOPMED, flag_COSMIC]
 		#print not(all([flag_AF, flag_CAF, flag_TOPMED]))
 
 		## merge and judge all flags
@@ -210,8 +216,11 @@ def MutationsFromVCF(sample, output, review_output, request_variant_list, pop_fr
 			OncoGxKB_id = "."
 
 		## Output review required mutations
+		print flag_COSMIC
 		if flag_COSMIC == 'Review':
 			print >> review_output, result_line + '\t' + OncoGxKB_id
+		elif flag_COSMIC == 'Indel_HLA':
+			print >> Indel_HLA_output, result_line + '\t' + OncoGxKB_id
 		else:
 			print >>output, result_line+"\t"+OncoGxKB_id
 
@@ -339,43 +348,64 @@ def COSMIC_filter(variant):
 		#print variant.__dict__['INFO']['EFF'].split('(')[0]
 		flag_COSMIC = variant.__dict__['INFO']['EFF'].split('(')[0] in SNP_effect
 	elif 'COSM' in variant.__dict__['ID'] and 'rs' in variant.__dict__['ID'] and variant.__dict__['INFO']['EFF'].split('(')[0] in SNP_eff_plus:
-		flag_COSMIC = 'Review'
-		#print variant.__dict__['INFO']['EFF'].split('(')[0] in SNP_eff_plus
+		flag_online = Call_COSMIC_API(variant)
+		print flag_online
+		if flag_online:
+			flag_indel = Indel_Check(variant)
+			flag_HLA = HLA_Check(variant)
+			flag_COSMIC = Flags_merge(variant, flag_indel, flag_HLA, 0.0004)
+		else:
+			flag_COSMIC = False
 	else:
 		flag_COSMIC = False
 	#print '2. %s'%flag_COSMIC
 	return flag_COSMIC
-
 
 ##################################################################################################
 # COSMIC websit API
 # Visit COSMIC websit to check the real-time data of mutation.
 #
 # Input:
-# 1. variant object.
+# 1. variant object;
+# 2. hold: sleep time to avoid visiting website too frequent.
 ##################################################################################################
 
 def COSMIC_API(variant):
-	
-	COSMIC_ID = variant.__dict__['ID'].split(';')[-1]
-	 
+	COSMIC_ID = variant.__dict__['ID'].split(';')[-1].replace('COSM', '')
+	print COSMIC_ID
 	## url of COSMIC website
 	url = 'https://cancer.sanger.ac.uk/cosmic/mutation/overview?id='
 	## pass ID to url
 	url_ID = '%s%s'%(url, COSMIC_ID)
+	#print url_ID
 	## generte request
-	request = urllib2.Request(url_req)
+	request = Request(url_ID)
 	## open url
-	response = urllib2.urlopen(request)
+	response = urlopen(request)
 	page = response.read()
 
-	if 'flagged as a SNP' or 'was not found in our database' in page:
+	if 'flagged as a SNP' in page or  'was not found in our database' in page:
 		flag_online = False
 	else:
 		flag_online = True
+	print 'API %s'%flag_online
 	return flag_online
-	
 
+
+##################################################################################################
+# Call COSMIC API
+#
+# Call API with rate limit
+##################################################################################################
+
+def Call_COSMIC_API(variant):
+	try:
+		return COSMIC_API(variant)
+	except HTTPError, e:
+		if e.code == 429:
+			time.sleep(5)
+			return Call_COSMIC_API(variant)
+		raise
 
 ##################################################################################################
 # Indle check
@@ -390,11 +420,84 @@ def Indel_Check(variant):
 	ref = variant.__dict__['REF']
 	alt = variant.__dict__['ALT']
 
-	print ref
-	print alt
+	## is this an idel?
+	if len(ref) != len(alt):
+		flag_indel = True
+	else:
+		flag_indel = False
+	return flag_indel
 
 
+##################################################################################################
+# HLA check
+# Check is this mutation a HLA.
+#
+# Input:
+# 1. variant object.
+##################################################################################################
 
+def HLA_Check(variant):
+
+	try:
+		if 'HLA' in variant.__dict__['INFO']['LOF']:
+			flag_HLA = True
+		else:
+			flag_HLA = False
+	except:
+		flag_HLA = False
+	return flag_HLA
+
+
+##################################################################################################
+# Apply stricter threshold
+#
+# Input:
+# 1. variant object;
+# 2. strict threshold: strict frequence.
+##################################################################################################
+
+def Strict_filter(variant, strict_freq):
+	try:
+		flag_AF = AF_filter(variant, strict_freq)
+	except:
+		flag_AF = True
+	try:
+		flag_CAF = CAF_filter(variant, strict_freq)
+	except:
+		flag_CAF = True
+	try:
+		flag_TOPMED = TOPMED_filter(variant, strict_freq)
+	except:
+		flag_TOPMED = True
+	if flag_AF and flag_CAF and flag_TOPMED:
+		flag_strict = True
+	else:
+		flag_strict = False
+
+##################################################################################################
+# Flags merge: COSMIC_API, Indle check and HLA check based on flag_COSMIC
+# merge flags and double check frequence with stricter threshold
+#
+# Input:
+# 1. flag_indel;
+# 2. flag_HLA;
+# 3. strict_freq;
+# 4. variant.
+##################################################################################################
+
+def Flags_merge(variant, flag_indel, flag_HLA, strict_freq):
+	if flag_indel:
+		flags_merge = 'Indel_HLA'
+	else:
+		if 'synonymous' in variant.__dict__['INFO']['EFF'].split('(')[0]:
+			flags_merge = Strict_filter(variant, strict_freq)
+		else:
+			if flag_HLA:
+				flags_merge = 'Indel_HLA'
+			else:
+				flags_merge = 'Review'
+
+	return flags_merge
 
 ##################################################################################################
 # Main function
@@ -405,6 +508,7 @@ def main():
 	vcf_file = sys.argv[1]
 	output_path = vcf_file.replace("_eff_clinvar_dbnsfp.vcf", ".anno.txt") 
 	review_path = vcf_file.replace("_eff_clinvar_dbnsfp.vcf", ".review.txt")
+	Indel_HLA_path = vcf_file.replace("_eff_clinvar_dbnsfp.vcf", ".Indel_HLA.txt")
 
 	## Log in OncoGxKB
 	user_file = open("/home/pengfei.yu/API_user.txt","r")
@@ -429,16 +533,18 @@ def main():
 	request_variant_list = json.loads(response_body)
 
 	## Output results
-	with open(vcf_file,"r") as File, open(output_path, 'w') as output, open(review_path, 'w') as review_output:
+	with open(vcf_file,"r") as File, open(output_path, 'w') as output, open(review_path, 'w') as review_output, open(Indel_HLA_path, 'w') as Indel_HLA_output:
 		vcf = VCFReader(File)
 		print >>output, Comments.strip()
 		print >>output, header_line+"\tOncoGxKB_id"
-		point_result, patho_result = MutationsFromVCF(vcf, output, review_output, request_variant_list, pop_freq)
+		point_result, patho_result = MutationsFromVCF(vcf, output, review_output, Indel_HLA_output, request_variant_list, pop_freq)
  
 ##################################################################################################
 ##################################################################################################
 
 # Run script
+
+start = time.time()
 
 if __name__ == '__main__':
 	min_depth= 20
@@ -448,3 +554,5 @@ if __name__ == '__main__':
 	pop_freq = 0.002
 	main()
 
+end = time.time()
+print 'Time elapsed %8.2f'%(end - start)
