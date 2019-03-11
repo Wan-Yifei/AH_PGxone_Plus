@@ -1,4 +1,4 @@
-
+#To do: Fix logic structure of COSMIC_filter #1
 ##################################################################################################
 # 2/20/2019    Basic version 0.0.1
 #
@@ -156,19 +156,20 @@ def MutationsFromVCF(sample, output, review_output, Indel_HLA_output, request_va
 			flag_TOPMED = TOPMED_filter(v, pop_freq)
 		except:
 			flag_TOPMED = True
+		if not(all([flag_AF, flag_CAF, flag_TOPMED])): continue
 		flag_COSMIC = COSMIC_filter(v)
 
 	## Test block 
 		#print v.__dict__
 		#print '%s, %s'%(v.__dict__['CHROM'], v.__dict__['POS'])
 		#print '%s, %s, %s, %s'%(flag_AF, flag_CAF, flag_TOPMED, flag_COSMIC)
-		#print v.__dict__['ID']
+		print v.__dict__['ID']
 		#print not(all([flag_AF, flag_CAF, flag_TOPMED, flag_COSMIC]))
 		print [flag_AF, flag_CAF, flag_TOPMED, flag_COSMIC]
 		#print not(all([flag_AF, flag_CAF, flag_TOPMED]))
 
 		## merge and judge all flags
-		if not(all([flag_AF, flag_CAF, flag_TOPMED, flag_COSMIC])): continue
+		if flag_COSMIC == False: continue
 		#print v.__dict__['ID']
 
 		if set(['AD', 'AF']) < set(v.samples[0].keys()) and 'DP' not in v.samples[0].keys():
@@ -341,21 +342,27 @@ def COSMIC_filter(variant):
 	#print variant.__dict__['INFO']['EFF'].split('(')[0]
 	if 'COSM' in variant.__dict__['ID'] and 'rs' not in variant.__dict__['ID'] and variant.__dict__['INFO']['EFF'].split('(')[0] in SNP_eff_plus:
 		flag_COSMIC = True 
-		#print '1. %s'%flag_COSMIC
+		print '1. %s'%flag_COSMIC
 	elif 'rs' in variant.__dict__['ID'] and 'COSM' not in variant.__dict__['ID']:
 		flag_COSMIC = False
+		print '2. %s'%flag_COSMIC
 	elif 'COSM' not in variant.__dict__['ID'] and 'rs' not in variant.__dict__['ID']:
 		#print variant.__dict__['INFO']['EFF'].split('(')[0]
 		flag_COSMIC = variant.__dict__['INFO']['EFF'].split('(')[0] in SNP_effect
+		print '3. %s'%flag_COSMIC
 	elif 'COSM' in variant.__dict__['ID'] and 'rs' in variant.__dict__['ID'] and variant.__dict__['INFO']['EFF'].split('(')[0] in SNP_eff_plus:
 		flag_online = Call_COSMIC_API(variant)
-		print flag_online
+		print '4. API %s'%flag_online
 		if flag_online:
 			flag_indel = Indel_Check(variant)
 			flag_HLA = HLA_Check(variant)
 			flag_COSMIC = Flags_merge(variant, flag_indel, flag_HLA, 0.0004)
+			print 'indel %s'%flag_indel
+			print 'HLA %s'%flag_HLA
+			print '4. merge %s'%flag_COSMIC
 		else:
 			flag_COSMIC = False
+			print '5. No match %s'%flag_COSMIC
 	else:
 		flag_COSMIC = False
 	#print '2. %s'%flag_COSMIC
@@ -473,6 +480,7 @@ def Strict_filter(variant, strict_freq):
 		flag_strict = True
 	else:
 		flag_strict = False
+	return flag_strict
 
 ##################################################################################################
 # Flags merge: COSMIC_API, Indle check and HLA check based on flag_COSMIC
