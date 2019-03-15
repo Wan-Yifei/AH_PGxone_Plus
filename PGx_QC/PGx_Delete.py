@@ -31,9 +31,12 @@ n = 1 ## Deleted sample count
 for sample in CaseID_Del:
 	if sample in ReqID_CaseID.keys():
 		CaseID = ReqID_CaseID[sample]
-		os.remove('{}/LIS/{}.txt'.format(Run_folder,CaseID))
-		print('{}.Action file: {}/{} has been deleted!'.format(n, sample, CaseID))
-		n += 1
+		try:
+			os.remove('{}/LIS/{}.txt'.format(Run_folder,CaseID))
+			print('{}.Action file: {}/{} has been deleted!'.format(n, sample, CaseID))
+			n += 1
+		except:
+			print('{}/{} cannot found!'.format(Run_folder, CaseID))
 
 for sample in ReqID_CaseID.keys():
 	if sample.startswith('RM'):
