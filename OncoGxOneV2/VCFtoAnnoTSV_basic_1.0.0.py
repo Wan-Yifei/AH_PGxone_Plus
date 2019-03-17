@@ -1,3 +1,6 @@
+#To do: fix logical flags.
+
+
 ##################################################################################################
 # 2/20/2019    Basic version 0.0.1
 #
@@ -68,7 +71,7 @@
 # 1. Check flag before cal API.
 ##################################################################################################
 
-import sys, subprocess, argparse, os, re, json, time
+import sys, subprocess, argparse, os, re, json, time, gc, copy, inspect
 sys.path.append("/home/pengfei.yu/OncoGxOne/pipeline")
 from VCFmodules.VCFutility import *
 from VCFmodules.SnpEff import *
@@ -184,12 +187,32 @@ def MutationsFromVCF(sample, output, Indel_HLA_output, request_variant_list, pop
 ########################          COSMIC mutation decesion tree          #########################
 ##################################################################################################
 
+		try:
+			print sys.getrefcount(alternate)
+			print gc.get_referrers(alternate)
+		except:
+			pass
+		print '\n'
+		print '\n'
+		print '\n'
+
 		## Initial an instant of Alternate class 
 		alternate = Alternate(v, pop_freq, strict_freq, strict_freq2, strict_freq3)
 		## 1.
-		print alternate.AF
-		print alternate.CAF
-		print alternate.TOPMED
+		print id(alternate)
+		alternate.Show()
+		#print 'AF %s'%(alternate.AF)
+		#print 'CAF %s'%(alternate.CAF)
+		#print 'TOPMED %s'%(alternate.TOPMED)
+		#print 'Indel %s'%(alternate.Indel)
+		#print 'HLA %s'%(alternate.HLA)
+		#print 'effect %s'%(alternate.effect)
+		#print alternate.output
+		#print alternate.AF
+		#print alternate.CAF
+		#print alternate.TOPMED
+		print 'all-judge: {}'.format(all([alternate.AF, alternate.CAF, alternate.TOPMED]))
+		print 'all_judge2: {}'.format(not(alternate.AF and alternate.CAF and alternate.TOPMED))
 		if not(alternate.AF and alternate.CAF and alternate.TOPMED): continue
 		## 2.0
 		if 'COSM' in alternate.ID:
@@ -305,9 +328,10 @@ def MutationsFromVCF(sample, output, Indel_HLA_output, request_variant_list, pop
 class Alternate():
 	''' Initial extract content from VCFmodule object '''
 	def __init__(self, variable, pop_freq, strict_freq, strict_freq2, strict_freq3):
-		self.var = variable
-		self.ID = variable.__dict__['ID']
-
+		print dir(variable)
+		self.dict = copy.deepcopy(variable.__dict__)
+		self.var = copy.deepcopy(variable)
+		self.ID = copy.deepcopy(variable.ID)
 		self.effect = None 
 		self.AF = None
 		self.CAF = None
@@ -318,18 +342,38 @@ class Alternate():
 		self.str_eff = None 
 		self.str_eff_er = None
 		self.output = None 
-
-		self.EFF_Check() 
+		print 'ID {}'.format(self.ID)
+		print id(self.ID)
+		print id(variable.ID)
+		print id(self.dict)
+		print id(variable.__dict__)
+		print 'CAF1    {}'.format(self.CAF)
+		print 'TOPMED1 {}'.format(self.TOPMED)
+		print '\n'
+		self.EFF_Check()
 		self.AF_filter(pop_freq)
 		self.CAF_filter(pop_freq)
 		self.TOPMED_filter(pop_freq)
 		self.Indel_Check()
-		self.HLA_Check() 
+		self.HLA_Check()
+		self.Output_direct()
 		self.strict = self.Strict_filter(strict_freq)
 		self.str_eff = self.Strict_filter(strict_freq2) 
 		self.str_eff_er = self.Strict_filter(strict_freq3)
-		self.Output_direct() 
+#		self.__del__()
 
+	def Show(self):
+		print 'Show CAF         {}'.format(self.CAF)
+		print 'Show ID_CAF      {}'.format(id(self.CAF))
+		print 'Show TOPMED      {}'.format(self.TOPMED)
+		print 'Show ID_TOPMED   {}'.format(id(self.TOPMED))
+		print 'Show Indel       {}'.format(self.Indel)
+		print 'Show HLA         {}'.format(self.HLA)
+
+	def __del__(self):
+		del self.CAF
+		del self.TOPMED
+		print 'delete'
 
 ##################################################################################################
 
@@ -348,8 +392,8 @@ class Alternate():
 		'''
 		keys = [key for key in self.var.__dict__['INFO'].keys() if key.endswith("_AF")]
 		if bool(keys):
-			## All AF values should be less than population frequency
 			flag_AF = all([bool(float(self.var.__dict__['INFO'][key][0]) < pop_freq) for key in keys])
+			#print 'judge_AF: {}'.format(flag_AF)
 		else:
 			flag_AF = True
 		self.AF = flag_AF
@@ -373,7 +417,8 @@ class Alternate():
 		except:
 			flag_CAF = True
 		self.CAF = flag_CAF
-
+		print 'object CAF1    {}'.format(id(self.CAF))
+		return flag_CAF
 
 ##################################################################################################
 
@@ -390,10 +435,12 @@ class Alternate():
 		'''
 		try:
 			if self.var.__dict__['INFO']['TOPMED'].split(',')[0].replace('.', "").isdigit():
-				flag_TOPMED = bool(float(self.var.__dict__['INFO']['TOPMED'].split(',')[0]) > 1 - pop_freq)
+				flag_TOPMED = bool(float(self.var.__dict__['INFO']['TOPMED'].split(',')[0]) > float(1 - pop_freq))
 		except:
 			flag_TOPMED = True
-		self.TOPMED =  flag_TOPMED
+		self.TOPMED = flag_TOPMED
+		print 'object TOPMED   {}'.format(id(self.TOPMED))
+		return flag_TOPMED
 
 ##################################################################################################
 
@@ -455,7 +502,7 @@ class Alternate():
 			flag_eff = True
 		else:
 			flag_eff = False 
-		self.effect = flag_eff
+		self.effect =  flag_eff
 
 ##################################################################################################
 
@@ -477,7 +524,7 @@ class Alternate():
 			flag_indel = True
 		else:
 			flag_indel = False
-		self.Indel =  flag_indel
+		self.Indel = flag_indel
 
 ##################################################################################################
 
@@ -538,80 +585,7 @@ class Alternate():
 			flag_strict = False
 		return flag_strict
 
-##################################################################################################
 
-# ## Check the rs ID and COSMIC ##
-
-# If an allele has rs ID, it also is required a COSMIC ID or it should be removed.
-
-# Input:
-# 1. variant: a line from Record object (an iteration);
-
-# Output: a boolean flag for ID.
-##################################################################################################
-
-def COSMIC_filter(variant):
-	## effect of mutations
-	SNP_effect = ["missense_variant","stop_lost","stop_gained","splice_acceptor_variant","splice_donor_variant","frameshift_variant","inframe_insertion","inframe_deletion","disruptive_inframe_insertion","disruptive_inframe_deletion"]
-	SNP_eff_plus = SNP_effect + ["synonymous_variant"]
-	#print SNP_eff_plus
-	#print variant.__dict__['ID'].split(';')[-1]
-	#print 'ID%s'%variant.__dict__['ID']
-	#print variant.__dict__['INFO']['EFF'].split('(')[0]
-	if 'COSM' in variant.__dict__['ID'] and 'rs' not in variant.__dict__['ID'] and variant.__dict__['INFO']['EFF'].split('(')[0] in SNP_eff_plus:
-		flag_COSMIC = True 
-		print '1. %s'%flag_COSMIC
-	elif 'rs' in variant.__dict__['ID'] and 'COSM' not in variant.__dict__['ID']:
-		flag_COSMIC = False
-		print '2. %s'%flag_COSMIC
-	elif 'COSM' not in variant.__dict__['ID'] and 'rs' not in variant.__dict__['ID']:
-		#print variant.__dict__['INFO']['EFF'].split('(')[0]
-		flag_COSMIC = variant.__dict__['INFO']['EFF'].split('(')[0] in SNP_effect
-		print '3. %s'%flag_COSMIC
-	elif 'COSM' in variant.__dict__['ID'] and 'rs' in variant.__dict__['ID'] and variant.__dict__['INFO']['EFF'].split('(')[0] in SNP_eff_plus:
-		flag_online = Call_COSMIC_API(variant)
-		print '4. API %s'%flag_online
-		if flag_online:
-			flag_indel = Indel_Check(variant)
-			flag_HLA = HLA_Check(variant)
-			flag_COSMIC = Flags_merge(variant, flag_indel, flag_HLA, 0.0004)
-			print 'indel %s'%flag_indel
-			print 'HLA %s'%flag_HLA
-			print '4. merge %s'%flag_COSMIC
-		else:
-			flag_COSMIC = False
-			print '5. No match %s'%flag_COSMIC
-	else:
-		flag_COSMIC = False
-	#print '2. %s'%flag_COSMIC
-	return flag_COSMIC
-
-
-
-##################################################################################################
-# Flags merge: COSMIC_API, Indle check and HLA check based on flag_COSMIC
-# merge flags and double check frequence with stricter threshold
-#
-# Input:
-# 1. flag_indel;
-# 2. flag_HLA;
-# 3. strict_freq;
-# 4. variant.
-##################################################################################################
-
-def Flags_merge(variant, flag_indel, flag_HLA, strict_freq):
-	if flag_indel:
-		flags_merge = 'Indel_HLA'
-	else:
-		if 'synonymous' in variant.__dict__['INFO']['EFF'].split('(')[0]:
-			flags_merge = Strict_filter(variant, strict_freq)
-		else:
-			if flag_HLA:
-				flags_merge = 'Indel_HLA'
-			else:
-				flags_merge = 'Review'
-
-	return flags_merge
 
 ##################################################################################################
 # Main function
