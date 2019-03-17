@@ -73,6 +73,11 @@
 # 2. Encapsulate the alternate from VCF as a class;
 # 3. Cancel the review.txt.
 ##################################################################################################
+# 3/17/2019 Basic version 1.0.1
+#
+# Fix:
+# 1. Fix the typo of attribute.
+##################################################################################################
 
 import sys, subprocess, argparse, os, re, json, time, copy 
 sys.path.append("/home/pengfei.yu/OncoGxOne/pipeline")
@@ -247,7 +252,7 @@ def MutationsFromVCF(sample, output, Indel_HLA_output, request_variant_list, pop
 						flag_output = alternate.Output_direct() 
 				else:
 					## 2.3.1.2
-					if not alternate.str_eff:
+					if not alternate.Strict_filter(strict_freq2):
 						continue
 					else:
 						flag_output = alternate.Output_direct()
