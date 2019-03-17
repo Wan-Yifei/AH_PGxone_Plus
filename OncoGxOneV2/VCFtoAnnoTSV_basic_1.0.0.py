@@ -1,6 +1,3 @@
-#To do: fix logical flags.
-
-
 ##################################################################################################
 # 2/20/2019    Basic version 0.0.1
 #
@@ -21,7 +18,6 @@
 # **Output file**
 # 1. %ID.anno.txt
 # 2. review.txt
-# 3. Indel_HLA.txt
 ##################################################################################################
 # 2/21/2019 Basic version 0.0.2
 #
@@ -70,8 +66,15 @@
 # Fix:
 # 1. Check flag before cal API.
 ##################################################################################################
+# 3/17/2019 Basic version 1.0.0
+#
+# Ref:
+# 1. Restructure the decesion tree for the somatic mutation;
+# 2. Encapsulate the alternate from VCF as a class;
+# 3. Cancel the review.txt.
+##################################################################################################
 
-import sys, subprocess, argparse, os, re, json, time, gc, copy, inspect
+import sys, subprocess, argparse, os, re, json, time, copy 
 sys.path.append("/home/pengfei.yu/OncoGxOne/pipeline")
 from VCFmodules.VCFutility import *
 from VCFmodules.SnpEff import *
@@ -187,33 +190,27 @@ def MutationsFromVCF(sample, output, Indel_HLA_output, request_variant_list, pop
 ########################          COSMIC mutation decesion tree          #########################
 ##################################################################################################
 
-		try:
-			print sys.getrefcount(alternate)
-			print gc.get_referrers(alternate)
-		except:
-			pass
-		print '\n'
-		print '\n'
-		print '\n'
-
 		## Initial an instant of Alternate class 
+		print '\n'
+		print '\n'
+		print '\n'
 		alternate = Alternate(v, pop_freq, strict_freq, strict_freq2, strict_freq3)
 		## 1.
-		print id(alternate)
-		alternate.Show()
+		print 'test AF %s'%(alternate.AF_filter(pop_freq))
+		print 'test CAF %s'%(alternate.CAF_filter(pop_freq))
+		print 'test TOPMED %s'%(alternate.TOPMED_filter(pop_freq))
+		#print id(alternate)
+		#alternate.Show()
 		#print 'AF %s'%(alternate.AF)
 		#print 'CAF %s'%(alternate.CAF)
 		#print 'TOPMED %s'%(alternate.TOPMED)
 		#print 'Indel %s'%(alternate.Indel)
 		#print 'HLA %s'%(alternate.HLA)
 		#print 'effect %s'%(alternate.effect)
-		#print alternate.output
-		#print alternate.AF
-		#print alternate.CAF
-		#print alternate.TOPMED
-		print 'all-judge: {}'.format(all([alternate.AF, alternate.CAF, alternate.TOPMED]))
-		print 'all_judge2: {}'.format(not(alternate.AF and alternate.CAF and alternate.TOPMED))
-		if not(alternate.AF and alternate.CAF and alternate.TOPMED): continue
+		#print not(all([alternate.AF_filter(pop_freq), alternate.CAF_filter(pop_freq), alternate.TOPMED_filter(pop_freq)]))
+		if not(all([alternate.AF_filter(pop_freq), alternate.CAF_filter(pop_freq), alternate.TOPMED_filter(pop_freq)])):
+			print 'continue'
+			continue
 		## 2.0
 		if 'COSM' in alternate.ID:
 			## 2.1
@@ -221,45 +218,45 @@ def MutationsFromVCF(sample, output, Indel_HLA_output, request_variant_list, pop
 			## 2.2
 			if 'rs' in alternate.ID:
 				## 2.2.1
-				if alternate.effect:
+				if alternate.Eff_Check():
 					## 2.2.1.1
-					if not alternate.strict:
+					if not alternate.Strict_filter(strict_freq):
 						continue
 					## 2.2.1.1.1
 					else:
-						flag_output = alternate.output 
+						flag_output = alternate.Output_direct() 
 				else:
 					## 2.2.1.2
-					if not alternate.str_eff:
+					if not alternate.Strict_filter(strict_freq2):
 						contine
 					else:
 						## 2.2.1.2.1
-						flag_output = alternate.output
+						flag_output = alternate.Output_direct()
 			else:
 				## 2.2.2
-				flag_output = alternate.output
+				flag_output = alternate.Output_direct()
 		else:
 			## 2.3
 			if 'rs' in alternate.ID:
 				## 2.3.1
-				if alternate.effect:
+				if alternate.Eff_Check():
 					## 2.3.1.1
-					if not alternate.str_eff_er:
+					if not alternate.Strict_filter(strict_freq3):
 						continue
 					else:
-						flag_output = alternate.output 
+						flag_output = alternate.Output_direct() 
 				else:
 					## 2.3.1.2
 					if not alternate.str_eff:
 						continue
 					else:
-						flag_output = alternate.output
+						flag_output = alternate.Output_direct()
 			else:
 				## 2.3.2
-				if alternate.effect:
+				if alternate.Eff_Check():
 					flag_output = 'Indel_HLA' 
 				else:
-					flag_output = alternate.output
+					flag_output = alternate.Output_direct()
 
 ##################################################################################################
 		#print v.__dict__['ID']
@@ -328,52 +325,9 @@ def MutationsFromVCF(sample, output, Indel_HLA_output, request_variant_list, pop
 class Alternate():
 	''' Initial extract content from VCFmodule object '''
 	def __init__(self, variable, pop_freq, strict_freq, strict_freq2, strict_freq3):
-		print dir(variable)
-		self.dict = copy.deepcopy(variable.__dict__)
+		#print dir(variable)
 		self.var = copy.deepcopy(variable)
 		self.ID = copy.deepcopy(variable.ID)
-		self.effect = None 
-		self.AF = None
-		self.CAF = None
-		self.TOPMED = None
-		self.Indel = None
-		self.HLA = None
-		self.strict = None
-		self.str_eff = None 
-		self.str_eff_er = None
-		self.output = None 
-		print 'ID {}'.format(self.ID)
-		print id(self.ID)
-		print id(variable.ID)
-		print id(self.dict)
-		print id(variable.__dict__)
-		print 'CAF1    {}'.format(self.CAF)
-		print 'TOPMED1 {}'.format(self.TOPMED)
-		print '\n'
-		self.EFF_Check()
-		self.AF_filter(pop_freq)
-		self.CAF_filter(pop_freq)
-		self.TOPMED_filter(pop_freq)
-		self.Indel_Check()
-		self.HLA_Check()
-		self.Output_direct()
-		self.strict = self.Strict_filter(strict_freq)
-		self.str_eff = self.Strict_filter(strict_freq2) 
-		self.str_eff_er = self.Strict_filter(strict_freq3)
-#		self.__del__()
-
-	def Show(self):
-		print 'Show CAF         {}'.format(self.CAF)
-		print 'Show ID_CAF      {}'.format(id(self.CAF))
-		print 'Show TOPMED      {}'.format(self.TOPMED)
-		print 'Show ID_TOPMED   {}'.format(id(self.TOPMED))
-		print 'Show Indel       {}'.format(self.Indel)
-		print 'Show HLA         {}'.format(self.HLA)
-
-	def __del__(self):
-		del self.CAF
-		del self.TOPMED
-		print 'delete'
 
 ##################################################################################################
 
@@ -385,7 +339,7 @@ class Alternate():
  be removed from output txt file.
 
  Input:
- 1. variable: a line from Record object (an iteration);
+ 1. self: a line from Record object (an iteration);
  2. pop_freq: the population frequence;
 
  Output: a boolean flag for AFs.
@@ -396,7 +350,8 @@ class Alternate():
 			#print 'judge_AF: {}'.format(flag_AF)
 		else:
 			flag_AF = True
-		self.AF = flag_AF
+		#self.AF = flag_AF
+		return flag_AF
 
 ##################################################################################################
 
@@ -406,7 +361,7 @@ class Alternate():
  ## Check the CAF values of each allele ##
 
  Input:
- 1. variable: a line from Record object (an iteration);
+ 1. self: a line from Record object (an iteration) which is initialed as an instant;
  2. pop_freq: the population frequence;
 
  Output: a boolean flag for CAF.
@@ -416,8 +371,8 @@ class Alternate():
 				flag_CAF = bool(float(self.var.__dict__['INFO']['CAF'].split(',')[0]) > 1 - pop_freq)
 		except:
 			flag_CAF = True
-		self.CAF = flag_CAF
-		print 'object CAF1    {}'.format(id(self.CAF))
+		#self.CAF = flag_CAF
+		#print 'object CAF1    {}'.format(id(self.CAF))
 		return flag_CAF
 
 ##################################################################################################
@@ -428,7 +383,7 @@ class Alternate():
 ## Check the TOPMED values of each allele ##
 
  Input:
- 1. variable: a line from Record object (an iteration);
+ 1. self: a line from Record object (an iteration) which is initialed as an instant;
  2. pop_freq: the population frequence;
 
  Output: a boolean flag for TOPMED.
@@ -438,8 +393,8 @@ class Alternate():
 				flag_TOPMED = bool(float(self.var.__dict__['INFO']['TOPMED'].split(',')[0]) > float(1 - pop_freq))
 		except:
 			flag_TOPMED = True
-		self.TOPMED = flag_TOPMED
-		print 'object TOPMED   {}'.format(id(self.TOPMED))
+		#self.TOPMED = flag_TOPMED
+		#print 'object TOPMED   {}'.format(id(self.TOPMED))
 		return flag_TOPMED
 
 ##################################################################################################
@@ -451,7 +406,7 @@ class Alternate():
  Visit COSMIC websit to check the real-time data of mutation.
 
  Input:
- 1. variable object;
+ 1. self instant;
  2. hold: sleep time to avoid visiting website too frequent.
 		'''
 		COSMIC_ID = self.ID.split(';')[-1].replace('COSM', '')
@@ -488,13 +443,13 @@ class Alternate():
 
 ##################################################################################################
 
-	def EFF_Check(self):
+	def Eff_Check(self):
 
 		'''
  ## Check the synonymous_variant ##
 
  Input:
- 1. variable: object
+ 1. self: instant. 
 		'''
 		#print self.var.__dict__['INFO']
 		effect = self.var.__dict__['INFO']['EFF']
@@ -502,7 +457,8 @@ class Alternate():
 			flag_eff = True
 		else:
 			flag_eff = False 
-		self.effect =  flag_eff
+		#self.effect =  flag_eff
+		return flag_eff
 
 ##################################################################################################
 
@@ -513,7 +469,7 @@ class Alternate():
  Check is this mutation an indel.
  
  Input:
- 1. variable: object
+ 1. self: instant. 
 		'''
 		## bases on reference
 		ref = self.var.__dict__['REF']
@@ -524,7 +480,8 @@ class Alternate():
 			flag_indel = True
 		else:
 			flag_indel = False
-		self.Indel = flag_indel
+		#self.Indel = flag_indel
+		return flag_indel
 
 ##################################################################################################
 
@@ -535,7 +492,7 @@ class Alternate():
  Check is this mutation a HLA.
 
  Input:
- 1. object.
+ 1. self: instant.
 		'''
 		try:
 			if 'HLA' in self.var.__dict__['INFO']['LOF']:
@@ -544,7 +501,8 @@ class Alternate():
 				flag_HLA = False
 		except:
 			flag_HLA = False
-		self.HLA = flag_HLA
+		#self.HLA = flag_HLA
+		return flag_HLA
 
 ##################################################################################################
 
@@ -554,11 +512,12 @@ class Alternate():
  ## Redirect the output ##
 		'''
 
-		if self.Indel or self.HLA:
+		if self.Indel_Check() or self.HLA_Check():
 			flag_output = 'Indel_HLA'
 		else:
 			flag_output = 'Action'
 		self.output = flag_output
+		return flag_output
 
 ##################################################################################################
 
@@ -568,7 +527,7 @@ class Alternate():
  ##  Apply stricter threshold ##
 
  Input:
- 1. variable object;
+ 1. self: instant;
  2. strict threshold: strict frequence.
 		'''
 		try:
