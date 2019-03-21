@@ -141,18 +141,21 @@ def Control_check():
 				control_CYP2D6[control] = 0
 			else:
 				control_CYP2D6[control] = 1
-			control_QC[control] = len([g_control for g_standard, g_control in zip(NA17244, control_genotype[control]) if g_standard != g_control])
+			#control_QC[control] = len([g_control for g_standard, g_control in zip(NA17244, control_genotype[control]) if g_standard != g_control])
+			control_QC[control] = [g_control for g_standard, g_control in zip(NA17244, control_genotype[control]) if g_standard != g_control]
 		if 'NA17281' in control:
 			if control_genotype[control][16] != '*5/*9':
 				control_CYP2D6[control] = 0
 			else:
 				control_CYP2D6[control] = 1
-			control_QC[control] = len([g_control for g_standard, g_control in zip(NA17281, control_genotype[control]) if g_standard != g_control])
+			#control_QC[control] = len([g_control for g_standard, g_control in zip(NA17281, control_genotype[control]) if g_standard != g_control])
+			control_QC[control] = [g_control for g_standard, g_control in zip(NA17244, control_genotype[control]) if g_standard != g_control]
 	print(Fore.RESET + '====================================================================')
 	print('Check genotype of controls:')
 	print('\n')
 	for control in control_QC:
-		if control_QC[control] > 3: print(Fore.RED + 'Warning: %s may failed!! Manual check required!!'%control)
+		print ('failed genes of {}: {}'.format(control, control_QC[control]))
+		if len(control_QC[control]) > 3: print(Fore.RED + 'Warning: %s may failed!! Manual check required!!'%control)
 		else: print(Fore.GREEN + '%s passed!'%control)
 		if control_CYP2D6[control] == 0: print(Fore.YELLOW + 'Warning: genotype of CYP2D6 {} of {} doesn\'t match SOP!'.format(control_genotype[control][16], control))
 	print('\n')
