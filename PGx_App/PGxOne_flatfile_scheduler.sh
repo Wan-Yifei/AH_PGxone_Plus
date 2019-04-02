@@ -22,6 +22,7 @@ then
 	echo folder: $date exists!
 else
 	echo folder: $date does not exists!
+	echo Create folder: $date
 	mkdir /admeraappflatfilesdev/$date
 fi
 
@@ -29,15 +30,16 @@ fi
 
 
 Move_flat() {
-	cp -v $ACTIONFOLDER/*.txt /admeraappflatfilesdev/
+	cp -v $ACTIONFOLDER/*.txt /admeraappflatfilesdev/$1
 }
 
 
 ## Run
 {
 	## try to move action files
-	Move_flat
+	Move_flat $date
 } || { ## sleep and try agian
+	echo Hold 5 seconds!
 	sleep 5
 	Move_flat
 }
