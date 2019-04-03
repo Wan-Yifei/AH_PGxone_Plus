@@ -11,11 +11,11 @@
 # ======================================================================
 # 04/03/2019	Basic version 0.0.2
 # Feat:
-# Redirct output and batch upload
+# Redirect output and batch upload
 #
 # 1. Replace mv to cp;
 # 2. Add batch uploading;
-# 3. Redirct standard output and error message to both console and file.
+# 3. Redirect standard output and error message to both console and file.
 # ======================================================================
 
 set -e
