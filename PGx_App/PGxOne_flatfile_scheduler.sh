@@ -61,7 +61,7 @@ Move_flat() {
 } || { ## sleep and try agian
 	echo Hold 5 seconds!
 	sleep 5
-	Move_flat
+	Move_flat $date
 }
 
 ## Clear the source folder:
