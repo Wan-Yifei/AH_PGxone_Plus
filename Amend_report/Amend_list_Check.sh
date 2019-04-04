@@ -62,6 +62,10 @@
 # Feat:
 # Update the path or record and log. Save both files to a fixed place as hidden files.
 # ===================================================================================================
+# 04/04/2019	Beta version 0.1.8
+# Feat:
+# Copy action files to the PGxOne_APP folder.
+# ===================================================================================================
 
 set -e
 ## message for Lab director
@@ -109,6 +113,7 @@ DDI_check=/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/PGxOn
 				CASE_ID=$(awk -F"\t" -v ID=$ID '$1 == ID {print $4}' /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/sample_codes_drugs.txt) ## find corresponding CASE ID based on requistion ID
 				#echo /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt
 				cp /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt /xifin/result-data/$CASE_ID.txt 
+				cp /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt /data/CLIA_Data/PGxOne_APP/$CASE_ID.txt 
 				awk -F '\t' -v ID=$ID '$1 == ID {print $0}' $1 >> /data/AmendReports/.Amend_record.txt
 				sed -i "/$ID*/d" $1 ## remove processed sample from request file
 				status=1
@@ -126,6 +131,7 @@ DDI_check=/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/PGxOn
 				CASE_ID=$(awk -F"\t" -v ID=$ID '$1 == ID {print $4}' /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/sample_codes_drugs.txt) ## find corresponding CASE ID based on requistion ID
 				#echo /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt
 				cp /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt /xifin/result-data/$CASE_ID.txt 
+				cp /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt /data/CLIA_Data/PGxOne_APP/$CASE_ID.txt 
 				awk -F '\t' -v ID=$ID '$1 == ID {print $0}' $1 >> /data/AmendReports/.Amend_record.txt
 				sed -i "/$ID*/d" $1 ## remove processed sample from request file
 				status=1
@@ -143,6 +149,7 @@ DDI_check=/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/PGxOn
 				CASE_ID=$(awk -F"\t" -v ID=$ID '$1 == ID {print $4}' /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/sample_codes_drugs.txt) ## find corresponding CASE ID based on requistion ID
 				#echo /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt
 				cp /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt /xifin/result-data/$CASE_ID.txt 
+				cp /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt /data/CLIA_Data/PGxOne_APP/$CASE_ID.txt 
 				awk -F '\t' -v ID=$ID '$1 == ID {print $0}' $1 >> /data/AmendReports/.Amend_record.txt
 				sed -i "/$ID*/d" $1 ## remove processed sample from request file
 				status=1
