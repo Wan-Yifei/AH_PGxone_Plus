@@ -27,7 +27,7 @@ BATCHUPLOAD='/xifin/result-data/'
 
 echo >> PGxOne_App_log.txt
 echo >> PGxOne_UPLOAD_log.txt
-cp -v $LISFOLDER/*.txt $APPFOLDER/ > >(tee -a PGxOne_APP_log.log) 2> >(tee -a PGxOne_APP_err.log >&2)
+cp -v $LISFOLDER/*.txt $APPFOLDER/ > >(tee -a /home/yifei.wan/AH_Project/PGx_App/PGxOne_APP_log.log) 2> >(tee -a /home/yifei.wan/AH_Project/PGx_App/PGxOne_APP_err.log >&2)
 read -p "Input any key to initial batch uploading:"
-cp -v $LISFOLDER/*.txt $BATCHUPLOAD/ > >(tee -a PGxOne_UPLOAD_log.txt) 2> >(tee -a PGxOne_UPLOAD_log.txt >&2)
+cp -v $LISFOLDER/*.txt $BATCHUPLOAD/ > >(tee -a /home/yifei.wan/AH_Project/PGx_App/PGxOne_UPLOAD_log.txt) 2> >(tee -a /home/yifei.wan/AH_Project/PGxOne_UPLOAD_log.txt >&2)
 
