@@ -19,6 +19,11 @@
 #
 # When input folder is empty, write a line of record and exit.
 # ========================================================================
+# 04/10/2019	Alpha version 0.0.1
+# Update target folder: admeraappflatfiles
+# 
+# Update the pathway to the production folder and upgrade to Alpha version.
+# ========================================================================
 
 set -e
 ACTIONFOLDER='/data/CLIA-Data/PGxOne_APP/'
@@ -35,20 +40,20 @@ date=$(date +%Y-%m-%d)
 
 ## Check wheter the date named output folder exists 
 
-if [ -d /admeraappflatfilesdev/$date ]
+if [ -d /admearappflatfiles/$date ]
 then
 	echo folder: $date exists!
 else
 	echo folder: $date does not exists!
 	echo Create folder: $date
-	mkdir /admeraappflatfilesdev/$date
+	mkdir /admearappflatfiles/$date
 fi
 
-## Move flat files to admeraappflatfilesdev folder 
+## Move flat files to admearappflatfiles folder 
 
 
 Move_flat() {
-	cp -v $ACTIONFOLDER/*.txt /admeraappflatfilesdev/$1 > >(tee -a /home/yifei.wan/yifei.wan/AH_Project/PGx_App/Bucket_log.txt) 2> >(tee -a /home/yifei.wan/yifei.wan/AH_Project/PGx_App/Bucket_err_log.txt >&2)
+	cp -v $ACTIONFOLDER/*.txt /admearappflatfiles/$1 > >(tee -a /home/yifei.wan/yifei.wan/AH_Project/PGx_App/Bucket_log.txt) 2> >(tee -a /home/yifei.wan/yifei.wan/AH_Project/PGx_App/Bucket_err_log.txt >&2)
 }
 
 
