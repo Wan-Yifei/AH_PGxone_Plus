@@ -40,20 +40,20 @@ date=$(date +%Y-%m-%d)
 
 ## Check wheter the date named output folder exists 
 
-if [ -d /admearappflatfiles/$date ]
+if [ -d /admeraappflatfiles/$date ]
 then
 	echo folder: $date exists!
 else
 	echo folder: $date does not exists!
 	echo Create folder: $date
-	mkdir /admearappflatfiles/$date
+	mkdir /admeraappflatfiles/$date
 fi
 
 ## Move flat files to admearappflatfiles folder 
 
 
 Move_flat() {
-	cp -v $ACTIONFOLDER/*.txt /admearappflatfiles/$1 > >(tee -a /home/yifei.wan/yifei.wan/AH_Project/PGx_App/Bucket_log.txt) 2> >(tee -a /home/yifei.wan/yifei.wan/AH_Project/PGx_App/Bucket_err_log.txt >&2)
+	cp -v $ACTIONFOLDER/*.txt /admeraappflatfiles/$1 > >(tee -a /home/yifei.wan/yifei.wan/AH_Project/PGx_App/Bucket_log.txt) 2> >(tee -a /home/yifei.wan/yifei.wan/AH_Project/PGx_App/Bucket_err_log.txt >&2)
 }
 
 
