@@ -56,15 +56,20 @@
 # ===================================================================================================
 # 03/01/2019	Beta version 0.1.6
 # Feat:
-# Update the path of PGx_report_amend.py as complete path.
+# 1. Update the path of PGx_report_amend.py as complete path.
 # ===================================================================================================
 # 03/13/2019	Beta version 0.1.7
 # Feat:
-# Update the path or record and log. Save both files to a fixed place as hidden files.
+# 1. Update the path or record and log. Save both files to a fixed place as hidden files.
 # ===================================================================================================
 # 04/04/2019	Beta version 0.1.8
 # Feat:
-# Copy action files to the PGxOne_APP folder.
+# 1. Copy action files to the PGxOne_APP folder.
+# ===================================================================================================
+# 04/12/2019	Beta version 0.2.0
+# Feat:
+# 1. Copy action files which are not amended medications or ICDs to APP folder and uploading folder;
+# 2. Edit the e-mail for cond4: others.
 # ===================================================================================================
 
 set -e
@@ -157,10 +162,14 @@ DDI_check=/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/PGxOn
 				status=0
 			fi
 		else
-			echo cond4:Check
-			echo [`date`] $TYPE of $ID has been update. Please check! | tee -a  /data/AmendReports/.Amend_log.txt | mail -s "Pleas check $ID" yifei.wan@admerahealth.com
+			echo cond4:Others
+			CASE_ID=$(awk -F"\t" -v ID=$ID '$1 == ID {print $4}' /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/sample_codes_drugs.txt) ## find corresponding CASE ID based on requistion ID
+			#echo /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt
+			cp /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt /xifin/result-data/$CASE_ID.txt 
+			cp /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt /data/CLIA-Data/PGxOne_APP/ 
 			awk -F '\t' -v ID=$ID '$1 == ID {print $0}' $1 >> /data/AmendReports/.Amend_record.txt
 			sed -i "/$ID*/d" $1 ## remove processed sample from request file
+			echo [`date`] The content: $TYPE of $ID from $run_index has been updated! $MESSAGE $TYPE\". | tee -a /data/AmendReports/.Amend_log.txt | mail -s "Pleas resign $ID" yifei.wan@admerahealth.com zhuosheng.gu@admerahealth.com
 		fi
 	else
 		echo [`date`] Cannot find any run folder including $ID | tee -a /data/AmendReports/.Amend_log.txt | mail -s "Cannot find $ID" yifei.wan@admerahealth.com zhuosheng.gu@admerahealth.com ## generate log file and send remindering e-mail 
