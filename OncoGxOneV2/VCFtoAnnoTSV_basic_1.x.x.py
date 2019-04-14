@@ -84,6 +84,12 @@
 # 1. Add the AC filter;
 # 2. Call AF check functioni only when it has at least 5 support cases.
 ##################################################################################################
+# 4/12/2019 Basic version 1.2.1
+#
+# Feat:
+# 1. Filter effect of mutation before the main decesion tree;
+# 2. Fix the logical flag of COSMIC_API.
+##################################################################################################
 
 import sys, subprocess, argparse, os, re, json, time, copy 
 sys.path.append("/home/pengfei.yu/OncoGxOne/pipeline")
@@ -196,6 +202,15 @@ def MutationsFromVCF(sample, output, Indel_HLA_output, request_variant_list, pop
 		if depth<min_depth: continue
 		if freq > max_freq: continue
 		if freq < min_freq: continue
+		SNP_effect = ["missense_variant","stop_lost","stop_gained","splice_acceptor_variant","splice_donor_variant","frameshift_variant","inframe_insertion","inframe_deletion",\
+		"disruptive_inframe_insertion","disruptive_inframe_deletion","synonymous_variant"]
+		#print v.__dict__['INFO']['GENE']
+		#print v.__dict__['INFO'].items()
+		#print dir(v)
+		#print v
+		#print v.CHROM
+		#print v.POS
+		if not v.__dict__['INFO']['EFF'].split('(')[0] in SNP_effect: continue
 
 ##################################################################################################
 ########################          COSMIC mutation decesion tree          #########################
@@ -215,7 +230,7 @@ def MutationsFromVCF(sample, output, Indel_HLA_output, request_variant_list, pop
 		## 2.0
 		if 'COSM' in alternate.ID:
 			## 2.1
-			if not alternate.Call_COSMIC_API(): continue
+			if alternate.Call_COSMIC_API(): continue
 			## 2.2
 			if 'rs' in alternate.ID:
 				## 2.2.1
@@ -329,6 +344,7 @@ class Alternate():
 		#print dir(variable)
 		self.var = copy.deepcopy(variable)
 		self.ID = copy.deepcopy(variable.ID)
+		self.CHROM = copy.deepcopy(variable.CHROM)
 		self.Show(pop_freq)
 
 	def Show(self, pop_freq):
@@ -336,6 +352,11 @@ class Alternate():
 		print 'AF check     {}'.format(self.AF_filter(self.AC_filter(), pop_freq))
 		print 'CAF check    {}'.format(self.CAF_filter(pop_freq))
 		print 'TOPMED check {}'.format(self.TOPMED_filter(pop_freq))
+		print 'HLA check    {}'.format(self.HLA_Check())
+		print 'Indel check  {}'.format(self.Indel_Check())
+		print 'Output       {}'.format(self.Output_direct())
+		print 'POSITION     {}'.format(self.var.__dict__['POS'])
+		print 'ID           {}'.format(self.ID)
 
 ##################################################################################################
 
@@ -524,8 +545,10 @@ class Alternate():
  1. self: instant.
 		'''
 		try:
-			if 'HLA' in self.var.__dict__['INFO']['LOF']:
+			if 'HLA' in self.var.__dict__['INFO']['GENE']:
 				flag_HLA = True
+				print 'HLA test%s'%self.var.__dict__['INFO']['GENE']
+				print self.var.ID
 			else:
 				flag_HLA = False
 		except:
