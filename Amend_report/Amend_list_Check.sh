@@ -71,6 +71,11 @@
 # 1. Copy action files which are not amended medications or ICDs to APP folder and uploading folder;
 # 2. Edit the e-mail for cond4: others.
 # ===================================================================================================
+# 04/18/2019	Gamma version 0.0.1
+# Feat:
+# 
+# 1. Update the sender of the e-mail.
+# ===================================================================================================
 
 set -e
 ## message for Lab director
@@ -169,20 +174,20 @@ DDI_check=/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/PGxOn
 			cp /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt /data/CLIA-Data/PGxOne_APP/ 
 			awk -F '\t' -v ID=$ID '$1 == ID {print $0}' $1 >> /data/AmendReports/.Amend_record.txt
 			sed -i "/$ID*/d" $1 ## remove processed sample from request file
-			echo [`date`] The content: $TYPE of $ID from $run_index has been updated! $MESSAGE $TYPE\". | tee -a /data/AmendReports/.Amend_log.txt | mail -s "Pleas resign $ID" yifei.wan@admerahealth.com zhuosheng.gu@admerahealth.com
+			echo [`date`] The content: $TYPE of $ID from $run_index has been updated! $MESSAGE $TYPE\". | tee -a /data/AmendReports/.Amend_log.txt | mail -a FROM:yifei.wan@admerahealth.com -s "Pleas resign $ID" yifei.wan@admerahealth.com zhuosheng.gu@admerahealth.com
 		fi
 	else
-		echo [`date`] Cannot find any run folder including $ID | tee -a /data/AmendReports/.Amend_log.txt | mail -s "Cannot find $ID" yifei.wan@admerahealth.com zhuosheng.gu@admerahealth.com ## generate log file and send remindering e-mail 
+		echo [`date`] Cannot find any run folder including $ID | tee -a /data/AmendReports/.Amend_log.txt | mail -a FROM:yifei.wan@admerahealth.com -s "Cannot find $ID" yifei.wan@admerahealth.com zhuosheng.gu@admerahealth.com ## generate log file and send remindering e-mail 
 	fi
 
 # Final e-mail
 	if [[ $TYPE == *"edication"* || $TYPE == *"ICD"* ]] && [[ $status == 1 ]]
 	then
-		echo [`date`] The content: $TYPE of $ID from $run_index has been updated! $MESSAGE $TYPE\". | tee -a /data/AmendReports/.Amend_log.txt | mail -s "Pleas resign $ID" yifei.wan@admerahealth.com zhuosheng.gu@admerahealth.com
-		echo [`date`] $TYPE of $ID from $run_index has been updated and $ID has been sent to sign. | mail -s "Amending: $ID" yifei.wan@admerahealth.com frances.ramos@admerahealth.com shadae.waiters@admerahealth.com ## send reminder to client care team 
+		echo [`date`] The content: $TYPE of $ID from $run_index has been updated! $MESSAGE $TYPE\". | tee -a /data/AmendReports/.Amend_log.txt | mail -a FROM:yifei.wan@admerahealth.com -s "Pleas resign $ID" yifei.wan@admerahealth.com zhuosheng.gu@admerahealth.com
+		echo [`date`] $TYPE of $ID from $run_index has been updated and $ID has been sent to sign. | mail -a FROM:yifei.wan@admerahealth.com -s "Amending: $ID" yifei.wan@admerahealth.com frances.ramos@admerahealth.com shadae.waiters@admerahealth.com ## send reminder to client care team 
 	elif [[ $status == 0 ]]
 	then
-		echo Please check DDI file for $ID in $run_index! | tee -a /data/AmendReports/.Amend_log.txt |  mail -s "Please check DDI" yifei.wan@admerahealth.com
+		echo Please check DDI file for $ID in $run_index! | tee -a /data/AmendReports/.Amend_log.txt | mail -a FROM:yifei.wan@admerahealth.com -s "Please check DDI" yifei.wan@admerahealth.com
 	fi
 
 	unset runfolder
