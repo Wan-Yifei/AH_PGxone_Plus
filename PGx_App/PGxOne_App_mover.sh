@@ -25,6 +25,11 @@
 # 1. move action files in the resolved folder;
 # 2. clear files in the resolved folder.
 # ======================================================================
+# 04/22/2019	Basic version 0.1.1
+# Feat:
+#
+# 1. Echo "Release folder is empty!" when folder does not have any files.
+# ======================================================================
 
 set -e
 
