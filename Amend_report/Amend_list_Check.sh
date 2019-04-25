@@ -76,6 +76,11 @@
 # 
 # 1. Update the sender of the e-mail.
 # ===================================================================================================
+# 04/25/2019	Gamma version 0.0.1
+# Feat:
+# 
+# 1. Run scripts for cond 4.
+# ===================================================================================================
 
 set -e
 ## message for Lab director
@@ -168,6 +173,8 @@ DDI_check=/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/PGxOn
 			fi
 		else
 			echo cond4:Others
+			python3 /home/yifei.wan/AH_Project/Amend_report/PGx_report_amend.py $runfolder $ID "$TYPE" -I "$ICD"
+			bash /home/yifei.wan/AH_Project/PGx_Run/PGxOne_Scripts.sh $runfolder
 			CASE_ID=$(awk -F"\t" -v ID=$ID '$1 == ID {print $4}' /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/sample_codes_drugs.txt) ## find corresponding CASE ID based on requistion ID
 			#echo /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt
 			cp /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/LIS/$CASE_ID.txt /xifin/result-data/$CASE_ID.txt 
