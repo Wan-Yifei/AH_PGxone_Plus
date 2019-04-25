@@ -30,6 +30,11 @@
 #
 # 1. Echo "Release folder is empty!" when folder does not have any files.
 # ======================================================================
+# 04/22/2019	Basic version 0.1.2
+# Fix:
+#
+# 1. Add echo function to accept error when rm meets empty folder.
+# ======================================================================
 
 set -e
 
@@ -54,4 +59,8 @@ cp -v $LISFOLDER/*.txt $BATCHUPLOAD/ > >(tee -a /home/yifei.wan/AH_Project/PGx_A
 } || {
 	echo Release folder is empty!
 }
-rm -v  $RELEASE/*
+{
+	rm -v  $RELEASE/*
+} || {
+	echo There is no resolved sample!
+}
