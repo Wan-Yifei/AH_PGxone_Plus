@@ -7,7 +7,7 @@
 # Automatically process QC for each run of PGxOne_V3.
 # =======================================================================================
 
-#To do: 
+#To do: Line60 needs a list comprehension to handle self.potential_Allele which includes nested list.
 
 import numpy as np
 import itertools as ir
@@ -81,31 +81,22 @@ class Gene:
 		return amp_panel, low_amp
 
 	def get_pot_allele(self, Gene_KB):
-		poten_alleles = [allele[2] for allele in Gene_KB for low_range in self.low_amp for high_range in self.panel if allele.split('\t')[0] == self.gene and \
-		allele.split('\t')[4].replace('chr', '') == low_range[0] and allele.split('\t')[5] in range(int(low_range[1]) + 5, int(low_range[2]) - 4) and allele.split('\t')[5] not in range(int(high_range[1]) + 5, int(high_range[2]) -4)]
-
+		poten_alleles = []
 		for low_range in self.low_amp:
 			for allele in Gene_KB:
 				if allele.split('\t')[0] == self.gene: 
 					if allele.split('\t')[4].replace('chr', '') == low_range[0]:
-						print all([int(pos) in range(int(low_range[1]) + 5, int(low_range[2]) - 4) for pos in allele.split('\t')[5].split(', ')]) 
 						if all([int(pos) not in range(int(high_range[1]) + 5, int(high_range[2]) - 4) for pos in allele.split('\t')[5].split(', ') for high_range in self.panel]):
-							print allele.split('\t')[1]
-				#		if all([int(pos) in range(int(low_range[1]) + 5, int(low_range[2]) - 4) for pos in allele.split('\t')[5].split(', ')]):
-				#			for high_range in self.panel:
-				#				if [int(pos) not in range(int(high_range[1]) + 5, int(high_range[2]) - 4) for pos in allele.split('\t')[5].split(', ')]:
-				#					print allele.split('\t')[1]
-				#			#print list(range(int(low_range[1]) + 5, int(low_range[2]) - 4))
-
-#				for high_range in self.panel:
-#					a = allele.split('\t')[0]
-
+							poten_alleles.append(allele.split('\t')[1])
+		print poten_alleles
 		poten_geno = [list(allele) for allele in ir.combinations_with_replacement(poten_alleles, 2)]
 		return poten_geno
 
 	def get_pot_pheno(self, Active_score):
 		#score_string = next(line.strip().split('\t')[4] for line in Active_score if self.gene in line)
 		score_threshold = next(line.strip().split('\t')[4] for line in Active_score if self.gene in line)
+		print self.potential_Allele
+		print self.score_allele
 		phenotypes = [self.parse_pheno(self.potential_Allele, self.score_allele, score_threshold) for alleles in self.score_allele]
 		print [pheno for pheno in phenotypes] 
 		phen_flag = all([pheno == self.phenotype for pheno in phenotypes])
