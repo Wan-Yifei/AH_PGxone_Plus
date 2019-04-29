@@ -72,8 +72,7 @@ class Gene:
 		return score_level, score_bin
 
 	def get_amp(self, amplicon_name, Range):
-	## Range: the file records loci each amplicon
-		#low_amp_names = [amp.split('\t')[2] for amp in Low_coverage if int(amp.split('\t')[3]) < 6 and self.gene in amp]  
+	## Range: the file records loci of each amplicon
 	## location of correspoding amplicon with low count
 		low_amp =  [[loc.split('\t')[0]] + loc.split('\t')[1].split('..') for name in amplicon_name for loc in Range if loc.split('\t')[2] == name]
 	## All amplicons of CYP super-family with enough count
@@ -87,17 +86,15 @@ class Gene:
 				if allele.split('\t')[0] == self.gene: 
 					if allele.split('\t')[4].replace('chr', '') == low_range[0]:
 						if all([int(pos) not in range(int(high_range[1]) + 5, int(high_range[2]) - 4) for pos in allele.split('\t')[5].split(', ') for high_range in self.panel]):
-							poten_alleles.append(allele.split('\t')[1])
-		print poten_alleles
+							poten_alleles.append(allele.split('\t')[1].strip())
+		poten_alleles = poten_alleles + list(set(self.genotype.split('/'))) ## add original allele to the potential list
 		poten_geno = [list(allele) for allele in ir.combinations_with_replacement(poten_alleles, 2)]
 		return poten_geno
 
 	def get_pot_pheno(self, Active_score):
 		#score_string = next(line.strip().split('\t')[4] for line in Active_score if self.gene in line)
 		score_threshold = next(line.strip().split('\t')[4] for line in Active_score if self.gene in line)
-		print self.potential_Allele
-		print self.score_allele
-		phenotypes = [self.parse_pheno(self.potential_Allele, self.score_allele, score_threshold) for alleles in self.score_allele]
-		print [pheno for pheno in phenotypes] 
-		phen_flag = all([pheno == self.phenotype for pheno in phenotypes])
+		phenotypes = [self.parse_pheno(pot_allele, self.score_allele, score_threshold) for pot_allele in self.potential_Allele]
+		print 'Phenotype %s'%phenotypes 
+		phen_flag = all([pheno == self.phenotype for pheno in phenotypes]) ## if False, amplicon failed.
 		return phen_flag
