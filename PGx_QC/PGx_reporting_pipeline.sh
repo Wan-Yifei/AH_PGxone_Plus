@@ -16,5 +16,5 @@ python3 /home/yifei.wan/AH_Project/PGx_QC/PGx_Delete.py $RUNFOLDER $QC_list
 
 python /data/AmendReports/Script/check_release.py $RUNFOLDER
 
-bash /home/yifei.wan/AH_Project/PGx_App/PGxOne_App_mover.sh $RUNFOLDER
+bash /home/yifei.wan/AH_Project/PGx_App/PGxOne_APP_mover.sh $RUNFOLDER
 
