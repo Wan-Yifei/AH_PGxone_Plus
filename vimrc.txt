@@ -1,3 +1,4 @@
+set expandtab
 set shortmess=atI  "Don’t show the intro message when starting Vim
 highlight Normal ctermbg=16
 set list listchars=tab:>-
@@ -7,7 +8,8 @@ syntax on
 "set tabstop=4  
 "set softtabstop=4
 "set shiftwidth=4  
-set tabstop=8 softtabstop=0 expandtab shiftwidth=4 smarttab
+set tabstop=8 softtabstop=0 shiftwidth=4 smarttab
+set et
 set autoindent  
 autocmd InsertLeave * se nocul 
 autocmd InsertEnter * se cul 
@@ -26,3 +28,4 @@ set foldmethod=syntax
 set nofoldenable 
 colorscheme industry
 "highlight Normal ctermbg=232
+    
