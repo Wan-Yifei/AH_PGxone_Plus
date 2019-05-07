@@ -4,9 +4,10 @@ set list listchars=tab:>-
 set background=dark
 set showcmd 
 syntax on 
-set tabstop=4  
-set softtabstop=4
-set shiftwidth=4  
+"set tabstop=4  
+"set softtabstop=4
+"set shiftwidth=4  
+set tabstop=8 softtabstop=0 expandtab shiftwidth=4 smarttab
 set autoindent  
 autocmd InsertLeave * se nocul 
 autocmd InsertEnter * se cul 
