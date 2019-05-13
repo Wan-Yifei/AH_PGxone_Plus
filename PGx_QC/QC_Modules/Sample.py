@@ -1,7 +1,6 @@
 #!/usr/bin/python
 #-*- coding: utf-8 -*-
 
-#To do: Only when amplicons have relevant ICD codes, check the phenotype.
 #To do: three QC function would generate two values. Acceptors need to be updated.
 #To do: Check how many critial amplicons have coverage less than 5 than check ICD and genotype.
 
@@ -13,17 +12,35 @@ class Sample:
 
     Amplicons_scored_list = ["CYP1A2", "CYP2C19", "CYP2C9", "CYP2D6", "CYP3A4", "CYP3A5", "CYP4F2", "DPYD", "NAT2", "TPMT"]
 
-    def __init__(self, Output_geno, Code_drug, Active_score, Drug_action, Low_coverage, Range, Gene_KB):
+    def __init__(self, ID, Output_geno, Code_drug, Active_score, Drug_action, Low_coverage, Range, Gene_KB):
         self.ID = ID 
         self.ICD = self.get_ICD(Drug_action)
-        self.LowCount_Amplicon, self.exLowCount_Amplicon, self.LowCount_scored = self.get_low_count_amp(Low_coverage) 
+        self.LowCount_Amplicon, self.LowCount_ex_Amplicon, self.LowCount_scored = self.get_low_count_amp(Low_coverage) 
         ## QC result of amplicons with coverage less than 5 (no score check requirement).
         self.QC_Complete_Pass = self.Global_QC() 
         if self.QC_Complete_Pass:
             self.Failed_critical_amp, self.Failed_amp_notice, self.QC_Amplicon_Pass = self.Amp_less_5_QC()
         if self.QC_Amplicon_Pass:
             ## dict of Gene object having socre info with coverage less than 5 
-            self.Failed_critical_scored_amp, self.scored_QC = self.Scored_less_5_QC(Output_geno, amp_name, Active_score, Drug_action, Low_coverage, Range, Gene_KB)        
+            self.Failed_critical_scored_amp, self.Failed_scored_amp_notice, self.scored_QC = self.Scored_less_5_QC(Output_geno, amp_name, Active_score, Drug_action, Low_coverage, Range, Gene_KB)        
+
+    def Check(self):
+        print self.ID
+        print 'Sample ICDs: %s'%self.ICD
+        print 'Coverage less than 5: %s'%self.LowCount_ex_Amplicon
+        print 'Scored amplicons having coverage less than 5: %s'%self.LowCount_scored
+        print 'Gobal check: %s'%self.QC_Complete_Pass
+        try:
+            print self.Failed_amp_notice
+            print self.QC_Amplicon_Pass
+        except:
+            print 'No gene objects generated!'
+        try:
+            print self.Failed_scored_amp_notice
+            print self.scored_QC
+        except:
+            print 'No scored objects generated!'
+
 
     
     def get_ICD(self, Code_drug):
@@ -65,7 +82,8 @@ class Sample:
         ## Failed_scored_gene dict: key: gene, value: QC result of gene
         Failed_scored_gene = {gene[0]: gene[1].potential_Phenotype for gene in amplicon_check.values() if not gene[1].potential_Phenotype}
         Scored_gene_pass = all(Failed_scored_gene.values())
-        return Failed_scored_gene, Scored_gene_pass
+        Failed_scored_amp_notice = 'Sample %s has failed on critical amplicons: %s'%(self.ID, Failed_scored_gene.keys())
+        return Failed_scored_gene, Failed_scored_amp_notice, Scored_gene_pass
 
     def Amp_less_5_QC(self, Low_ex_amplicons, Drug_action, Range):
         ## the amplicons of each gene should be organize as a list
@@ -76,13 +94,13 @@ class Sample:
 
         if len(Low_ex_amplicons) > 7:
              QC_status = False ## too many critial amplicons have extrme low coverage
-             Amp_check = '%s critical amplicons have coverage less than 6, sample has completely failed!'%len(Low_ex_amplicons)
+             Failed_amp_notice = '%s critical amplicons have coverage less than 6, sample has completely failed!'%len(Low_ex_amplicons)
         else:
              Amplicon_check = {low_gene[0] : G.Gene(self.ID, sample_ICD, low_gene[0], Drug_action, low_gene[1], Range) for low gene in Low_ex_gene.items()}
         Failed_gene = [gene[0] for gene in Amplicon_check.items() if gene[1].ICD_relevant]
         QC_status = bool(Failed_gene)
         if QC_status:
-            Amp_check = 'Sample %s has failed on critical amplicons: %s'%(self.ID, Failed_gene)
+            Failed_amp_notice = 'Sample %s has failed on critical amplicons: %s'%(self.ID, Failed_gene)
         else:
-            Amp_check = None
-        return Failed_gene, Amp_check, QC_status 
+            Failed_amp_notice = None
+        return Failed_gene, Failed_amp_notice, QC_status 
