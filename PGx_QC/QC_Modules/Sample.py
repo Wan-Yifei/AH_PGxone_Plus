@@ -4,9 +4,10 @@
 #To do: three QC function would generate two values. Acceptors need to be updated.
 #To do: Check how many critial amplicons have coverage less than 5 than check ICD and genotype.
 
-sys.path.append('/home/yifei.wan/PGx_QC/QC_Modules/Gene_Scored.py')
 import Gene_Scored as GS
 import re
+import sys
+sys.path.append('/home/yifei.wan/PGx_QC/QC_Modules/Gene_Scored.py')
 
 class Sample:
 
@@ -45,7 +46,7 @@ class Sample:
     
     def get_ICD(self, Code_drug):
         ICDs = next(ICD.strip().split('\t')[1].split(', ') for ICD in Code_drug if self.ID in ICD)
-        sample_ICDs = [re.sub('\..*', '', ICD) for ICD in ICDS]
+        sample_ICDs = [re.sub('\..*', '', ICD) for ICD in ICDs]
         return sampler_ICD 
         
     def get_low_count_amp(self, Low_coverage):
@@ -58,7 +59,7 @@ class Sample:
         ## amplicons having score info, key: gene_name, value: amplicon_name 
         Low_scored_amplicons = {}
         for amp in Low_ex_amplicons.keys():
-            if next((scored in amp) for scored in Amplicons_scored_list if scored in amp and 'CNV_CYP2D6' not in amp)]:
+            if next((scored in amp) for scored in Amplicons_scored_list if scored in amp and 'CNV_CYP2D6' not in amp):
                 values = Low_scored_amplicons.get(Low_ex_amplicons[amp], [])
                 Low_scored_amplicons[Low_ex_amplicons[amp]] = values.append(amp) ## key: gene, values: amplicons (list) 
         return Low_amplicons, Low_ex_amplicons, Low_scored_amplicons
@@ -96,7 +97,7 @@ class Sample:
              QC_status = False ## too many critial amplicons have extrme low coverage
              Failed_amp_notice = '%s critical amplicons have coverage less than 6, sample has completely failed!'%len(Low_ex_amplicons)
         else:
-             Amplicon_check = {low_gene[0] : G.Gene(self.ID, sample_ICD, low_gene[0], Drug_action, low_gene[1], Range) for low gene in Low_ex_gene.items()}
+             Amplicon_check = {low_gene[0] : G.Gene(self.ID, sample_ICD, low_gene[0], Drug_action, low_gene[1], Range) for low_gene in Low_ex_gene.items()}
         Failed_gene = [gene[0] for gene in Amplicon_check.items() if gene[1].ICD_relevant]
         QC_status = bool(Failed_gene)
         if QC_status:
