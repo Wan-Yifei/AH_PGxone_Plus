@@ -1,6 +1,8 @@
 #!/usr/bin/python
 #-*- coding: utf-8 -*-
 
+## To do: the get_ICD function cannot get complete ICD list of gene, need to be fixed.
+
 import sys
 sys.path.append('/home/yifei.wan/PGx_QC/QC_Modules/Gene.py')
 from Gene import Gene
@@ -9,15 +11,23 @@ import itertools as ir
 import re
 
 class Gene_Scored(Gene):
-    def __init__(self, sample_ID, gene_name, Output_geno, amplicon_name, Active_score, Drug_action, Low_coverage, Range, Gene_KB):
-        Gene.__init__(self, sample_ID, gene_name, Drug_action, amplicon_name, Range)
-        self.genotype = self.get_geno(Output_geno) 
-        self.phenotype, self.score_allele = self.get_pheno(Active_score) 
-        self.potential_Allele = self.get_pot_allele(Gene_KB) 
-        self.potential_Phenotype = self.get_pot_pheno(Active_score)
+    def __init__(self, sample_ID, sample_ICD, gene_name, Output_geno, amplicon_name, Active_score, Drug_action, Low_coverage, Range, Gene_KB):
+        Gene.__init__(self, sample_ID, sample_ICD, gene_name, Drug_action, amplicon_name, Range)
+        if self.ICD_relevant:
+            self.genotype = self.get_geno(Output_geno) 
+            self.phenotype, self.score_allele = self.get_pheno(Active_score) 
+            self.potential_Allele = self.get_pot_allele(Gene_KB) 
+            self.potential_Phenotype = self.get_pot_pheno(Active_score)
+        else:
+            self.genotype = None
+            self.phenotype, self.score_allele = None, None 
+            self.potential_Allele = None 
+            self.potential_Phenotype = True 
         self.Check_list()
 
     def Check_list(self):
+        print 'sample ICD: %s'%self.sample_ICD
+        print 'ICD of %s: %s'%(self.gene, self.ICD)
         print self.genotype
         print self.phenotype
         print self.potential_Allele
