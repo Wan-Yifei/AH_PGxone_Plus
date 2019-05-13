@@ -1,6 +1,7 @@
 import sys
 import os
 import glob
+import re
 
 ## To do: check input file of DA is correct
 #sys.path.append('/home/yifei.wan/PGx_QC/Auto_QC.py')
@@ -26,6 +27,8 @@ Gene_var_path = '/home/yifei.wan/AH_Project/PGx_QC/PGx_GV/PGxOne_v3_Gene_Variant
 ID = 'A-1600158824'
 amp_name = ['792984_CYP3A5-exon2-2-exon2-1']
 gene_name = 'CYP3A5'
+ICDs = ['F32.9', 'F41.9']
+sample_ICD = [re.sub('\..*', '', ICD) for ICD in ICDs]
 
 with open(Drug_action_path, 'r') as DA, open(Low_coverage_path, 'r') as LC, open(Range_path, 'r') as RP, open(Active_score_path, 'r') as AS, open(Output_geno_path, 'r') as OG, open(Gene_var_path, 'r') as GK:
         Active_score = AS.readlines()
@@ -35,7 +38,7 @@ with open(Drug_action_path, 'r') as DA, open(Low_coverage_path, 'r') as LC, open
         Output_geno = OG.readlines()
         Gene_KB = GK.readlines()
         #check_point = aq.Gene(ID, gene_name, Output_geno, amp_name, Active_score, Drug_action, Low_coverage, Range, Gene_KB)
-        check_point = aq.Gene_Scored(ID, gene_name, Output_geno, amp_name, Active_score, Drug_action, Low_coverage, Range, Gene_KB)
+        check_point = aq.Gene_Scored(ID, sample_ICD, gene_name, Output_geno, amp_name, Active_score, Drug_action, Low_coverage, Range, Gene_KB)
 
         #check_point = aq.Gene(ID, gene_name, OG, amp_name, AS, DA, LC, Range)
 
