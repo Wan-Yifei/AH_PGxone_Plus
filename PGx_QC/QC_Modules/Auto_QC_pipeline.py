@@ -15,7 +15,7 @@ Runfolder = sys.argv[1]
 path = '/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/%s'%Runfolder
 
 Drug_action_path = '%s/%s'%(path, 'PGxOneV3_drug_action.txt')
-Low_coverage_path = '%s/%s'%(path, 'sample_output_genotype.txt')
+Low_coverage_path = '%s/%s'%(path, 'sample_QC_low_coverage.txt')
 Active_score_path = '%s/%s'%(path, 'PGxOneV3_gene_allele_activity_score.txt')
 Output_geno_path = '%s/%s'%(path, 'sample_output_genotype.txt')
 Range_path = glob.glob('%s/NA17281_S[0-9][0-9].txt'%path)[0] 
