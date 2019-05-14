@@ -23,15 +23,15 @@ class Gene_Scored(Gene):
             self.phenotype, self.score_allele = None, None 
             self.potential_Allele = None 
             self.potential_Phenotype = True 
-        self.Check_list()
+        #self.Check_list()
 
     def Check_list(self):
         print 'sample ICD: %s'%self.sample_ICD
         print 'ICD of %s: %s'%(self.gene, self.ICD)
-        print self.genotype
-        print self.phenotype
-        print self.potential_Allele
-        print self.potential_Phenotype
+        print 'Original gneotype: %s'%self.genotype
+        print 'Original phenotype: %s'%self.phenotype
+        print 'All potential alleles: %s'%self.potential_Allele
+        print 'Potential phenotype check pass: %s'%self.potential_Phenotype
 
     def get_geno(self, Output_geno):
         index = next(line.strip().split('\t').index(self.gene) for line in Output_geno if self.gene in line)
@@ -49,8 +49,6 @@ class Gene_Scored(Gene):
     def parse_pheno(self, alleles, score_allele, score_threshold):
         alleles_score = sum([score_allele[allele.replace('xN', '')]*2 if 'xN' in allele else score_allele[allele] for allele in alleles])
         score_level, score_bin = self.parse_score(score_threshold) ## name of action level and bins of score
-        #print alleles_score
-        #print score_bin
         phenotype = score_level[np.digitize(alleles_score, score_bin)] ## phenotype of input genotype
         return phenotype
 
@@ -78,7 +76,6 @@ class Gene_Scored(Gene):
         #score_string = next(line.strip().split('\t')[4] for line in Active_score if self.gene in line)
         score_threshold = next(line.strip().split('\t')[4] for line in Active_score if self.gene in line)
         phenotypes = [self.parse_pheno(pot_allele, self.score_allele, score_threshold) for pot_allele in self.potential_Allele]
-        #print 'Phenotype %s'%phenotypes
         phen_flag = all([pheno == self.phenotype for pheno in phenotypes]) ## if False, amplicon failed.
         return phen_flag
 
