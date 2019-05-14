@@ -35,7 +35,7 @@ class Sample:
             print 'Non-scored amplicon QC status note: %s'%self.Failed_amp_notice
             print 'Non-scored amplicon QC pass: $s'%self.QC_amplicon_pass
         except:
-            print 'No gene objects generated!'
+            print 'No gene instances generated!'
         try:
             print self.Failed_scored_amp_notice
             print 'Scored amplicon QC pass: %s'%self.scored_QC
