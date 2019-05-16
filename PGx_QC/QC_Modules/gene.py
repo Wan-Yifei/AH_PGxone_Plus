@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #-*- coding: utf-8 -*-
 
-class Gene:
+class Gene(object):
     def __init__(self, sample_ID, sample_ICD, gene_name, Drug_action, amplicon_name, Range):
         self.ID = sample_ID 
         self.gene = gene_name 
