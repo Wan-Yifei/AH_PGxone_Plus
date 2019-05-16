@@ -5,11 +5,10 @@ import re
 
 ## To do: check input file of DA is correct
 #sys.path.append('/home/yifei.wan/PGx_QC/Auto_QC.py')
-sys.path.append('/home/yifei.wan/PGx_QC/QC_Modules/Gene_Scored.py')
-sys.path.append('/home/yifei.wan/PGx_QC/QC_Modules/Sample.py')
+sys.path.append('/home/yifei.wan/PGx_QC/QC_Modules/gene_scored.py')
+sys.path.append('/home/yifei.wan/PGx_QC/QC_Modules/sample.py')
 
-#import Auto_QC as aq
-import Sample as aq
+import sample as aq
 
 Runfolder = sys.argv[1]
 path = '/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/%s'%Runfolder
