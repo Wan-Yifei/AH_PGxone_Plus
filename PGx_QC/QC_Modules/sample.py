@@ -79,8 +79,8 @@ class Sample:
     def scored_less_5_QC(self, Output_geno, Active_score, Drug_action, Low_coverage, Range, Gene_KB):
         ## low coverage amplicons much associate to ICD code of sample:
         ## key: gene, value: Gene_scored instance 
-        amplicon_check = {low_amp[0] : GS.GeneScored(self.ID, self.ICD, low_amp[0], Output_geno, low_amp[1], Active_score, Drug_action, Low_coverage, Range, Gene_KB) \
-        for low_amp in self.low_count_scored_amplicon.items() if low_amp[0] in self.failed_critical_amp} 
+        amplicon_check = ({low_amp[0] : GS.GeneScored(self.ID, self.ICD, low_amp[0], Output_geno, low_amp[1], Active_score, Drug_action, Low_coverage, Range, Gene_KB)
+        for low_amp in self.low_count_scored_amplicon.items() if low_amp[0] in self.failed_critical_amp}) 
         ## failed_scored_gene dict: key: gene, value: QC result of gene
         failed_scored_gene = {gene[0]: gene[1].potential_phenotype for gene in amplicon_check.items() if not gene[1].potential_phenotype}
         scored_gene_pass = all(failed_scored_gene.values())
