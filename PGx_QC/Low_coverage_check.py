@@ -201,7 +201,7 @@ if __name__ == '__main__':
 	init(autoreset = True)
 	args = ParseArg()
 	folder = args.Run_Name
-	Run = folder[folder.find('Run'):folder.find('Run')+6]
+	Run = folder[folder.find('Run'):folder.find('Run')+7]
 	#folder = '181112_CLIA_Plus_Run723_M01519_0042_000000000-C2LBF'
 	#os.chdir('/data/CLIA-Data/PGxOne_V3/Testing/BI_Data_Analysis%s'%folder)
 	#os.chdir('T:/PGxOne_V3/Production/BI_Data_Analysis/%s'%folder)
