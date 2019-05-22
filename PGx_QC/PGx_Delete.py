@@ -21,7 +21,7 @@ Run_folder = '/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/%s'%Run_name
 with open('%s/sample_codes_drugs.txt'%Run_folder) as Records:
 	samples = Records.readlines()
 
-with open('/home/yifei.wan/AH_Project/PGx_QC/%s'%QC_result) as Del_list:
+with open(QC_result) as Del_list:
 	samples_del = Del_list.readlines()
 
 ReqID_CaseID = {sample.strip().split('\t')[0]:sample.strip().split('\t')[3] for sample in samples if 'SampleID' not in sample.strip().split('\t')[0]}
