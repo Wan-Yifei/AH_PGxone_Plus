@@ -7,6 +7,10 @@
 # 
 # This pipeline accepts the name of run folder then deleles failed sample an# d un-resolved samples. Finally it would upload actions files to xifin.
 # ==========================================================================
+# 05/23/2019
+#
+# Add NY check.
+# ==========================================================================
 
 set -e
 
