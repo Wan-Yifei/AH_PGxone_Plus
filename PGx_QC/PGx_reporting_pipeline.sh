@@ -13,8 +13,13 @@ set -e
 RUNFOLDER=$1
 QC_list=$2
 python3 /home/yifei.wan/AH_Project/PGx_QC/PGx_Delete.py $RUNFOLDER $QC_list
-
+echo
+echo ====================================================
+python /home/yifei.wan/AH_Project/PGx_NY/PGx_NY.py $RUNFOLDER
+echo
+echo ====================================================
 python /data/AmendReports/Script/check_release.py $RUNFOLDER
-
+echo
+echo ====================================================
 bash /home/yifei.wan/AH_Project/PGx_App/PGxOne_APP_mover.sh $RUNFOLDER
 
