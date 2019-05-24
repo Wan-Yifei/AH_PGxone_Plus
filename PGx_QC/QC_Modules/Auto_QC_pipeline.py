@@ -25,7 +25,9 @@ Code_drug_path = '%s/%s'%(path, 'sample_codes_drugs.txt')
 #print Low_coverage_path
 #print Range_path
 
-ID = 'A-1600158824'
+#ID = 'A-1600158824'
+#ID = 'A-1600161746B'
+ID = sys.argv[2]
 amp_name = ['792984_CYP3A5-exon2-2-exon2-1']
 gene_name = 'CYP3A5'
 ICDs = ['F32.9', 'F41.9']
