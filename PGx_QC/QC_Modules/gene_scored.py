@@ -65,7 +65,7 @@ class GeneScored(Gene):
         for low_range in self.low_amp:
             for allele in Gene_KB:
                 if allele.split('\t')[0] == self.gene:
-                    if allele.split('\t')[4].replace('chr', '') == low_range[0]:
+                    if allele.split('\t')[4].replace('chr', '') == low_range[0] and 'deletion' not in allele:
                         if (all([int(pos) not in range(int(high_range[1]) + 5, int(high_range[2]) - 4) 
                         for pos in allele.split('\t')[5].split(', ') for high_range in self.panel])):
                             poten_alleles.append(allele.split('\t')[1].strip())
