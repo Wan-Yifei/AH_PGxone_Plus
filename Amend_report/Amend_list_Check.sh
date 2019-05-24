@@ -81,6 +81,11 @@
 # 
 # 1. Run scripts for cond 4.
 # ===================================================================================================
+# 05/24/2019
+# Fix:
+#
+# 1. Add absolute path to tmp file.
+# ===================================================================================================
 
 set -e
 ## message for Lab director
@@ -92,13 +97,13 @@ do
 ## Find run folder based on ID
 	find /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/ -name "$ID*.vcf" | while read path
 	do
-		dirname $path >> tmp.txt
+		dirname $path >> /data/AmendReports/tmp.txt
 	done
-	if [ -f tmp.txt ]
+	if [ -f /data/AmendReports/tmp.txt ]
 	then
-		runfolder=$(sort -u -t_ -rk4 tmp.txt | head -n 1 | cut -d / -f7) ## pathway of run folder, select the newest folder
+		runfolder=$(sort -u -t_ -rk4 /data/AmendReports/tmp.txt | head -n 1 | cut -d / -f7) ## pathway of run folder, select the newest folder
 		run_index=$(echo $runfolder | cut -d _ -f4) ## e.g. Run700
-		rm tmp.txt ## delet tmp	echo -e
+		rm /data/AmendReports/tmp.txt ## delet tmp	echo -e
 		echo ================================================================
 		echo ================================================================
 		echo -e
