@@ -7,21 +7,25 @@ import sys
 sys.path.append('/home/yifei.wan/PGx_QC/QC_Modules/gene_scored.py')
 import gene as G
 
-class Sample:
+class Sample(object):
 
     AMPLICONS_SCORED_LIST = ["CYP1A2", "CYP2C19", "CYP2C9", "CYP2D6", "CYP3A4", "CYP3A5", "CYP4F2", "DPYD", "NAT2", "TPMT"]
 
     def __init__(self, ID, Output_geno, Code_drug, Active_score, Drug_action, Low_coverage, Range, Gene_KB):
-        self.ID = ID 
+        if 'B' in ID:
+            self.ID = ID[0:-1]
+            self.swab_b_flag = True
+        else:
+            self.ID = ID 
+            self.swab_b_flag = False
         self.ICD = self.get_ICD(Code_drug)
         self.low_count_amplicon, self.low_count_ex_amplicon, self.low_count_scored_amplicon = self.get_low_count_amp(Low_coverage) 
         ## QC result of amplicons with coverage less than 5 (no score check requirement).
         self.QC_complete_pass, self.QC_CYP2D6_notice = self.global_QC() 
         if self.QC_complete_pass:
             self.failed_critical_amp, self.failed_amp_notice, self.QC_amplicon_pass = self.amp_less_5_QC(Drug_action, Range)
-        #if self.QC_amplicon_pass:
             ## dict of Gene object having socre info with coverage less than 5 
-        self.failed_critical_scored_amp, self.failed_scored_amp_notice, self.scored_QC = self.scored_less_5_QC(Output_geno, Active_score, Drug_action, Low_coverage, Range, Gene_KB)        
+            self.failed_critical_scored_amp, self.failed_scored_amp_notice, self.scored_QC = self.scored_less_5_QC(Output_geno, Active_score, Drug_action, Low_coverage, Range, Gene_KB)        
         self.Check()
 
     def Check(self):
@@ -57,7 +61,9 @@ class Sample:
         ## amplicons having score info, key: gene_name, value: amplicon_name 
         low_scored_amplicons = {}
         for amp in low_ex_amplicons.keys():
-            if next((scored in amp) for scored in self.AMPLICONS_SCORED_LIST if scored in amp and 'CNV_CYP2D6' not in amp):
+            #print amp
+            #print [scored for scored in self.AMPLICONS_SCORED_LIST if scored in amp]
+            if [amp for scored in self.AMPLICONS_SCORED_LIST if scored in amp and 'CNV_CYP2D6' not in amp]:
                 values = low_scored_amplicons.get(low_ex_amplicons[amp], [])
                 low_scored_amplicons[low_ex_amplicons[amp]] = values + [amp] ## key: gene, values: amplicons (list) 
         return low_amplicons, low_ex_amplicons, low_scored_amplicons
@@ -67,7 +73,7 @@ class Sample:
         CYP2D6 = low_CYP2D6/28
         CYP2D6_check = None
         low_amplicons = len(self.low_count_amplicon.keys())
-        if low_amplicons > 10 and low_CYP2D6 > 0.8:
+        if low_amplicons > 10 and CYP2D6 > 0.8:
             QC_status = False 
             CYP2D6_check = '%s CYP2D6 amplicons are low coverage, please check!'%low_CYP2D6 ## Del/Del check required
         elif low_amplicons > 20:
@@ -77,7 +83,7 @@ class Sample:
         return QC_status, CYP2D6_check
         
     def scored_less_5_QC(self, Output_geno, Active_score, Drug_action, Low_coverage, Range, Gene_KB):
-        ## low coverage amplicons much associate to ICD code of sample:
+        ## low coverage amplicons must associate to ICD code of sample:
         ## key: gene, value: Gene_scored instance 
         amplicon_check = ({low_amp[0] : GS.GeneScored(self.ID, self.ICD, low_amp[0], Output_geno, low_amp[1], Active_score, Drug_action, Low_coverage, Range, Gene_KB)
         for low_amp in self.low_count_scored_amplicon.items() if low_amp[0] in self.failed_critical_amp}) 
