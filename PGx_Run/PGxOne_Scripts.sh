@@ -2,6 +2,7 @@
 set -e # exit when error occur
 cd /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$1/
 echo "Run folder: $1"
+bash /home/yifei.wan/AH_Project/PGx_Run/columnCheck.sh $1 
 perl PGxOneV3_Phenotype.pl
 echo "1. Phenotype done!"
 perl PGxOneV3_Create_DrugList.pl
