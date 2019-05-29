@@ -44,18 +44,18 @@ APPFOLDER='/data/CLIA-Data/PGxOne_APP'
 BATCHUPLOAD='/xifin/result-data/'
 RELEASE='/data/CLIA-Data/PGx_Resolved/Release'
 
-echo >> PGxOne_App_log.txt
-echo >> PGxOne_UPLOAD_log.txt
-cp -v $LISFOLDER/*.txt $APPFOLDER/ > >(tee -a /home/yifei.wan/AH_Project/PGx_App/PGxOne_APP_log.log) 2> >(tee -a /home/yifei.wan/AH_Project/PGx_App/PGxOne_APP_err.log >&2)
+echo >> /data/AmendReports/Script/PGx_APP_log/PGxOne_APP_log.txt
+echo >> /data/AmendReports/Script/PGx_APP_log/PGxOne_UPLOAD_log.txt
+cp -v $LISFOLDER/*.txt $APPFOLDER/ > >(tee -a /data/AmendReports/Script/PGx_APP_log/PGxOne_APP_log.txt) 2> >(tee -a /data/AmendReports/Script/PGx_APP_log/PGxOne_APP_err.log >&2)
 {
-	cp -v $RELEASE/*.txt $APPFOLDER/ > >(tee -a /home/yifei.wan/AH_Project/PGx_App/PGxOne_APP_log.log) 2> >(tee -a /home/yifei.wan/AH_Project/PGx_App/PGxOne_APP_err.log >&2)
+	cp -v $RELEASE/*.txt $APPFOLDER/ > >(tee -a /data/AmendReports/Script/PGx_APP_log/PGxOne_APP_log.txt) 2> >(tee -a /data/AmendReports/Script/PGx_APP_log/PGxOne_APP_err.log >&2)
 } || {
 	echo Release folder is empty!
 }
 read -p "Input any key to initial batch uploading:"
-cp -v $LISFOLDER/*.txt $BATCHUPLOAD/ > >(tee -a /home/yifei.wan/AH_Project/PGx_App/PGxOne_UPLOAD_log.txt) 2> >(tee -a /home/yifei.wan/AH_Project/PGxOne_UPLOAD_log.txt >&2)
+cp -v $LISFOLDER/*.txt $BATCHUPLOAD/ > >(tee -a /data/AmendReports/Script/PGx_APP_log/PGxOne_UPLOAD_log.txt) 2> >(tee -a /data/AmendReports/Script/PGx_APP_log/PGxOne_UPLOAD_err.txt >&2)
 {
-	cp -v $RELEASE/*.txt $BATCHUPLOAD/ > >(tee -a /home/yifei.wan/AH_Project/PGx_App/PGxOne_UPLOAD_log.txt) 2> >(tee -a /home/yifei.wan/AH_Project/PGxOne_UPLOAD_log.txt >&2)
+	cp -v $RELEASE/*.txt $BATCHUPLOAD/ > >(tee -a /data/AmendReports/Script/PGx_APP_log/PGxOne_UPLOAD_log.txt) 2> >(tee -a /data/AmendReports/Script/PGx_APP_log/PGxOne_UPLOAD_err.txt >&2)
 } || {
 	echo Release folder is empty!
 }
