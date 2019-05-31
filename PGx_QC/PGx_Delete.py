@@ -27,7 +27,7 @@ with open(QC_result) as Del_list:
 ReqID_CaseID = {sample.strip().split('\t')[0]:sample.strip().split('\t')[3] for sample in samples if 'SampleID' not in sample.strip().split('\t')[0]}
 CaseID_Del = [ReqID_del.strip() for ReqID_del in samples_del if 'A-' in ReqID_del or 'RM-' in ReqID_del]
 
-print(CaseID_Del)
+#print(CaseID_Del)
 
 if CaseID_Del and not ReqID_CaseID: raise IOError('Check QC list, action files cannot be found!')
 if not CaseID_Del and ReqID_CaseID: raise IOError('Check QC list, some unexpected action files are found!')
