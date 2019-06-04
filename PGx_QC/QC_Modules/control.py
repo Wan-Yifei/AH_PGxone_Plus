@@ -42,7 +42,7 @@ class Control(Sample):
         if low_coverage_flage:
             Sample.__init__(self, ID, Output_geno, Code_drug, Active_score, Drug_action, Low_coverage, Range, Gene_KB) 
 
-    def whole_genotype(self, Output_geno):
+    def get_whole_genotype(self, Output_geno):
         genotypes = next(sample.strip().split('\t') for sample in Output_geno if self.ID in sample)
 
     def standard_check(self):
