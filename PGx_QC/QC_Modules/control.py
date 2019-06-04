@@ -3,8 +3,7 @@
 
 import sys
 sys.path.append('/home/yifei.wan/PGx_QC/QC_Modules/sample.py')
-import sample as Sample
-
+from sample import Sample
 
 class Control(Sample):
 
@@ -39,24 +38,26 @@ class Control(Sample):
         self.ID = ID
         self.whole_genotype = self.get_whole_genotype(Output_geno)
         self.standard_pass, self.cyp2d6_pass = self.standard_check()
-        if low_coverage_flage:
+        if low_coverage_flag:
             Sample.__init__(self, ID, Output_geno, Code_drug, Active_score, Drug_action, Low_coverage, Range, Gene_KB) 
 
     def get_whole_genotype(self, Output_geno):
-        genotypes = next(sample.strip().split('\t') for sample in Output_geno if self.ID in sample)
+        genotypes = next(line.strip().split('\t') for line in Output_geno if self.ID in line)
+        return genotypes
 
     def standard_check(self):
         if 'NA17244' in self.ID:
             mismatch_count = len([g_control for g_standard, g_control in 
-            zip(NA17244_standard_genotype, self.whole_genotype) if g_standard != g_control])
+            zip(self.NA17244_standard_genotype, self.whole_genotype) if g_standard != g_control])
             ## check the mismatch of CYP2D6
-            if self.whole_genotype[16] != '2xN/*4' or self.whole_genotype[16] ! = '*4/2xN': 
+            if self.whole_genotype[16] != '2xN/*4' or self.whole_genotype[16] != '*4/2xN': 
+                print self.whole_genotype[16]
                 mismatch_CYP2D6 = False
             else:
                 mismatch_CYP2D6 = True
         if 'NA17281' in self.ID:
             mismatch_count = len([g_control for g_standard, g_control in
-            zip(NA17281_standard_genotype, self.whole_genotype) if g_standard != g_control])
+            zip(self.NA17281_standard_genotype, self.whole_genotype) if g_standard != g_control])
             ## check the mismatch of CYP2D6
             if self.whole_genotype[16] != '*5/*9':
                 mismatch_CYP2D6 = False
