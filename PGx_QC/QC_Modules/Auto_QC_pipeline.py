@@ -3,7 +3,6 @@ import os
 import glob
 import re
 
-## To do: check input file of DA is correct
 #sys.path.append('/home/yifei.wan/PGx_QC/Auto_QC.py')
 sys.path.append('/home/yifei.wan/PGx_QC/QC_Modules/gene_scored.py')
 sys.path.append('/home/yifei.wan/PGx_QC/QC_Modules/sample.py')
