@@ -116,8 +116,7 @@ do
         echo Cannot find $ID
         unset runfolder
         unset run_index
-        echo runfolder: $runfolder
-        echo index: $run_index
+        unset TYPE
     fi
 
 ## Amend report
@@ -207,9 +206,7 @@ DDI_check=/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/PGxOn
     then
         echo Please check DDI file for $ID in $run_index! | tee -a /data/AmendReports/.Amend_log.txt | mail -a FROM:yifei.wan@admerahealth.com -s "Please check DDI" yifei.wan@admerahealth.com
     fi
-
     unset runfolder
     unset TYPE
-    echo "runfolder clean check (should be empty):" $runfolder
-    echo "Type clean check (should be empty):" $runfolder
+    unset status
 done
