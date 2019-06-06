@@ -16,5 +16,13 @@ echo "5. Cleanup done!"
 python PGxOneV3_Drug_DDI.py
 echo "6. DDI done!"
 
-python3 /home/yifei.wan/AH_Project/PGx_Run/change_group.py $1
-echo The groups of all files has been changed to CLIA!
+{
+    python3 /home/yifei.wan/AH_Project/PGx_Run/change_group.py $1
+} || {
+    echo ======================================
+    echo Ignore chgrp command line!
+    echo ======================================
+}
+#echo The groups of all files has been changed to CLIA!
+echo Action files have been updated! 
+echo ======================================
