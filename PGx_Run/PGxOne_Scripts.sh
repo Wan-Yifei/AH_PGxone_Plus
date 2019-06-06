@@ -16,10 +16,5 @@ echo "5. Cleanup done!"
 python PGxOneV3_Drug_DDI.py
 echo "6. DDI done!"
 
-#echo ====================================================
-#chgrp -c CLIA /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$1/LIS/*
-#chgrp -c CLIA /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$1/LIS/*
-#chgrp -c CLIA /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$1/DDI/*
-#echo ====================================================
-#echo
-#echo The groups of all files has been changed to CLIA!
+python3 /home/yifei.wan/PGx_Run/change_group.py $1
+echo The groups of all files has been changed to CLIA!
