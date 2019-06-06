@@ -114,6 +114,10 @@ do
         echo ================================================================
         echo ================================================================
         echo Cannot find $ID
+        unset runfolder
+        unset run_index
+        echo runfolder: $runfolder
+        echo index: $run_index
     fi
 
 ## Amend report
@@ -207,5 +211,5 @@ DDI_check=/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$runfolder/PGxOn
     unset runfolder
     unset TYPE
     echo "runfolder clean check (should be empty):" $runfolder
-    echo "Type clean checkr (should be empty):" $runfolder
+    echo "Type clean check (should be empty):" $runfolder
 done
