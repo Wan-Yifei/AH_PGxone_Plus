@@ -15,3 +15,8 @@ python PGxOneV3_Drug_Cleanup.py
 echo "5. Cleanup done!"
 python PGxOneV3_Drug_DDI.py
 echo "6. DDI done!"
+
+chgrp CLIA ./LIS
+chgrp CLIA ./Plus
+chgrp CLIA ./DDI
+echo The groups of all files has been changed to CLIA!
