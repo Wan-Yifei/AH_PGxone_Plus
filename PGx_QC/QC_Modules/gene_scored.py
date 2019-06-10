@@ -56,26 +56,26 @@ class GeneScored(Gene):
 
     def parse_pheno(self, alleles, score_allele, score_threshold):
         alleles_score = sum([score_allele[allele.replace('xN', '')]*2 if 'xN' in allele else score_allele[allele] for allele in alleles])
-        print 'Alleles: %s'%alleles
-        print 'score_threshold %s'%score_threshold
-        phenotype = self.parse_score(score_threshold) ## current phenotype
+        phenotype = self.parse_score(alleles_score, score_threshold) ## current phenotype
         return phenotype
 
-    def parse_score(self, score_threshold):
-        #print score_threshold
-        score_level = np.array([item.split(':')[0].strip() for item in score_threshold.split(';')]) ## extract medications action level
-        opt_pattern = re.compile(r'<|>|<=|>=')
-        num_pattern = re.compile(r'\d.*\d*')
-        opts = opt_pattern.match(score_threshold)
-        nums = num_pattern.match(score_threshold)
-        if not opts:
-            opts = ['==' for num in nums]
-        print 'Level: %s'%score_level
-        score_bin = [float(num) for num in set(re.findall(r'\d.\d+|\d', score_threshold))] ## extract bin of each level
-        score_bin.sort()
-        print 'Bins: %s'%score_bin
-        ## parse score standard as close range
-        return score_level, score_bin
+    def parse_score(self, alleles_score, score_threshold):
+        ## pattern of operators
+        opt_pattern = re.compile(r'>=|<=|<|>')
+        ## pattern of threshold
+        num_pattern = re.compile(r'\d\.*\d*')
+        ## parse phenotype of gene
+        for threshold in score_threshold.split(';'):
+            level = threshold.split(':')[0].strip()
+            opts = opt_pattern.findall(threshold)
+            nums = num_pattern.findall(threshold)
+            ## assign eq to None value of opt
+            if not opts:
+                opts = ['==' for num in nums]
+            genotype_flags = [self.operators[opt](alleles_score, float(nums[opts.index(opt)])) for opt in opts]
+            if all(genotype_flags):
+                phenotype = level
+        return phenotype 
 
     def get_pot_allele(self, Gene_KB):
         poten_alleles = []
