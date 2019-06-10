@@ -1,8 +1,9 @@
 #!/usr/bin/python
 #-*- coding: utf-8 -*-
 
-## To do: the get_ICD function cannot get complete ICD list of gene, need to be fixed.
+## To do: fix scre_parse
 
+import operator as opt
 import sys
 sys.path.append('/home/yifei.wan/PGx_QC/QC_Modules/gene.py')
 from gene import Gene
@@ -11,6 +12,13 @@ import itertools as ir
 import re
 
 class GeneScored(Gene):
+
+    operators = {'>': opt.gt,
+                '<': opt.lt,
+                '>=': opt.ge,
+                '<=': opt.le,
+                '==': opt.eq}
+
     def __init__(self, sample_ID, sample_ICD, gene_name, Output_geno, amplicon_name, Active_score, Drug_action, Low_coverage, Range, Gene_KB):
         Gene.__init__(self, sample_ID, sample_ICD, gene_name, Drug_action, amplicon_name, Range)
         if self.ICD_relevant:
@@ -48,15 +56,24 @@ class GeneScored(Gene):
 
     def parse_pheno(self, alleles, score_allele, score_threshold):
         alleles_score = sum([score_allele[allele.replace('xN', '')]*2 if 'xN' in allele else score_allele[allele] for allele in alleles])
-        score_level, score_bin = self.parse_score(score_threshold) ## name of action level and bins of score
-        phenotype = score_level[np.digitize(alleles_score, score_bin)] ## phenotype of input genotype
+        print 'Alleles: %s'%alleles
+        print 'score_threshold %s'%score_threshold
+        phenotype = self.parse_score(score_threshold) ## current phenotype
         return phenotype
 
     def parse_score(self, score_threshold):
         #print score_threshold
-        score_level = np.array([item.split(':')[0] for item in score_threshold.split(';')]) ## extract medications action level
-        score_bin = [float(num) for num in set(re.findall(r'\d.\d+', score_threshold))] ## extract bin of each level
+        score_level = np.array([item.split(':')[0].strip() for item in score_threshold.split(';')]) ## extract medications action level
+        opt_pattern = re.compile(r'<|>|<=|>=')
+        num_pattern = re.compile(r'\d.*\d*')
+        opts = opt_pattern.match(score_threshold)
+        nums = num_pattern.match(score_threshold)
+        if not opts:
+            opts = ['==' for num in nums]
+        print 'Level: %s'%score_level
+        score_bin = [float(num) for num in set(re.findall(r'\d.\d+|\d', score_threshold))] ## extract bin of each level
         score_bin.sort()
+        print 'Bins: %s'%score_bin
         ## parse score standard as close range
         return score_level, score_bin
 
