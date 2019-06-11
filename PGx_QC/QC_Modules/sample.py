@@ -90,7 +90,7 @@ class Sample(object):
         ## failed_scored_gene dict: key: gene, value: QC result of gene
         failed_scored_gene = {gene[0]: gene[1].potential_phenotype for gene in amplicon_check.items() if not gene[1].potential_phenotype}
         scored_gene_pass = all(failed_scored_gene.values())
-        failed_scored_amp_notice = 'Sample %s has failed on critical amplicons: %s'%(self.ID, failed_scored_gene.keys())
+        failed_scored_amp_notice = 'Sample %s has failed on scored critical amplicons: %s'%(self.ID, failed_scored_gene.keys())
         return failed_scored_gene, failed_scored_amp_notice, scored_gene_pass
 
     def amp_less_5_QC(self, Drug_action, Range):
@@ -104,11 +104,11 @@ class Sample(object):
              failed_amp_notice = '%s critical amplicons have coverage less than 6, sample has completely failed!'%len(low_count_ex_amplicon)
         else:
              amplicon_check = {low_gene[0] : G.Gene(self.ID, self.ICD, low_gene[0], Drug_action, low_gene[1], Range) for low_gene in low_ex_gene.items()}
-        failed_gene = [gene[0] for gene in amplicon_check.items() if gene[1].ICD_relevant and gene[0]]
+        failed_gene = [gene[0] for gene in amplicon_check.items() if gene[1].ICD_relevant]
         potential_failed_gene = [gene for gene in failed_gene if gene not in self.AMPLICONS_SCORED_LIST]
         QC_status = not bool(potential_failed_gene) #True: passed; False: failed
-        if QC_status:
-            failed_amp_notice = 'Sample %s has failed on critical amplicons: %s'%(self.ID, failed_gene)
+        if not QC_status:
+            failed_amp_notice = 'Sample %s has failed on critical amplicons: %s'%(self.ID, potential_failed_gene)
         else:
             failed_amp_notice = None
         return failed_gene, failed_amp_notice, QC_status 
