@@ -51,7 +51,6 @@ class Control(Sample):
             zip(self.NA17244_standard_genotype, self.whole_genotype) if g_standard != g_control])
             ## check the mismatch of CYP2D6
             if self.whole_genotype[16] != '2xN/*4' or self.whole_genotype[16] != '*4/2xN': 
-                print self.whole_genotype[16]
                 mismatch_CYP2D6 = False
             else:
                 mismatch_CYP2D6 = True
