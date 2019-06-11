@@ -64,6 +64,8 @@ class GeneScored(Gene):
         opt_pattern = re.compile(r'>=|<=|<|>')
         ## pattern of threshold
         num_pattern = re.compile(r'\d\.*\d*')
+        ## replace unexpected delimter
+        if 'normal: >=1 & <=2:' in score_threshold: score_threshold = score_threshold.replace('normal: >=1 & <=2:', 'normal: >=1 & <=2;')
         ## parse phenotype of gene
         for threshold in score_threshold.split(';'):
             level = threshold.split(':')[0].strip()
