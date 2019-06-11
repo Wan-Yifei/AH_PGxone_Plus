@@ -2,6 +2,7 @@ import sys
 import os
 import glob
 import re
+from colorama import Fore, Back, Style, init 
 
 #sys.path.append('/home/yifei.wan/PGx_QC/Auto_QC.py')
 sys.path.append('/home/yifei.wan/PGx_QC/QC_Modules/gene_scored.py')
@@ -34,6 +35,8 @@ def get_control_ID(Output_geno):
     controls = [line.strip().split('\t')[0] for line in Output_geno if 'NA' in line.split('\t')[0]]
     return controls
 
+init(autoreset = True)
+
 with open(Code_drug_path, 'r') as CD, open(Drug_action_path, 'r') as DA, open(
     Low_coverage_path, 'r') as LC, open(Range_path, 'r') as RP, open(
     Active_score_path, 'r') as AS, open(Output_geno_path, 'r') as OG, open(
@@ -49,6 +52,13 @@ with open(Code_drug_path, 'r') as CD, open(Drug_action_path, 'r') as DA, open(
         potential_failed_samples = low_coverage_scan(Low_coverage)
         ctrls = get_control_ID(Output_geno)
         #print ctrls
+        print("========================================================")
+        print("========================================================")
+        print 'Run folder: %s'%Runfolder 
+        print("========================================================")
+        print("Check controls:")
+        print("")
+        
         for ctrl_id in ctrls:
             if ctrl_id in potential_failed_samples:
                 low_coverage_flag = True ## contrl is potential failed
@@ -56,29 +66,57 @@ with open(Code_drug_path, 'r') as CD, open(Drug_action_path, 'r') as DA, open(
                 low_coverage_flag = False
             conl = (control.Control(ctrl_id, Output_geno, Code_drug, Active_score
             , Drug_action, Low_coverage, Range, Gene_KB, low_coverage_flag))
-            print conl.ID
-            print 'Control passed' + " : " + str(conl.standard_pass)
-            print ('CYP2D6 genotype of control' + conl.ID + " : " + 
-                    str(conl.cyp2d6_pass) + " " + conl.whole_genotype[16])
+            if conl.standard_pass:
+                print(Fore.GREEN + '%s passed!'%conl.ID)
+            if not conl.cyp2d6_pass:
+                print(Fore.YELLOW + 'The genotype of CYP2D6 does not match SOP: %s'%conl.whole_genotype[16])
         
-        print "========================================================"
-        print "========================================================\n"
+        print("========================================================")
+        print("========================================================")
+        print("Completely failed samples:")
+        print("")
+        complete_failed = []
+        critical_failed = {}
         for ID in potential_failed_samples:
             if 'NA' not in ID:
                 check_case = aq.Sample(ID, Output_geno, Code_drug, Active_score
                 , Drug_action, Low_coverage, Range, Gene_KB)
+
                 if not check_case.QC_complete_pass:
-                    check_case.check()
-                    print "========================================================"
-                    print "========================================================\n"
+                    if check_case.swab_b_flag:
+                        complete_failed.append(check_case.ID + 'B')
+                    else:
+                        complete_failed.append(check_case.ID)
                 elif not check_case.QC_amplicon_pass:
-                    check_case.check()
-                    print "========================================================"
-                    print "========================================================\n"
+                    if 'completely failed' in check_case.failed_amp_notice:
+                        if check_case.swab_b_flag:
+                            complete_failed.append(check_case.ID + 'B')
+                        else:
+                            complete_failed.append(check_case.ID)
+                    else:
+                        if check_case.swab_b_flag:
+                            critical_failed[check_case.ID + 'B'] = check_case.failed_critical_amp
+                        else:
+                            critical_failed[check_case.ID] = check_case.failed_critical_amp
                 elif not check_case.scored_QC:
-                    check_case.check()
-                    print "========================================================"
-                    print "========================================================\n"
+                    if check_case.swab_b_flag:
+                        critical_failed[check_case.ID + 'B'] = check_case.failed_critical_scored_amp
+                    else:
+                        critical_failed[check_case.ID] = check_case.failed_critical_scored_amp
                 else:
                     pass
+        
+        n = 1
+        for case in complete_failed:
+            print('%s. %s'%(n,case))
+            n += 1
+
+        print("========================================================")
+        print("Samples failed on critical amplicons:")
+        print("")
+        n = 1
+        for case in critical_failed.items():
+            print("%s. %s : failed on %s"%(n, case[0], case[1]))
+            n += 1
+
  
