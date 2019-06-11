@@ -42,6 +42,6 @@ with open(output_log + 'processed_log.txt', 'a+') as logging, open(output_log + 
         ## chage user group
         os.system('chgrp CLIA /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/%s/LIS/%s.txt %s' 
         % (runfolder, action, output_folder + '/' + NY_ids[action] + '.txt'))
-        print >> logging, action + '/' + NY_ids[action] ## log without duplicate
+        print >> logging, action + '/' + NY_ids[action] + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + '\r' ## log with duplicate
         if action + '\n' not in ids:
-            print >> id_list, action + '/' + NY_ids[action] + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            print >> id_list, action + '/' + NY_ids[action] + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + '\r'
