@@ -43,6 +43,6 @@ with open(Code_drug_path, 'r') as CD, open(Drug_action_path, 'r') as DA, open(Lo
         #check_point = aq.Gene(ID, gene_name, Output_geno, amp_name, Active_score, Drug_action, Low_coverage, Range, Gene_KB)
         #check_point = aq.Gene_Scored(ID, sample_ICD, gene_name, Output_geno, amp_name, Active_score, Drug_action, Low_coverage, Range, Gene_KB)
         check_point = aq.Sample(ID, Output_geno, Code_drug, Active_score, Drug_action, Low_coverage, Range, Gene_KB)
-
+        check_point.check()
         #check_point = aq.Gene(ID, gene_name, OG, amp_name, AS, DA, LC, Range)
 
