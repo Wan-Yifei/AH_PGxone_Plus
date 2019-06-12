@@ -12,6 +12,11 @@
 # Output:
 # 1. QC check list.
 # =============================================================================
+# 06/12/2019 Basic version 0.0.2
+#
+# Feat:
+# 1. Add # check for action files.
+# =============================================================================
 
 import sys
 import os
@@ -40,6 +45,16 @@ Range_path = glob.glob('%s/NA17281_S[0-9][0-9].txt'%path)[0]
 Gene_var_path = '/home/yifei.wan/AH_Project/PGx_QC/PGx_GV/PGxOne_v3_Gene_Variant_List.txt'
 Code_drug_path = '%s/%s'%(path, 'sample_codes_drugs.txt')
 CYP_hom_path = '/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/%s/sample_QC_CYP2D6_deletion_hom.txt'%Runfolder
+LIS = '%s/LIS'%path ## path of LIS folder
+
+def lis_count(LIS): ## check the count of action files
+    print("========================================================")
+    print("Count# of action files")
+    print("")
+    LIS_n = len([name for name in os.listdir(LIS) if os.path.isfile(LIS + '/' + name)])
+    if LIS_n == 44: print(Fore.GREEN + 'LIS # check: %d'%LIS_n)
+    else: print(Fore.RED + 'LIS # check: %d'%LIS_n)
+    print("========================================================")
 
 def low_coverage_scan(Low_coverage):
     samples = [line.strip().split('\t')[0].split('_')[0] for line in Low_coverage if 'Sample' not in  line]
@@ -101,7 +116,9 @@ with open(Code_drug_path, 'r', errors='replace') as CD, open(Drug_action_path, '
                 print(Fore.GREEN + '%s passed!'%conl.ID)
             if not conl.cyp2d6_pass:
                 print(Fore.YELLOW + 'The genotype of CYP2D6 does not match SOP: %s'%conl.whole_genotype[17])
-        
+        print("")
+
+        lis_count(LIS)
         cyp_homo_check(cyp_list)
 
         print("Completely failed samples:")
