@@ -34,12 +34,12 @@ class GeneScored(Gene):
         #self.Check_list()
 
     def Check_list(self):
-        print 'sample ICD: %s'%self.sample_ICD
-        print 'ICD of %s: %s'%(self.gene, self.ICD)
-        print 'Original gneotype: %s'%self.genotype
-        print 'Original phenotype: %s'%self.phenotype
-        print 'All potential alleles: %s'%self.potential_allele
-        print 'Potential phenotype check pass: %s'%self.potential_phenotype
+        print('sample ICD: %s'%self.sample_ICD)
+        print('ICD of %s: %s'%(self.gene, self.ICD))
+        print('Original gneotype: %s'%self.genotype)
+        print('Original phenotype: %s'%self.phenotype)
+        print('All potential alleles: %s'%self.potential_allele)
+        print('Potential phenotype check pass: %s'%self.potential_phenotype)
 
     def get_geno(self, Output_geno):
         index = next(line.strip().split('\t').index(self.gene) for line in Output_geno if self.gene in line)
