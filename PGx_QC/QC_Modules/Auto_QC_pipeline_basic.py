@@ -24,6 +24,7 @@ Output_geno_path = '%s/%s'%(path, 'sample_output_genotype.txt')
 Range_path = glob.glob('%s/NA17281_S[0-9][0-9].txt'%path)[0] 
 Gene_var_path = '/home/yifei.wan/AH_Project/PGx_QC/PGx_GV/PGxOne_v3_Gene_Variant_List.txt'
 Code_drug_path = '%s/%s'%(path, 'sample_codes_drugs.txt')
+CYP_hom_path = '/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/%s/sample_QC_CYP2D6_deletion_hom.txt'%Runfolder
 
 def low_coverage_scan(Low_coverage):
     samples = [line.strip().split('\t')[0].split('_')[0] for line in Low_coverage if 'Sample' not in  line]
@@ -35,12 +36,26 @@ def get_control_ID(Output_geno):
     controls = [line.strip().split('\t')[0] for line in Output_geno if 'NA' in line.split('\t')[0]]
     return controls
 
+def cyp_homo_check(cyp_list):
+    CYP_genotypes = {line.strip().split('\t')[0]:line.strip().split('\t')[1] for line in cyp_list if 'sample_ID' not in line}
+    print("========================================================")
+    print('Homo/Heter check for CYP2D6')
+    print('')
+    for sample in CYP_genotypes.keys():
+        if CYP_genotypes[sample].split('/')[0] != CYP_genotypes[sample].split('/')[1]:
+            print(Fore.GREEN + '%s passed!'%sample)
+        else:
+            print(Fore.RED + 'The genotype of CYP2D6 of %s needs check!!'%sample)
+            print('')
+    print("========================================================")
+
+## colorful print init
 init(autoreset = True)
 
-with open(Code_drug_path, 'r') as CD, open(Drug_action_path, 'r') as DA, open(
-    Low_coverage_path, 'r') as LC, open(Range_path, 'r') as RP, open(
-    Active_score_path, 'r') as AS, open(Output_geno_path, 'r') as OG, open(
-    Gene_var_path, 'r') as GK:
+with open(Code_drug_path, 'r', errors='replace') as CD, open(Drug_action_path, 'r', errors='replace') as DA, open(
+    Low_coverage_path, 'r', errors='replace') as LC, open(Range_path, 'r', errors='replace') as RP, open(
+    Active_score_path, 'r', errors='replace') as AS, open(Output_geno_path, 'r', errors='replace') as OG, open(
+    Gene_var_path, 'r', errors='replace') as GK, open(CYP_hom_path, 'r', errors='replace') as CP:
         Active_score = AS.readlines()
         Drug_action = DA.readlines()
         Low_coverage = LC.readlines()
@@ -48,13 +63,14 @@ with open(Code_drug_path, 'r') as CD, open(Drug_action_path, 'r') as DA, open(
         Output_geno = OG.readlines()
         Gene_KB = GK.readlines()
         Code_drug = CD.readlines()
+        cyp_list = CP.readlines()
 
         potential_failed_samples = low_coverage_scan(Low_coverage)
         ctrls = get_control_ID(Output_geno)
         #print ctrls
         print("========================================================")
         print("========================================================")
-        print 'Run folder: %s'%Runfolder 
+        print('Run folder: %s'%Runfolder)
         print("========================================================")
         print("Check controls:")
         print("")
@@ -71,8 +87,8 @@ with open(Code_drug_path, 'r') as CD, open(Drug_action_path, 'r') as DA, open(
             if not conl.cyp2d6_pass:
                 print(Fore.YELLOW + 'The genotype of CYP2D6 does not match SOP: %s'%conl.whole_genotype[16])
         
-        print("========================================================")
-        print("========================================================")
+        cyp_homo_check(cyp_list)
+
         print("Completely failed samples:")
         print("")
         complete_failed = []
@@ -100,9 +116,9 @@ with open(Code_drug_path, 'r') as CD, open(Drug_action_path, 'r') as DA, open(
                             critical_failed[check_case.ID] = check_case.failed_critical_amp
                 elif not check_case.scored_QC:
                     if check_case.swab_b_flag:
-                        critical_failed[check_case.ID + 'B'] = check_case.failed_critical_scored_amp
+                        critical_failed[check_case.ID + 'B'] = list(check_case.failed_critical_scored_amp.keys())
                     else:
-                        critical_failed[check_case.ID] = check_case.failed_critical_scored_amp
+                        critical_failed[check_case.ID] = list(check_case.failed_critical_scored_amp.keys())
                 else:
                     pass
         
@@ -118,5 +134,15 @@ with open(Code_drug_path, 'r') as CD, open(Drug_action_path, 'r') as DA, open(
         for case in critical_failed.items():
             print("%s. %s : failed on %s"%(n, case[0], case[1]))
             n += 1
+        print("========================================================")
 
- 
+## write QC output to the QC list
+Run_ind = Runfolder[Runfolder.find('Run'):Runfolder.find('Run')+7]
+print('Completely failed sample:', file = open('%s_QC.txt'%Run_ind, 'w+'))
+for case in complete_failed:
+    print(case, file = open('%s_QC.txt'%Run_ind, 'a+'))
+
+print('Samples failed on critical amplicons:', file = open('%s_QC.txt'%Run_ind, 'a+'))
+for case in critical_failed.items():
+    print(case[0], file = open('%s_QC.txt'%Run_ind, 'a+'))
+
