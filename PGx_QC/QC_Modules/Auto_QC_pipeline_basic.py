@@ -100,7 +100,7 @@ with open(Code_drug_path, 'r', errors='replace') as CD, open(Drug_action_path, '
             if conl.standard_pass:
                 print(Fore.GREEN + '%s passed!'%conl.ID)
             if not conl.cyp2d6_pass:
-                print(Fore.YELLOW + 'The genotype of CYP2D6 does not match SOP: %s'%conl.whole_genotype[16])
+                print(Fore.YELLOW + 'The genotype of CYP2D6 does not match SOP: %s'%conl.whole_genotype[17])
         
         cyp_homo_check(cyp_list)
 
