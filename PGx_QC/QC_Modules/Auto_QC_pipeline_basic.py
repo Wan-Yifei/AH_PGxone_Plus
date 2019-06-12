@@ -1,3 +1,18 @@
+# =============================================================================
+# Automatical QC pipeline of PGxOne
+# @author: Yifei Wan
+# 
+# =============================================================================
+# 06/12/2019 Basic version 0.0.1
+# Summary: 
+# This pipeline accept runfolder name to process QC for specified run.
+#
+# Input: 
+# 1. The name of run folder;
+# Output:
+# 1. QC check list.
+# =============================================================================
+
 import sys
 import os
 import glob
@@ -138,11 +153,11 @@ with open(Code_drug_path, 'r', errors='replace') as CD, open(Drug_action_path, '
 
 ## write QC output to the QC list
 Run_ind = Runfolder[Runfolder.find('Run'):Runfolder.find('Run')+7]
-print('Completely failed sample:', file = open('%s_QC.txt'%Run_ind, 'w+'))
+print('Completely failed sample:', file = open('/home/yifei.wan/AH_Project/PGx_QC/auto_QC/%s_QC.txt'%Run_ind, 'w+'))
 for case in complete_failed:
-    print(case, file = open('%s_QC.txt'%Run_ind, 'a+'))
+    print(case, file = open('/home/yifei.wan/AH_Project/PGx_QC/auto_QC/%s_QC.txt'%Run_ind, 'a+'))
 
-print('Samples failed on critical amplicons:', file = open('%s_QC.txt'%Run_ind, 'a+'))
+print('Samples failed on critical amplicons:', file = open('/home/yifei.wan/AH_Project/PGx_QC/auto_QC/%s_QC.txt'%Run_ind, 'a+'))
 for case in critical_failed.items():
-    print(case[0], file = open('%s_QC.txt'%Run_ind, 'a+'))
+    print(case[0], file = open('/home/yifei.wan/AH_Project/PGx_QC/auto_QC/%s_QC.txt'%Run_ind, 'a+'))
 
