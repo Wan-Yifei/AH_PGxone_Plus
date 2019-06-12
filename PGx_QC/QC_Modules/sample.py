@@ -28,23 +28,23 @@ class Sample(object):
             self.failed_critical_scored_amp, self.failed_scored_amp_notice, self.scored_QC = self.scored_less_5_QC(Output_geno, Active_score, Drug_action, Low_coverage, Range, Gene_KB)        
 
     def check(self):
-        print 'Sample ID: %s'%self.ID
-        print 'Sample ICDs: %s'%self.ICD
+        print('Sample ID: %s'%self.ID)
+        print('Sample ICDs: %s'%self.ICD)
         if self.QC_complete_pass:
-            print 'Coverage less than 5: %s'%self.low_count_ex_amplicon.keys()
-            print 'Scored amplicons having coverage less than 5: %s'%self.low_count_scored_amplicon
-        print 'Gobal Pass: %s'%self.QC_complete_pass
-        print 'CYP2D6 global QC status note: %s'%self.QC_CYP2D6_notice
+            print('Coverage less than 5: %s'%self.low_count_ex_amplicon.keys())
+            print('Scored amplicons having coverage less than 5: %s'%self.low_count_scored_amplicon)
+        print('Gobal Pass: %s'%self.QC_complete_pass)
+        print('CYP2D6 global QC status note: %s'%self.QC_CYP2D6_notice)
         try:
-            print 'Non-scored amplicon QC status note: %s'%self.failed_amp_notice
-            print 'Non-scored amplicon QC pass: $s'%self.QC_amplicon_pass
+            print('Non-scored amplicon QC status note: %s'%self.failed_amp_notice)
+            print('Non-scored amplicon QC pass: $s'%self.QC_amplicon_pass)
         except:
-            print 'No gene instances generated!'
+            print('No gene instances generated!')
         try:
-            print self.failed_scored_amp_notice
-            print 'Scored amplicon QC pass: %s'%self.scored_QC
+            print(self.failed_scored_amp_notice)
+            print('Scored amplicon QC pass: %s'%self.scored_QC)
         except:
-            print 'No scored instances generated!'
+            print('No scored instances generated!')
 
     def get_ICD(self, Code_drug):
         ICDs = next(ICD.strip().split('\t')[1].split(', ') for ICD in Code_drug if self.ID in ICD)
