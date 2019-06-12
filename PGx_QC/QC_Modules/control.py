@@ -50,15 +50,15 @@ class Control(Sample):
             mismatch_count = len([g_control for g_standard, g_control in 
             zip(self.NA17244_standard_genotype, self.whole_genotype) if g_standard != g_control])
             ## check the mismatch of CYP2D6
-            if self.whole_genotype[16] != '2xN/*4' or self.whole_genotype[16] != '*4/2xN': 
-                mismatch_CYP2D6 = False
+            if self.whole_genotype[17] == '*2xN/*4' or self.whole_genotype[17] == '*2/*4xN': 
+                mismatch_CYP2D6 = True 
             else:
-                mismatch_CYP2D6 = True
+                mismatch_CYP2D6 = False 
         if 'NA17281' in self.ID:
             mismatch_count = len([g_control for g_standard, g_control in
             zip(self.NA17281_standard_genotype, self.whole_genotype) if g_standard != g_control])
             ## check the mismatch of CYP2D6
-            if self.whole_genotype[16] != '*5/*9':
+            if self.whole_genotype[17] != '*5/*9':
                 mismatch_CYP2D6 = False
             else:
                 mismatch_CYP2D6 = True
