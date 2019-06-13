@@ -123,7 +123,7 @@ with open(Code_drug_path, 'r', errors='replace') as CD, open(Drug_action_path, '
 
         print("Completely failed samples:")
         print("")
-        complete_failed = []
+        complete_failed = {} 
         critical_failed = {}
         for ID in potential_failed_samples:
             if 'NA' not in ID:
@@ -132,15 +132,15 @@ with open(Code_drug_path, 'r', errors='replace') as CD, open(Drug_action_path, '
 
                 if not check_case.QC_complete_pass:
                     if check_case.swab_b_flag:
-                        complete_failed.append(check_case.ID + 'B')
+                        complete_failed[check_case.ID + 'B'] = check_case.QC_CYP2D6_notice
                     else:
-                        complete_failed.append(check_case.ID)
+                        complete_failed[check_case.ID] = check_case.QC_CYP2D6_notice
                 elif not check_case.QC_amplicon_pass:
                     if 'completely failed' in check_case.failed_amp_notice:
                         if check_case.swab_b_flag:
-                            complete_failed.append(check_case.ID + 'B')
+                            complete_failed[check_case.ID + 'B'] = check_case.QC_CYP2D6_notice
                         else:
-                            complete_failed.append(check_case.ID)
+                            complete_failed.append[check_case.ID] = check_case.QC_CYP2D6_notice
                     else:
                         if check_case.swab_b_flag:
                             critical_failed[check_case.ID + 'B'] = check_case.failed_critical_amp
@@ -155,8 +155,8 @@ with open(Code_drug_path, 'r', errors='replace') as CD, open(Drug_action_path, '
                     pass
         
         n = 1
-        for case in complete_failed:
-            print('%s. %s'%(n,case))
+        for case in complete_failed.items():
+            print('%s. %s: '%(n,case[0]), case[1])
             n += 1
 
         print("========================================================")
