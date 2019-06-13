@@ -71,7 +71,7 @@ class Sample(object):
     def global_QC(self):
         low_CYP2D6 = len([amp for amp in self.low_count_amplicon.keys() if 'CYP2D6' in amp])
         CYP2D6 = low_CYP2D6/28
-        CYP2D6_check = None
+        CYP2D6_check = 'CYP2D6 pass!' 
         low_amplicons = len(self.low_count_amplicon.keys())
         if low_amplicons > 10 and CYP2D6 > 0.8:
             QC_status = False 
