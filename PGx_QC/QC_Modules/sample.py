@@ -47,7 +47,10 @@ class Sample(object):
             print('No scored instances generated!')
 
     def get_ICD(self, Code_drug):
-        ICDs = next(ICD.strip().split('\t')[1].split(', ') for ICD in Code_drug if self.ID in ICD)
+        try:
+            ICDs = next(ICD.strip().split('\t')[1].split(', ') for ICD in Code_drug if self.ID in ICD)
+        except:
+            ICDs = []
         sample_ICDs = [re.sub('\..*', '', ICD) for ICD in ICDs]
         return sample_ICDs 
         
@@ -70,12 +73,15 @@ class Sample(object):
 
     def global_QC(self):
         low_CYP2D6 = len([amp for amp in self.low_count_amplicon.keys() if 'CYP2D6' in amp])
-        CYP2D6 = low_CYP2D6/28
-        CYP2D6_check = 'CYP2D6 pass!' 
+        #CYP2D6 = low_CYP2D6/28
+        CYP2D6_check = 'completely failed!' 
         low_amplicons = len(self.low_count_amplicon.keys())
-        if low_amplicons > 10 and CYP2D6 > 0.8:
-            QC_status = False 
-            CYP2D6_check = '%s CYP2D6 amplicons are low coverage, please check!'%low_CYP2D6 ## Del/Del check required
+        if low_amplicons > 40 and low_CYP2D6 < 20: ## failed low amplicons of CYP2D6 less than 50%
+            QC_status = False
+            CYP2D6_check = 'completely failed!'
+        elif low_amplicons < 40 and low_CYP2D6 > 20: ## failed low amplicons of CYP2D6 larger than 50%
+            QC_status = False
+            CYP2D6_check = '%s CYP2D6 low coverage amplicons (%s low coverage amplicons in total), please check!'%(low_CYP2D6, low_amplicons) ## Del/Del check required
         elif low_amplicons > 20:
             QC_status = False ## Completely failed
         else:
