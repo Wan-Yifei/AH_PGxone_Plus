@@ -79,7 +79,7 @@ class Sample(object):
         if low_amplicons > 40 and low_CYP2D6 < 20: ## failed low amplicons of CYP2D6 less than 50%
             QC_status = False
             CYP2D6_check = 'completely failed!'
-        elif low_amplicons < 40 and low_CYP2D6 > 20: ## failed low amplicons of CYP2D6 larger than 50%
+        elif low_amplicons < 40 and low_CYP2D6 > 10: ## failed low amplicons of CYP2D6 larger than 50%
             QC_status = False
             CYP2D6_check = '%s CYP2D6 low coverage amplicons (%s low coverage amplicons in total), please check!'%(low_CYP2D6, low_amplicons) ## Del/Del check required
         elif low_amplicons > 20:
