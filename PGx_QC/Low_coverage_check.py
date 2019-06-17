@@ -216,6 +216,7 @@ if __name__ == '__main__':
     LIS = '/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/%s/LIS'%folder ## path of LIS folder 
     CYP_hom = '/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/%s/sample_QC_CYP2D6_deletion_hom.txt'%folder ## samples need to be checked the genotype of CYP2D6
     CNV_output = '/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/%s/sample_output_cnv.txt'%folder
+    os.system('chgrp -R CLIA /data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/%s'%folder) 
 
     with open(CNV_output) as raw:
         CNV_checklist = raw.readlines()
