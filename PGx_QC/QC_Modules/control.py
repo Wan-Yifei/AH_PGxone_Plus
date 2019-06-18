@@ -43,6 +43,7 @@ class Control(Sample):
 
     def get_whole_genotype(self, Output_geno):
         genotypes = next(line.strip().split('\t') for line in Output_geno if self.ID in line)
+        genotypes.pop(0) ## remove the ID from list
         return genotypes
 
     def standard_check(self):
@@ -50,7 +51,7 @@ class Control(Sample):
             mismatch_count = len([g_control for g_standard, g_control in 
             zip(self.NA17244_standard_genotype, self.whole_genotype) if g_standard != g_control])
             ## check the mismatch of CYP2D6
-            if self.whole_genotype[17] == '*2xN/*4' or self.whole_genotype[17] == '*2/*4xN': 
+            if self.whole_genotype[16] == '*2xN/*4' or self.whole_genotype[16] == '*2/*4xN': 
                 mismatch_CYP2D6 = True 
             else:
                 mismatch_CYP2D6 = False 
@@ -58,11 +59,11 @@ class Control(Sample):
             mismatch_count = len([g_control for g_standard, g_control in
             zip(self.NA17281_standard_genotype, self.whole_genotype) if g_standard != g_control])
             ## check the mismatch of CYP2D6
-            if self.whole_genotype[17] != '*5/*9':
+            if self.whole_genotype[16] != '*5/*9':
                 mismatch_CYP2D6 = False
             else:
                 mismatch_CYP2D6 = True
-        if mismatch_count > 3:
+        if mismatch_count < 4:
             control_QC = True ## control passes QC
         else:
             control_QC = False ## control failed
