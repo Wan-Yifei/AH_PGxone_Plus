@@ -82,99 +82,106 @@ def cyp_homo_check(cyp_list):
 ## colorful print init
 init(autoreset = True)
 
-with open(Code_drug_path, 'r', errors='replace') as CD, open(Drug_action_path, 'r', errors='replace') as DA, open(
-    Low_coverage_path, 'r', errors='replace') as LC, open(Range_path, 'r', errors='replace') as RP, open(
-    Active_score_path, 'r', errors='replace') as AS, open(Output_geno_path, 'r', errors='replace') as OG, open(
-    Gene_var_path, 'r', errors='replace') as GK, open(CYP_hom_path, 'r', errors='replace') as CP:
-        Active_score = AS.readlines()
-        Drug_action = DA.readlines()
-        Low_coverage = LC.readlines()
-        Range = RP.readlines()
-        Output_geno = OG.readlines()
-        Gene_KB = GK.readlines()
-        Code_drug = CD.readlines()
-        cyp_list = CP.readlines()
-
-        potential_failed_samples = low_coverage_scan(Low_coverage)
-        ctrls = get_control_ID(Output_geno)
-        #print ctrls
-        print("========================================================")
-        print("========================================================")
-        print('Run folder: %s'%Runfolder)
-        print("========================================================")
-        print("Check controls:")
-        print("")
-        
-        for ctrl_id in ctrls:
-            if ctrl_id in potential_failed_samples:
-                low_coverage_flag = True ## contrl is potential failed
-            else:
-                low_coverage_flag = False
-            conl = (control.Control(ctrl_id, Output_geno, Code_drug, Active_score
-            , Drug_action, Low_coverage, Range, Gene_KB, low_coverage_flag))
-            if conl.standard_pass:
-                print(Fore.GREEN + '%s passed!'%conl.ID)
-            if not conl.cyp2d6_pass:
-                print(Fore.YELLOW + 'The genotype of CYP2D6 does not match SOP: %s'%conl.whole_genotype[17])
-        print("")
-
-        lis_count(LIS)
-        cyp_homo_check(cyp_list)
-
-        print("Completely failed samples:")
-        print("")
-        complete_failed = {} 
-        critical_failed = {}
-        for ID in potential_failed_samples:
-            if 'NA' not in ID:
-                check_case = aq.Sample(ID, Output_geno, Code_drug, Active_score
-                , Drug_action, Low_coverage, Range, Gene_KB)
-
-                if not check_case.QC_complete_pass:
-                    if check_case.swab_b_flag:
-                        complete_failed[check_case.ID + 'B'] = check_case.QC_CYP2D6_notice
-                    else:
-                        complete_failed[check_case.ID] = check_case.QC_CYP2D6_notice
-                elif not check_case.QC_amplicon_pass:
-                    if 'completely failed' in check_case.failed_amp_notice:
+def main():
+    with open(Code_drug_path, 'r', errors='replace') as CD, open(Drug_action_path, 'r', errors='replace') as DA, open(
+        Low_coverage_path, 'r', errors='replace') as LC, open(Range_path, 'r', errors='replace') as RP, open(
+        Active_score_path, 'r', errors='replace') as AS, open(Output_geno_path, 'r', errors='replace') as OG, open(
+        Gene_var_path, 'r', errors='replace') as GK, open(CYP_hom_path, 'r', errors='replace') as CP:
+            Active_score = AS.readlines()
+            Drug_action = DA.readlines()
+            Low_coverage = LC.readlines()
+            Range = RP.readlines()
+            Output_geno = OG.readlines()
+            Gene_KB = GK.readlines()
+            Code_drug = CD.readlines()
+            cyp_list = CP.readlines()
+    
+            potential_failed_samples = low_coverage_scan(Low_coverage)
+            ctrls = get_control_ID(Output_geno)
+            #print ctrls
+            print("========================================================")
+            print("========================================================")
+            print('Run folder: %s'%Runfolder)
+            print("========================================================")
+            print("Check controls:")
+            print("")
+            
+            for ctrl_id in ctrls:
+                if ctrl_id in potential_failed_samples:
+                    low_coverage_flag = True ## contrl is potential failed
+                else:
+                    low_coverage_flag = False
+                conl = (control.Control(ctrl_id, Output_geno, Code_drug, Active_score
+                , Drug_action, Low_coverage, Range, Gene_KB, low_coverage_flag))
+                if conl.standard_pass:
+                    print(Fore.GREEN + '%s passed!'%conl.ID)
+                else:
+                    print(Fore.RED + '%s may failed, please check!'%conl.ID)
+                if not conl.cyp2d6_pass:
+                    print(Fore.YELLOW + 'The genotype of CYP2D6 does not match SOP: %s'%conl.whole_genotype[16])
+            print("")
+    
+            lis_count(LIS)
+            cyp_homo_check(cyp_list)
+    
+            print("Completely failed samples:")
+            print("")
+            complete_failed = {} 
+            critical_failed = {}
+            for ID in potential_failed_samples:
+                if 'NA' not in ID:
+                    check_case = aq.Sample(ID, Output_geno, Code_drug, Active_score
+                    , Drug_action, Low_coverage, Range, Gene_KB)
+    
+                    if not check_case.QC_complete_pass:
                         if check_case.swab_b_flag:
                             complete_failed[check_case.ID + 'B'] = check_case.QC_CYP2D6_notice
                         else:
-                            complete_failed.append[check_case.ID] = check_case.QC_CYP2D6_notice
-                    else:
-                        if check_case.swab_b_flag:
-                            critical_failed[check_case.ID + 'B'] = check_case.failed_critical_amp
+                            complete_failed[check_case.ID] = check_case.QC_CYP2D6_notice
+                    elif not check_case.QC_amplicon_pass:
+                        if 'completely failed' in check_case.failed_amp_notice:
+                            if check_case.swab_b_flag:
+                                complete_failed[check_case.ID + 'B'] = check_case.QC_CYP2D6_notice
+                            else:
+                                complete_failed.append[check_case.ID] = check_case.QC_CYP2D6_notice
                         else:
-                            critical_failed[check_case.ID] = check_case.failed_critical_amp
-                elif not check_case.scored_QC:
-                    if check_case.swab_b_flag:
-                        critical_failed[check_case.ID + 'B'] = list(check_case.failed_critical_scored_amp.keys())
+                            if check_case.swab_b_flag:
+                                critical_failed[check_case.ID + 'B'] = check_case.failed_critical_amp
+                            else:
+                                critical_failed[check_case.ID] = check_case.failed_critical_amp
+                    elif not check_case.scored_QC:
+                        if check_case.swab_b_flag:
+                            critical_failed[check_case.ID + 'B'] = list(check_case.failed_critical_scored_amp.keys())
+                        else:
+                            critical_failed[check_case.ID] = list(check_case.failed_critical_scored_amp.keys())
                     else:
-                        critical_failed[check_case.ID] = list(check_case.failed_critical_scored_amp.keys())
-                else:
-                    pass
-        
-        n = 1
-        for case in complete_failed.items():
-            print('%s. %s: '%(n,case[0]), case[1])
-            n += 1
+                        pass
+            
+            n = 1
+            for case in complete_failed.items():
+                print('%s. %s: '%(n,case[0]), case[1])
+                n += 1
+    
+            print("========================================================")
+            print("Samples failed on critical amplicons:")
+            print("")
+            n = 1
+            for case in critical_failed.items():
+                print("%s. %s : failed on %s"%(n, case[0], case[1]))
+                n += 1
+            print("========================================================")
+    
+    ## write QC output to the QC list
+    Run_ind = Runfolder[Runfolder.find('Run'):Runfolder.find('Run')+7]
+    print('Completely failed sample:', file = open('/home/yifei.wan/AH_Project/PGx_QC/auto_QC/%s_QC.txt'%Run_ind, 'w+'))
+    for case in complete_failed:
+        print(case, file = open('/home/yifei.wan/AH_Project/PGx_QC/auto_QC/%s_QC.txt'%Run_ind, 'a+'))
+    
+    print('Samples failed on critical amplicons:', file = open('/home/yifei.wan/AH_Project/PGx_QC/auto_QC/%s_QC.txt'%Run_ind, 'a+'))
+    for case in critical_failed.items():
+        #print(case[0], file = open('/home/yifei.wan/AH_Project/PGx_QC/auto_QC/%s_QC.txt'%Run_ind, 'a+'))
+        print(case[0], file = open('/home/yifei.wan/AH_Project/PGx_QC/%s_QC.txt'%Run_ind, 'a+'))
 
-        print("========================================================")
-        print("Samples failed on critical amplicons:")
-        print("")
-        n = 1
-        for case in critical_failed.items():
-            print("%s. %s : failed on %s"%(n, case[0], case[1]))
-            n += 1
-        print("========================================================")
-
-## write QC output to the QC list
-Run_ind = Runfolder[Runfolder.find('Run'):Runfolder.find('Run')+7]
-print('Completely failed sample:', file = open('/home/yifei.wan/AH_Project/PGx_QC/auto_QC/%s_QC.txt'%Run_ind, 'w+'))
-for case in complete_failed:
-    print(case, file = open('/home/yifei.wan/AH_Project/PGx_QC/auto_QC/%s_QC.txt'%Run_ind, 'a+'))
-
-print('Samples failed on critical amplicons:', file = open('/home/yifei.wan/AH_Project/PGx_QC/auto_QC/%s_QC.txt'%Run_ind, 'a+'))
-for case in critical_failed.items():
-    print(case[0], file = open('/home/yifei.wan/AH_Project/PGx_QC/auto_QC/%s_QC.txt'%Run_ind, 'a+'))
-
+if __name__ == '__main__':
+    main()
+    
