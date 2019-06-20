@@ -19,6 +19,7 @@ class Gene(object):
             if line.split('\t')[5] in self.gene:
                ICDs = ICDs + line.split('\t')[7].split(', ')
         ICDs = list(set(ICDs))
+        if '' in ICDs: ICDs.remove('')  
         return ICDs
 
     def get_amp(self, amplicon_name, Range):
