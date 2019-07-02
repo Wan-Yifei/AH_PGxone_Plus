@@ -16,6 +16,7 @@ set -e
 
 RUNFOLDER=$1
 QC_list=$2
+python column_verify.py $RUNFOLDER
 python3 /home/yifei.wan/AH_Project/PGx_QC/PGx_Delete.py $RUNFOLDER $QC_list
 echo
 echo ====================================================
