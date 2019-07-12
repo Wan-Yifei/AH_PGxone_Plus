@@ -143,7 +143,7 @@ def main():
                             if check_case.swab_b_flag:
                                 complete_failed[check_case.ID + 'B'] = check_case.QC_CYP2D6_notice
                             else:
-                                complete_failed.append[check_case.ID] = check_case.QC_CYP2D6_notice
+                                complete_failed[check_case.ID] = check_case.QC_CYP2D6_notice
                         else:
                             if check_case.swab_b_flag:
                                 critical_failed[check_case.ID + 'B'] = check_case.failed_critical_amp
