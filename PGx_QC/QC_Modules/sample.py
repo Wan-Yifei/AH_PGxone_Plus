@@ -108,15 +108,16 @@ class Sample(object):
         if len(self.low_count_ex_amplicon) > 7:
             QC_status = False ## too many critial amplicons have extrme low coverage
             failed_amp_notice = '%s critical amplicons have coverage less than 6, sample has completely failed!'%len(self.low_count_ex_amplicon)
+            failed_gene = "NA" 
+            return failed_gene, failed_amp_notice, QC_status 
         else:
             QC_status = True ## temp assign a value to be a placeholder
         amplicon_check = {low_gene[0] : G.Gene(self.ID, self.ICD, low_gene[0], Drug_action, low_gene[1], Range) for low_gene in low_ex_gene.items()}
-        failed_gene = [gene[0] for gene in amplicon_check.items() if gene[1].ICD_relevant]
+        failed_gene = [gene[0] for gene in amplicon_check.items() if gene[1].ICD_relevant] ## Does the low coverage amp associate to the ICD codes?
         potential_failed_gene = [gene for gene in failed_gene if gene not in self.AMPLICONS_SCORED_LIST]
         if QC_status:
             QC_status = not bool(potential_failed_gene) #True: passed; False: failed
-        if not QC_status:
-            failed_amp_notice = 'Sample %s has failed on critical amplicons: %s'%(self.ID, potential_failed_gene)
+            failed_amp_notice = "Nothing!" 
         else:
-            failed_amp_notice = None
+            failed_amp_notice = 'Sample %s has failed on critical amplicons: %s'%(self.ID, potential_failed_gene)
         return failed_gene, failed_amp_notice, QC_status 
