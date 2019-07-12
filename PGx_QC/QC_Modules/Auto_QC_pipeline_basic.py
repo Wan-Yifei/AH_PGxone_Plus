@@ -173,11 +173,11 @@ def main():
     
     ## write QC output to the QC list
     Run_ind = Runfolder[Runfolder.find('Run'):Runfolder.find('Run')+7]
-    print('Completely failed sample:', file = open('/home/yifei.wan/AH_Project/PGx_QC/auto_QC/%s_QC.txt'%Run_ind, 'w+'))
+    print('Completely failed sample:', file = open('/home/yifei.wan/AH_Project/PGx_QC/%s_QC.txt'%Run_ind, 'w+'))
     for case in complete_failed:
-        print(case, file = open('/home/yifei.wan/AH_Project/PGx_QC/auto_QC/%s_QC.txt'%Run_ind, 'a+'))
+        print(case, file = open('/home/yifei.wan/AH_Project/PGx_QC/%s_QC.txt'%Run_ind, 'a+'))
     
-    print('Samples failed on critical amplicons:', file = open('/home/yifei.wan/AH_Project/PGx_QC/auto_QC/%s_QC.txt'%Run_ind, 'a+'))
+    print('Samples failed on critical amplicons:', file = open('/home/yifei.wan/AH_Project/PGx_QC/%s_QC.txt'%Run_ind, 'a+'))
     for case in critical_failed.items():
         #print(case[0], file = open('/home/yifei.wan/AH_Project/PGx_QC/auto_QC/%s_QC.txt'%Run_ind, 'a+'))
         print(case[0], file = open('/home/yifei.wan/AH_Project/PGx_QC/%s_QC.txt'%Run_ind, 'a+'))
