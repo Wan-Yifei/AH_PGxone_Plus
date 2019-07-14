@@ -244,7 +244,7 @@ def MutationsFromVCF(sample, output, Indel_HLA_output, request_variant_list, pop
                                 else:
                                         ## 2.2.1.2
                                         if not alternate.Strict_filter(strict_freq2):
-                                                contine
+                                                continue
                                         else:
                                                 ## 2.2.1.2.1
                                                 flag_output = alternate.Output_direct()
