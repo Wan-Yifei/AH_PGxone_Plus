@@ -50,7 +50,7 @@ RELEASE='/data/CLIA-Data/PGx_Resolved/Release'
 
 echo >> /data/AmendReports/Script/PGx_APP_log/PGxOne_APP_log.txt
 echo >> /data/AmendReports/Script/PGx_APP_log/PGxOne_UPLOAD_log.txt
-echo `data` >> /data/AmendReports/Script/PGx_APP_log/PGxOne_APP_log.txt
+echo `date` >> /data/AmendReports/Script/PGx_APP_log/PGxOne_APP_log.txt
 echo `date` >> /data/AmendReports/Script/PGx_APP_log/PGxOne_UPLOAD_log.txt
 cp -v $LISFOLDER/*.txt $APPFOLDER/ > >(tee -a /data/AmendReports/Script/PGx_APP_log/PGxOne_APP_log.txt) 2> >(tee -a /data/AmendReports/Script/PGx_APP_log/PGxOne_APP_err.log >&2)
 {
