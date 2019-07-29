@@ -1,8 +1,6 @@
 #!/usr/bin/python
 #-*- coding: utf-8 -*-
 
-## To do: fix scre_parse
-
 import operator as opt
 import sys
 sys.path.append('/home/yifei.wan/PGx_QC/QC_Modules/gene.py')
@@ -67,16 +65,25 @@ class GeneScored(Gene):
         ## replace unexpected delimter
         if 'normal: >=1 & <=2:' in score_threshold: score_threshold = score_threshold.replace('normal: >=1 & <=2:', 'normal: >=1 & <=2;')
         ## parse phenotype of gene
-        for threshold in score_threshold.split(';'):
-            level = threshold.split(':')[0].strip()
-            opts = opt_pattern.findall(threshold)
-            nums = num_pattern.findall(threshold)
-            ## assign eq to None value of opt
-            if not opts:
-                opts = ['==' for num in nums]
-            genotype_flags = [self.operators[opt](alleles_score, float(nums[opts.index(opt)])) for opt in opts]
-            if all(genotype_flags):
-                phenotype = level
+        if "NAT2" in self.gene:
+            opts = ['==', '==', '>=']
+            nums = [0, 1, 2]
+            levels = ['slow', 'intermediate', 'rapid']
+            for num in nums:
+                if self.operators[opts[nums.index(num)]](alleles_score, num):
+                    phenotype = levels[nums.index(num)]
+        else:
+            for threshold in score_threshold.split(';'):
+                level = threshold.split(':')[0].strip()
+                opts = opt_pattern.findall(threshold)
+                nums = num_pattern.findall(threshold)
+                ## assign eq to None value of opt
+                if not opts:
+                    opts = ['==' for num in nums]
+                genotype_flags = [self.operators[opt](alleles_score, float(nums[opts.index(opt)])) for opt in opts]
+            # print(level)
+                if all(genotype_flags):
+                    phenotype = level
         return phenotype 
 
     def get_pot_allele(self, Gene_KB):
