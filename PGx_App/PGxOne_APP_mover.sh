@@ -44,29 +44,42 @@ set -e
 
 RUNFOLDER=$1
 LISFOLDER=/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$RUNFOLDER/LIS
+LISFOLDER_NO=/data/CLIA-Data/PGxOne_V3/Production/BI_Data_Analysis/$RUNFOLDER/LIS_no_action
 APPFOLDER='/data/CLIA-Data/PGxOne_APP'
 BATCHUPLOAD='/xifin/result-data/'
 RELEASE='/data/CLIA-Data/PGx_Resolved/Release'
+RELEASE_NO='/data/CLIA-Data/PGx_Resolved/Release_no_action'
 
 echo >> /data/AmendReports/Script/PGx_APP_log/PGxOne_APP_log.txt
 echo >> /data/AmendReports/Script/PGx_APP_log/PGxOne_UPLOAD_log.txt
 echo `date` >> /data/AmendReports/Script/PGx_APP_log/PGxOne_APP_log.txt
 echo `date` >> /data/AmendReports/Script/PGx_APP_log/PGxOne_UPLOAD_log.txt
+
+## Upload to APP
 cp -v $LISFOLDER/*.txt $APPFOLDER/ > >(tee -a /data/AmendReports/Script/PGx_APP_log/PGxOne_APP_log.txt) 2> >(tee -a /data/AmendReports/Script/PGx_APP_log/PGxOne_APP_err.log >&2)
 {
 	cp -v $RELEASE/*.txt $APPFOLDER/ > >(tee -a /data/AmendReports/Script/PGx_APP_log/PGxOne_APP_log.txt) 2> >(tee -a /data/AmendReports/Script/PGx_APP_log/PGxOne_APP_err.log >&2)
 } || {
 	echo Release folder is empty!
 }
+
+## Upload to LIS
 read -p "Input any key to initial batch uploading:"
-cp -v $LISFOLDER/*.txt $BATCHUPLOAD/ > >(tee -a /data/AmendReports/Script/PGx_APP_log/PGxOne_UPLOAD_log.txt) 2> >(tee -a /data/AmendReports/Script/PGx_APP_log/PGxOne_UPLOAD_err.txt >&2)
+cp -v $LISFOLDER_NO/*.txt $BATCHUPLOAD/ > >(tee -a /data/AmendReports/Script/PGx_APP_log/PGxOne_UPLOAD_log.txt) 2> >(tee -a /data/AmendReports/Script/PGx_APP_log/PGxOne_UPLOAD_err.txt >&2)
 {
-	cp -v $RELEASE/*.txt $BATCHUPLOAD/ > >(tee -a /data/AmendReports/Script/PGx_APP_log/PGxOne_UPLOAD_log.txt) 2> >(tee -a /data/AmendReports/Script/PGx_APP_log/PGxOne_UPLOAD_err.txt >&2)
+	cp -v $RELEASE_NO/*.txt $BATCHUPLOAD/ > >(tee -a /data/AmendReports/Script/PGx_APP_log/PGxOne_UPLOAD_log.txt) 2> >(tee -a /data/AmendReports/Script/PGx_APP_log/PGxOne_UPLOAD_err.txt >&2)
 } || {
-	echo Release folder is empty!
+	echo Release_no_action folder is empty!
 }
+
 {
 	rm -v  $RELEASE/*
 } || {
 	echo There is no resolved sample!
+}
+
+{
+	rm -v  $RELEASE_NO/*
+} || {
+	echo There is no resolved no action sample!
 }
