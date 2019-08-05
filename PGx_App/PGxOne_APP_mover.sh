@@ -65,11 +65,11 @@ cp -v $LISFOLDER/*.txt $APPFOLDER/ > >(tee -a /data/AmendReports/Script/PGx_APP_
 
 ## Upload to LIS
 read -p "Input any key to initial batch uploading:"
-cp -v $LISFOLDER_NO/*.txt $BATCHUPLOAD/ > >(tee -a /data/AmendReports/Script/PGx_APP_log/PGxOne_UPLOAD_log.txt) 2> >(tee -a /data/AmendReports/Script/PGx_APP_log/PGxOne_UPLOAD_err.txt >&2)
+cp -v $LISFOLDER/*.txt $BATCHUPLOAD/ > >(tee -a /data/AmendReports/Script/PGx_APP_log/PGxOne_UPLOAD_log.txt) 2> >(tee -a /data/AmendReports/Script/PGx_APP_log/PGxOne_UPLOAD_err.txt >&2)
 {
-	cp -v $RELEASE_NO/*.txt $BATCHUPLOAD/ > >(tee -a /data/AmendReports/Script/PGx_APP_log/PGxOne_UPLOAD_log.txt) 2> >(tee -a /data/AmendReports/Script/PGx_APP_log/PGxOne_UPLOAD_err.txt >&2)
+	cp -v $RELEASE/*.txt $BATCHUPLOAD/ > >(tee -a /data/AmendReports/Script/PGx_APP_log/PGxOne_UPLOAD_log.txt) 2> >(tee -a /data/AmendReports/Script/PGx_APP_log/PGxOne_UPLOAD_err.txt >&2)
 } || {
-	echo Release_no_action folder is empty!
+	echo Release folder is empty!
 }
 
 {
