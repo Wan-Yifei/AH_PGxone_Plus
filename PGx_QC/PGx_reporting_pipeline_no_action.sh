@@ -28,5 +28,5 @@ python /data/AmendReports/Script/check_release.py $RUNFOLDER
 python /data/AmendReports/Script/check_release_no_action.py $RUNFOLDER
 echo
 echo ====================================================
-bash /home/yifei.wan/AH_Project/PGx_App/PGxOne_APP_mover.sh $RUNFOLDER
+bash /home/yifei.wan/AH_Project/PGx_App/PGxOne_APP_mover_no_action.sh $RUNFOLDER
 
