@@ -29,8 +29,8 @@ CaseID_Del = [ReqID_del.strip() for ReqID_del in samples_del if 'A-' in ReqID_de
 
 #print(CaseID_Del)
 
-if CaseID_Del and not ReqID_CaseID: raise IOError('Check QC list, action files cannot be found!')
-if not CaseID_Del and ReqID_CaseID: raise IOError('Check QC list, some unexpected action files are found!')
+#if CaseID_Del and not ReqID_CaseID: raise IOError('Check QC list, action files cannot be found!')
+#if not CaseID_Del and ReqID_CaseID: raise IOError('Check QC list, some unexpected action files are found!')
 
 n = 1 ## Deleted sample count
 for sample in CaseID_Del:
